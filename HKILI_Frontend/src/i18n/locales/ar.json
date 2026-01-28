@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "share": "مشاركة",
+    "back": "رجوع",
+    "next": "التالي",
+    "done": "تم",
+    "close": "إغلاق"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "loginWithGoogle": "المتابعة مع جوجل",
+    "loginWithApple": "المتابعة مع آبل",
+    "continueAsGuest": "المتابعة كضيف",
+    "logout": "تسجيل الخروج",
+    "resetPassword": "إعادة تعيين كلمة المرور"
+  },
+  "home": {
+    "welcome": "مرحباً بك في حكايات الذكاء الاصطناعي",
+    "generateStory": "إنشاء قصة جديدة",
+    "storyLibrary": "مكتبة القصص",
+    "offlineStories": "القصص المحفوظة",
+    "coins": "العملات",
+    "subscription": "الاشتراك"
+  },
+  "storyGeneration": {
+    "title": "أنشئ قصتك",
+    "childName": "اسم الطفل",
+    "childAge": "عمر الطفل",
+    "genre": "نوع القصة",
+    "characters": "الشخصيات المفضلة",
+    "moralLesson": "الدرس الأخلاقي (اختياري)",
+    "storyLength": "طول القصة",
+    "generateStory": "إنشاء القصة",
+    "preview": "معاينة",
+    "generating": "جاري إنشاء قصتك السحرية..."
+  },
+  "storyViewer": {
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "skipForward": "تقديم 10 ثواني",
+    "playbackSpeed": "السرعة",
+    "volume": "الصوت",
+    "favorite": "المفضلة",
+    "download": "تحميل",
+    "share": "مشاركة"
+  },
+  "library": {
+    "myStories": "قصصي",
+    "search": "البحث في القصص...",
+    "filterByGenre": "تصفية حسب النوع",
+    "favorites": "المفضلة",
+    "recent": "الأحدث",
+    "noStories": "لم يتم العثور على قصص"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "textSize": "حجم النص",
+    "offlineStorage": "التخزين المحلي",
+    "storageUsed": "المساحة المستخدمة",
+    "clearCache": "مسح التخزين المؤقت",
+    "about": "حول التطبيق"
+  },
+  "genres": {
+    "adventure": "مغامرة",
+    "fantasy": "خيال",
+    "educational": "تعليمي",
+    "bedtime": "قصة ما قبل النوم",
+    "friendship": "صداقة",
+    "animals": "حيوانات",
+    "science": "علوم"
+  },
+  "lengths": {
+    "short": "قصير (5 دقائق)",
+    "medium": "متوسط (10 دقائق)",
+    "long": "طويل (15 دقيقة)"
+  }
+}

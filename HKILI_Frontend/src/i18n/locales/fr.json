@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "share": "Partager",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "close": "Fermer"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "loginWithGoogle": "Continuer avec Google",
+    "loginWithApple": "Continuer avec Apple",
+    "continueAsGuest": "Continuer en tant qu'invité",
+    "logout": "Déconnexion",
+    "resetPassword": "Réinitialiser le mot de passe"
+  },
+  "home": {
+    "welcome": "Bienvenue dans AI Storytelling",
+    "generateStory": "Générer une nouvelle histoire",
+    "storyLibrary": "Bibliothèque d'histoires",
+    "offlineStories": "Histoires hors ligne",
+    "coins": "Pièces",
+    "subscription": "Abonnement"
+  },
+  "storyGeneration": {
+    "title": "Créez votre histoire",
+    "childName": "Nom de l'enfant",
+    "childAge": "Âge de l'enfant",
+    "genre": "Genre d'histoire",
+    "characters": "Personnages préférés",
+    "moralLesson": "Leçon morale (Optionnel)",
+    "storyLength": "Longueur de l'histoire",
+    "generateStory": "Générer l'histoire",
+    "preview": "Aperçu",
+    "generating": "Création de votre histoire magique..."
+  },
+  "storyViewer": {
+    "play": "Lire",
+    "pause": "Pause",
+    "skipForward": "Avancer 10s",
+    "playbackSpeed": "Vitesse",
+    "volume": "Volume",
+    "favorite": "Favori",
+    "download": "Télécharger",
+    "share": "Partager"
+  },
+  "library": {
+    "myStories": "Mes histoires",
+    "search": "Rechercher des histoires...",
+    "filterByGenre": "Filtrer par genre",
+    "favorites": "Favoris",
+    "recent": "Récent",
+    "noStories": "Aucune histoire trouvée"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "textSize": "Taille du texte",
+    "offlineStorage": "Stockage hors ligne",
+    "storageUsed": "Stockage utilisé",
+    "clearCache": "Vider le cache",
+    "about": "À propos"
+  },
+  "genres": {
+    "adventure": "Aventure",
+    "fantasy": "Fantaisie",
+    "educational": "Éducatif",
+    "bedtime": "Histoire du soir",
+    "friendship": "Amitié",
+    "animals": "Animaux",
+    "science": "Science"
+  },
+  "lengths": {
+    "short": "Court (5 min)",
+    "medium": "Moyen (10 min)",
+    "long": "Long (15 min)"
+  }
+}

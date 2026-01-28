@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "share": "Share",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "loginWithGoogle": "Continue with Google",
+    "loginWithApple": "Continue with Apple",
+    "continueAsGuest": "Continue as Guest",
+    "logout": "Logout",
+    "resetPassword": "Reset Password"
+  },
+  "home": {
+    "welcome": "Welcome to AI Storytelling",
+    "generateStory": "Generate New Story",
+    "storyLibrary": "Story Library",
+    "offlineStories": "Offline Stories",
+    "coins": "Coins",
+    "subscription": "Subscription"
+  },
+  "storyGeneration": {
+    "title": "Create Your Story",
+    "childName": "Child's Name",
+    "childAge": "Child's Age",
+    "genre": "Story Genre",
+    "characters": "Favorite Characters",
+    "moralLesson": "Moral Lesson (Optional)",
+    "storyLength": "Story Length",
+    "generateStory": "Generate Story",
+    "preview": "Preview",
+    "generating": "Creating your magical story..."
+  },
+  "storyViewer": {
+    "play": "Play",
+    "pause": "Pause",
+    "skipForward": "Skip 10s",
+    "playbackSpeed": "Speed",
+    "volume": "Volume",
+    "favorite": "Favorite",
+    "download": "Download",
+    "share": "Share"
+  },
+  "library": {
+    "myStories": "My Stories",
+    "search": "Search stories...",
+    "filterByGenre": "Filter by Genre",
+    "favorites": "Favorites",
+    "recent": "Recent",
+    "noStories": "No stories found"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "textSize": "Text Size",
+    "offlineStorage": "Offline Storage",
+    "storageUsed": "Storage Used",
+    "clearCache": "Clear Cache",
+    "about": "About"
+  },
+  "genres": {
+    "adventure": "Adventure",
+    "fantasy": "Fantasy",
+    "educational": "Educational",
+    "bedtime": "Bedtime",
+    "friendship": "Friendship",
+    "animals": "Animals",
+    "science": "Science"
+  },
+  "lengths": {
+    "short": "Short (5 min)",
+    "medium": "Medium (10 min)",
+    "long": "Long (15 min)"
+  }
+}

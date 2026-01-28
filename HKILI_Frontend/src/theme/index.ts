@@ -1,0 +1,81 @@
+export const theme = {
+  colors: {
+    primary: '#4CAF50',
+    primaryDark: '#2E7D32',
+    secondary: '#2196F3',
+    background: '#0A1929',
+    surface: '#1E3A8A',
+    surfaceVariant: '#1565C0',
+    text: '#ffffff',
+    textSecondary: '#81C784',
+    textMuted: '#64B5F6',
+    accent: '#00E676',
+    success: '#4CAF50',
+    warning: '#FFC107',
+    error: '#F44336',
+    border: '#1976D2',
+    overlay: 'rgba(10, 25, 41, 0.8)',
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    xxl: 48,
+  },
+  borderRadius: {
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+  },
+  typography: {
+    h1: {
+      fontSize: 32,
+      fontWeight: 'bold' as const,
+      lineHeight: 40,
+    },
+    h2: {
+      fontSize: 24,
+      fontWeight: 'bold' as const,
+      lineHeight: 32,
+    },
+    h3: {
+      fontSize: 20,
+      fontWeight: '600' as const,
+      lineHeight: 28,
+    },
+    body: {
+      fontSize: 16,
+      fontWeight: 'normal' as const,
+      lineHeight: 24,
+    },
+    caption: {
+      fontSize: 14,
+      fontWeight: 'normal' as const,
+      lineHeight: 20,
+    },
+    small: {
+      fontSize: 12,
+      fontWeight: 'normal' as const,
+      lineHeight: 16,
+    },
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    md: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+  },
+} as const;

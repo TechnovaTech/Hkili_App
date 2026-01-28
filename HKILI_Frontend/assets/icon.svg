@@ -1,0 +1,6 @@
+<!-- Simple SVG placeholder for icon -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#6366f1"/>
+  <circle cx="512" cy="400" r="150" fill="#ffffff"/>
+  <rect x="362" y="550" width="300" height="200" rx="20" fill="#ffffff"/>
+</svg>

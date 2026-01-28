@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "AI Storytelling",
+    "slug": "ai-storytelling-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.company.aistorytelling"
+    },
+    "android": {
+      "package": "com.company.aistorytelling"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "scheme": "ai-storytelling",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
