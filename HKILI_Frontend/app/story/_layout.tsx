@@ -14,7 +14,12 @@ export default function StoryLayout() {
       <Stack.Screen name="library" />
       <Stack.Screen name="offline" />
       <Stack.Screen name="character-selection" />
-      <Stack.Screen name="story-generation" />
+      <Stack.Screen 
+        name="story-generation" 
+        options={{
+          presentation: 'fullScreenModal',
+        }}
+      />
     </Stack>
   );
 }

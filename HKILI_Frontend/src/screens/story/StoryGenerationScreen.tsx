@@ -66,12 +66,16 @@ export default function StoryGenerationScreen() {
     console.log('Get notified clicked');
   };
 
+  const handleBackPress = () => {
+    router.push('/(tabs)/home');
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
       
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="chevron-back" size={24} color="#4CAF50" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Story is generating...</Text>
@@ -104,28 +108,6 @@ export default function StoryGenerationScreen() {
       >
         <Text style={styles.notifyButtonText}>Get notified</Text>
       </TouchableOpacity>
-
-      <View style={styles.bottomNavbar}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/home')}>
-          <Ionicons name="home" size={24} color="#81C784" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/library')}>
-          <Ionicons name="book-outline" size={24} color="#81C784" />
-          <Text style={styles.navText}>My Story</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/subscription')}>
-          <Ionicons name="card-outline" size={24} color="#81C784" />
-          <Text style={styles.navText}>Subscription</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/settings')}>
-          <Ionicons name="settings-outline" size={24} color="#81C784" />
-          <Text style={styles.navText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -208,7 +190,7 @@ const styles = StyleSheet.create({
   notifyButton: {
     backgroundColor: '#4CAF50',
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 40,
     paddingVertical: 15,
     borderRadius: 12,
   },
@@ -217,22 +199,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     textAlign: 'center',
-  },
-  bottomNavbar: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  navText: {
-    fontSize: 12,
-    color: '#81C784',
   },
 });

@@ -24,22 +24,22 @@ export default function TabsLayout() {
       
       <View style={styles.bottomNavbar}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/home')}>
-          <Ionicons name="home" size={24} color={currentTab === 'home' ? '#FF6B35' : '#B8A9C9'} />
+          <Ionicons name="home" size={24} color={currentTab === 'home' ? '#4CAF50' : '#888888'} />
           <Text style={[styles.navText, currentTab === 'home' && styles.activeNavText]}>Home</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/library')}>
-          <Ionicons name="book-outline" size={24} color={currentTab === 'library' ? '#FF6B35' : '#B8A9C9'} />
+          <Ionicons name="book-outline" size={24} color={currentTab === 'library' ? '#4CAF50' : '#888888'} />
           <Text style={[styles.navText, currentTab === 'library' && styles.activeNavText]}>My Story</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/subscription')}>
-          <Ionicons name="card-outline" size={24} color={currentTab === 'subscription' ? '#FF6B35' : '#B8A9C9'} />
+          <Ionicons name="card-outline" size={24} color={currentTab === 'subscription' ? '#4CAF50' : '#888888'} />
           <Text style={[styles.navText, currentTab === 'subscription' && styles.activeNavText]}>Subscription</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/settings')}>
-          <Ionicons name="settings-outline" size={24} color={currentTab === 'settings' ? '#FF6B35' : '#B8A9C9'} />
+          <Ionicons name="settings-outline" size={24} color={currentTab === 'settings' ? '#4CAF50' : '#888888'} />
           <Text style={[styles.navText, currentTab === 'settings' && styles.activeNavText]}>Settings</Text>
         </TouchableOpacity>
       </View>
@@ -67,10 +67,10 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#B8A9C9',
+    color: '#888888',
   },
   activeNavText: {
-    color: '#FF6B35',
+    color: '#4CAF50',
     fontWeight: '600',
   },
 });

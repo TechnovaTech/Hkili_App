@@ -20,6 +20,7 @@ export interface CharacterFormData {
   eyeColor: string;
   interests: string[];
   customInterests: string[];
+  avatarId?: number;
 }
 
 export const HAIR_COLORS = [

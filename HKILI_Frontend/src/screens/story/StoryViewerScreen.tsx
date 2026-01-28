@@ -53,15 +53,15 @@ export default function StoryViewerScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2D1B3D" />
+      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
       
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#FF6B35" />
+        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={24} color="#4CAF50" />
         </TouchableOpacity>
         <Text style={styles.title}>{mockStory.title}</Text>
         <TouchableOpacity style={styles.audioButton}>
-          <Ionicons name="volume-high" size={24} color="#FF6B35" />
+          <Ionicons name="volume-high" size={24} color="#4CAF50" />
         </TouchableOpacity>
       </View>
 
@@ -119,7 +119,7 @@ export default function StoryViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2D1B3D',
+    backgroundColor: '#0A1929',
   },
   header: {
     flexDirection: 'row',
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#2D1B3D',
+    backgroundColor: '#0A1929',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#4CAF50',
     gap: 8,
   },
   navButtonDisabled: {
