@@ -7,8 +7,21 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { authService } from '../../services/authService';
 
 export default function SettingsScreen() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      router.replace('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      router.replace('/auth/login');
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -41,6 +54,11 @@ export default function SettingsScreen() {
             <Text style={styles.settingSubtitle}>Version 1.0.0</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#81C784" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#F44336" />
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -86,5 +104,21 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     color: '#81C784',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 67, 54, 0.3)',
+  },
+  logoutText: {
+    fontSize: 16,
+    color: '#F44336',
+    marginLeft: 16,
+    fontWeight: '600',
   },
 });

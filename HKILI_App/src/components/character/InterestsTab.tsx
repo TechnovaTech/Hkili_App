@@ -142,8 +142,11 @@ export default function InterestsTab({ formData, updateFormData, onNext }: Inter
           </Text>
         </View>
         {/* Next Button */}
-        <TouchableOpacity style={styles.nextButton} onPress={onNext}>
-          <Text style={styles.nextButtonText}>Next</Text>
+        <TouchableOpacity 
+          style={styles.nextButton} 
+          onPress={onNext}
+        >
+          <Text style={styles.nextButtonText}>Finish & Save</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -19,27 +19,27 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setError('Please fill in all fields');
       return;
     }
 
     setLoading(true);
+    setError('');
     try {
       const response = await authService.login({ email, password });
       
       if (response.success) {
-        // Navigate to the main app stack or where needed
-        // Since we are replacing the stack, we should probably check if user has character created?
-        // But for now let's follow existing logic: go to character/add
-        router.replace('/character/add');
+        // Navigate to home page after successful login
+        router.replace('/home');
       } else {
-        Alert.alert('Login Failed', response.error || 'Invalid credentials');
+        setError(response.error || 'Invalid credentials');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      setError(error.message || 'Network error occurred');
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
   const handleGoogleLogin = () => {
     // Google login logic
-    router.replace('/character/add');
+    router.replace('/home');
   };
 
   const handleSignUp = () => {
@@ -106,6 +106,13 @@ export default function LoginScreen() {
             placeholderTextColor="#64B5F6"
           />
         </View>
+
+        {/* Error Message */}
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
 
         {/* Forgot Password */}
         <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotContainer}>
@@ -251,5 +258,18 @@ const styles = StyleSheet.create({
   signUpLink: {
     color: '#2196F3',
     fontWeight: '600',
+  },
+  errorContainer: {
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 67, 54, 0.3)',
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

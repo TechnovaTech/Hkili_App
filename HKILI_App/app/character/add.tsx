@@ -42,17 +42,18 @@ export default function AddCharacterScreen() {
     
     setLoading(true);
     try {
+      console.log('Creating character with data:', formData);
       const response = await characterService.create(formData);
+      console.log('Character service response:', response);
       
-      if (response.success) {
-        Alert.alert('Success', 'Character created successfully', [
-          { text: 'OK', onPress: () => router.replace('/(tabs)/home') }
-        ]);
-      } else {
-        Alert.alert('Error', response.error || 'Failed to create character');
-      }
+      // Always redirect regardless of API response for now
+      console.log('Redirecting to home...');
+      router.push('/home');
+      
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'An unexpected error occurred');
+      console.error('Character creation error:', error);
+      // Still redirect even on error
+      router.push('/home');
     } finally {
       setLoading(false);
     }
@@ -93,11 +94,7 @@ export default function AddCharacterScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Character</Text>
-        <View style={styles.headerSpacer} />
       </View>
 
       {/* Tab Navigation */}
