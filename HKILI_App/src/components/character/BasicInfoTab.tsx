@@ -32,7 +32,7 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
             style={styles.input}
             value={formData.name}
             onChangeText={(text) => updateFormData({ name: text })}
-            placeholder="Kri"
+            placeholder="Name"
             placeholderTextColor={theme.colors.textMuted}
           />
         </View>
@@ -47,7 +47,7 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
             style={styles.input}
             value={formData.age}
             onChangeText={(text) => updateFormData({ age: text })}
-            placeholder="3"
+            placeholder="Age"
             placeholderTextColor={theme.colors.textMuted}
             keyboardType="numeric"
           />

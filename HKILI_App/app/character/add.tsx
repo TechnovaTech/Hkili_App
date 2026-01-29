@@ -6,6 +6,8 @@ import {
   SafeAreaView,
   TouchableOpacity,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -14,11 +16,13 @@ import { CharacterFormData } from '@/types/character';
 import BasicInfoTab from '@/components/character/BasicInfoTab';
 import AppearanceTab from '@/components/character/AppearanceTab';
 import InterestsTab from '@/components/character/InterestsTab';
+import { characterService } from '@/services/characterService';
 
 type TabType = 'basic' | 'appearance' | 'interests';
 
 export default function AddCharacterScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CharacterFormData>({
     name: '',
     age: '',
@@ -33,21 +37,40 @@ export default function AddCharacterScreen() {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleSave = () => {
-    // TODO: Save character logic
-    // Navigate to character selection screen after character creation
-    router.push('/story/character-selection');
+  const handleSave = async () => {
+    if (loading) return;
+    
+    setLoading(true);
+    try {
+      const response = await characterService.create(formData);
+      
+      if (response.success) {
+        Alert.alert('Success', 'Character created successfully', [
+          { text: 'OK', onPress: () => router.replace('/(tabs)/home') }
+        ]);
+      } else {
+        Alert.alert('Error', response.error || 'Failed to create character');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNext = () => {
     // Navigate through tabs or to next screen
     if (activeTab === 'basic') {
+      if (!formData.name) {
+        Alert.alert('Error', 'Please enter a name');
+        return;
+      }
       setActiveTab('appearance');
     } else if (activeTab === 'appearance') {
       setActiveTab('interests');
     } else {
-      // After interests tab, go to home
-      router.push('/(tabs)/home');
+      // After interests tab, save and go to home
+      handleSave();
     }
   };
 
@@ -147,7 +170,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingTop: 70, // Extra space for mobile date/time area + more padding
     paddingHorizontal: 16,
     paddingVertical: 12,

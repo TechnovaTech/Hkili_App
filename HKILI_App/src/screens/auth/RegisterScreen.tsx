@@ -10,18 +10,58 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { authService } from '../../services/authService';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+ 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/auth/login');
+    }
+  };
 
-  const handleSignUp = () => {
-    console.log('Sign up:', { email, password, acceptTerms });
-    router.push('/character/add');
+  const handleSignUp = async () => {
+    setEmailError('');
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    if (!acceptTerms) {
+      Alert.alert('Error', 'Please accept the terms of service');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authService.register({ email, password });
+      
+      if (response.success) {
+        router.replace('/character/add');
+      } else {
+        if (response.error && response.error.toLowerCase().includes('email')) {
+          setEmailError(response.error);
+        } else {
+          Alert.alert('Registration Failed', response.error || 'Something went wrong');
+        }
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Network error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -39,7 +79,7 @@ export default function RegisterScreen() {
       
       {/* Fixed Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Sign Up</Text>
@@ -59,14 +99,18 @@ export default function RegisterScreen() {
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>Email*</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, emailError ? styles.inputError : null]}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                setEmailError('');
+              }}
               placeholder="Enter your email"
               placeholderTextColor="#64B5F6"
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           </View>
 
           {/* Password Field */}
@@ -103,11 +147,15 @@ export default function RegisterScreen() {
 
           {/* Sign Up Button */}
           <TouchableOpacity
-            style={[styles.signUpButton, !acceptTerms && styles.disabledButton]}
+            style={[styles.signUpButton, (!acceptTerms || loading) && styles.disabledButton]}
             onPress={handleSignUp}
-            disabled={!acceptTerms}
+            disabled={!acceptTerms || loading}
           >
-            <Text style={styles.signUpButtonText}>Sign Up</Text>
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.signUpButtonText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
 
           {/* Google Sign In Button */}
@@ -177,6 +225,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  inputError: {
+    borderColor: '#FF5252',
+  },
+  errorText: {
+    color: '#FF5252',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
   },
   checkboxContainer: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 import { ApiResponse, AuthTokens } from '@/types';
+import { tokenStorage } from './tokenStorage';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -25,7 +25,7 @@ class ApiClient {
     this.client.interceptors.request.use(
       async (config) => {
         try {
-          const tokens = await this.getStoredTokens();
+          const tokens = await tokenStorage.get();
           if (tokens?.accessToken) {
             config.headers.Authorization = `Bearer ${tokens.accessToken}`;
           }
@@ -47,15 +47,15 @@ class ApiClient {
           originalRequest._retry = true;
           
           try {
-            const tokens = await this.getStoredTokens();
+            const tokens = await tokenStorage.get();
             if (tokens?.refreshToken) {
               const newTokens = await this.refreshTokens(tokens.refreshToken);
-              await this.storeTokens(newTokens);
+              await tokenStorage.set(newTokens);
               originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
               return this.client(originalRequest);
             }
           } catch (refreshError) {
-            await this.clearTokens();
+            await tokenStorage.clear();
             // Redirect to login would be handled by the app
           }
         }
@@ -63,31 +63,6 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
-  }
-
-  private async getStoredTokens(): Promise<AuthTokens | null> {
-    try {
-      const tokensJson = await SecureStore.getItemAsync('auth_tokens');
-      return tokensJson ? JSON.parse(tokensJson) : null;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  private async storeTokens(tokens: AuthTokens): Promise<void> {
-    try {
-      await SecureStore.setItemAsync('auth_tokens', JSON.stringify(tokens));
-    } catch (error) {
-      console.error('Failed to store tokens:', error);
-    }
-  }
-
-  private async clearTokens(): Promise<void> {
-    try {
-      await SecureStore.deleteItemAsync('auth_tokens');
-    } catch (error) {
-      console.error('Failed to clear tokens:', error);
-    }
   }
 
   private async refreshTokens(refreshToken: string): Promise<AuthTokens> {

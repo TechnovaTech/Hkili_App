@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import { User, AuthTokens, ApiResponse } from '@/types';
-import * as SecureStore from 'expo-secure-store';
+import { tokenStorage } from './tokenStorage';
 
 export interface LoginRequest {
   email: string;
@@ -23,7 +23,7 @@ class AuthService {
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
     
     if (response.success && response.data) {
-      await this.storeTokens(response.data.tokens);
+      await tokenStorage.set(response.data.tokens);
     }
     
     return response;
@@ -33,7 +33,7 @@ class AuthService {
     const response = await apiClient.post<AuthResponse>('/auth/register', userData);
     
     if (response.success && response.data) {
-      await this.storeTokens(response.data.tokens);
+      await tokenStorage.set(response.data.tokens);
     }
     
     return response;
@@ -69,7 +69,7 @@ class AuthService {
     } catch (error) {
       console.warn('Logout API call failed:', error);
     } finally {
-      await this.clearTokens();
+      await tokenStorage.clear();
     }
   }
 
@@ -87,28 +87,10 @@ class AuthService {
     };
   }
 
-  private async storeTokens(tokens: AuthTokens): Promise<void> {
-    try {
-      await SecureStore.setItemAsync('auth_tokens', JSON.stringify(tokens));
-    } catch (error) {
-      console.error('Failed to store auth tokens:', error);
-    }
-  }
-
-  private async clearTokens(): Promise<void> {
-    try {
-      await SecureStore.deleteItemAsync('auth_tokens');
-    } catch (error) {
-      console.error('Failed to clear auth tokens:', error);
-    }
-  }
-
   async isAuthenticated(): Promise<boolean> {
     try {
-      const tokensJson = await SecureStore.getItemAsync('auth_tokens');
-      if (!tokensJson) return false;
-      
-      const tokens: AuthTokens = JSON.parse(tokensJson);
+      const tokens = await tokenStorage.get();
+      if (!tokens) return false;
       return tokens.expiresAt > Date.now();
     } catch (error) {
       return false;

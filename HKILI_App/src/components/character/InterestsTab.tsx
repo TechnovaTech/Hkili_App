@@ -30,9 +30,9 @@ const INTEREST_ICONS: { [key: string]: string } = {
   'Space': 'rocket-outline',
   'Video Games': 'game-controller-outline',
   'Superheroes': 'shield-outline',
-  'Princesses': 'diamond-outline',
+  'Princesses': 'heart-outline',
   'Cars': 'car-outline',
-  'Magic': 'sparkles-outline',
+  'Magic': 'star-outline',
 };
 
 export default function InterestsTab({ formData, updateFormData, onNext }: InterestsTabProps) {

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { message: 'Email and password are required' },
+        { success: false, error: 'Email and password are required', message: 'Email and password are required' },
         { status: 400 }
       )
     }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const user = await User.findOne({ email })
     if (!user) {
       return NextResponse.json(
-        { message: 'Invalid credentials' },
+        { success: false, error: 'Invalid credentials', message: 'Invalid credentials' },
         { status: 401 }
       )
     }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
     if (!isPasswordValid) {
       return NextResponse.json(
-        { message: 'Invalid credentials' },
+        { success: false, error: 'Invalid credentials', message: 'Invalid credentials' },
         { status: 401 }
       )
     }
@@ -44,14 +44,22 @@ export async function POST(request: NextRequest) {
       .setExpirationTime('24h')
       .sign(secret)
 
-    // Create response
+    // Create response (ApiResponse shape)
     const response = NextResponse.json({
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
+      success: true,
+      data: {
+        user: {
+          id: user._id.toString(),
+          email: user.email,
+          role: user.role,
+        },
+        tokens: {
+          accessToken: token,
+          refreshToken: token,
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+        }
       },
+      message: 'Login successful'
     })
 
     // Set HTTP-only cookie

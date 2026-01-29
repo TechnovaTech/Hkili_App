@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import dbConnect from '../../../lib/mongodb'
 import Character from '../../../models/Character'
+import User from '../../../models/User'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,12 +14,14 @@ export async function GET(request: NextRequest) {
     const token = authHeader.replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
     
+    await dbConnect()
+
+    let query = {}
     if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+      query = { userId: decoded.userId }
     }
 
-    await dbConnect()
-    const characters = await Character.find({}).sort({ createdAt: -1 })
+    const characters = await Character.find(query).sort({ createdAt: -1 })
 
     return NextResponse.json(characters)
   } catch (error) {
@@ -37,14 +40,17 @@ export async function POST(request: NextRequest) {
     const token = authHeader.replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
     
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
-    }
+    // Removed admin check to allow users to create characters
 
     const body = await request.json()
     await dbConnect()
     
-    const character = await Character.create(body)
+    const characterData = {
+      ...body,
+      userId: decoded.userId
+    }
+    
+    const character = await Character.create(characterData)
     return NextResponse.json(character, { status: 201 })
   } catch (error) {
     console.error('Character creation error:', error)

@@ -12,6 +12,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
+import { authService } from '../../services/authService';
+
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -25,10 +27,22 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await authService.login({ email, password });
+      
+      if (response.success) {
+        // Navigate to the main app stack or where needed
+        // Since we are replacing the stack, we should probably check if user has character created?
+        // But for now let's follow existing logic: go to character/add
+        router.replace('/character/add');
+      } else {
+        Alert.alert('Login Failed', response.error || 'Invalid credentials');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Network error occurred');
+    } finally {
       setLoading(false);
-      router.replace('/character/add');
-    }, 1000);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -61,9 +75,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        
         <Text style={styles.headerTitle}>Sign In</Text>
       </View>
 
@@ -184,6 +196,12 @@ const styles = StyleSheet.create({
   forgotContainer: {
     alignItems: 'flex-end',
     marginBottom: 30,
+  },
+  errorText: {
+    color: '#FF5252',
+    marginBottom: 16,
+    textAlign: 'center',
+    fontSize: 14,
   },
   forgotText: {
     color: '#81C784',
