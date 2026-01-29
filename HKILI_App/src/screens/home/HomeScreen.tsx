@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   charactersContainer: {
     flexDirection: 'row',
     gap: 16,
+    flexWrap: 'wrap',
   },
   characterCard: {
     alignItems: 'center',
