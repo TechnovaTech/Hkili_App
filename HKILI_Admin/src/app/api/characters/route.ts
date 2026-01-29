@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     const token = authHeader.replace('Bearer ', '')
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
 
     const characters = await Character.find(query).sort({ createdAt: -1 })
 
-    return NextResponse.json(characters)
+    return NextResponse.json({ success: true, data: characters })
   } catch (error) {
     console.error('Characters fetch error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -34,14 +34,12 @@ export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     const token = authHeader.replace('Bearer ', '')
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
     
-    // Removed admin check to allow users to create characters
-
     const body = await request.json()
     await dbConnect()
     
@@ -51,9 +49,9 @@ export async function POST(request: NextRequest) {
     }
     
     const character = await Character.create(characterData)
-    return NextResponse.json(character, { status: 201 })
+    return NextResponse.json({ success: true, data: character }, { status: 201 })
   } catch (error) {
     console.error('Character creation error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }

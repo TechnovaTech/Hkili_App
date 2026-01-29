@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,35 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { characterService } from '@/services/characterService';
+import { useCallback } from 'react';
 
 export default function HomeScreen() {
   const [selectedMainCharacters, setSelectedMainCharacters] = useState([]);
   const [selectedSideCharacters, setSelectedSideCharacters] = useState([]);
   const [hasSelectedCharacter, setHasSelectedCharacter] = useState(false);
+  const [characters, setCharacters] = useState<any[]>([]);
+  const [loadingCharacters, setLoadingCharacters] = useState(false);
+
+  const fetchCharacters = useCallback(async () => {
+    setLoadingCharacters(true);
+    try {
+      const res = await characterService.getAll();
+      if (res.success && res.data) {
+        setCharacters(res.data as any[]);
+        setHasSelectedCharacter((res.data as any[]).length > 0);
+      }
+    } finally {
+      setLoadingCharacters(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCharacters();
+    }, [fetchCharacters])
+  );
 
   const handleAddMainCharacter = () => {
     router.push('/character/add');
@@ -64,14 +87,23 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.charactersContainer}>
-              <TouchableOpacity style={styles.characterCard} onPress={handleSelectCharacter}>
-                <View style={styles.avatarContainer}>
-                  <View style={styles.foxAvatar}>
-                    <Text style={styles.foxEmoji}>🦊</Text>
+              {characters.map((c: any) => (
+                <TouchableOpacity
+                  key={c.id || c._id}
+                  style={styles.characterCard}
+                  onPress={handleSelectCharacter}
+                >
+                  <View style={styles.avatarContainer}>
+                    <View style={[styles.characterAvatar, { backgroundColor: c.hairColor || '#8B4513' }]}>
+                      <View style={[styles.characterFace, { backgroundColor: '#FDBCB4' }]}>
+                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                      </View>
+                    </View>
                   </View>
-                </View>
-                <Text style={styles.characterName}>Kri</Text>
-              </TouchableOpacity>
+                  <Text style={styles.characterName}>{c.name}</Text>
+                </TouchableOpacity>
+              ))}
               
               <TouchableOpacity
                 style={styles.addCharacterButton}
@@ -201,16 +233,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  foxAvatar: {
+  characterAvatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(76, 175, 80, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  foxEmoji: {
-    fontSize: 40,
+  characterFace: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  characterEyes: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   characterName: {
     fontSize: 16,
