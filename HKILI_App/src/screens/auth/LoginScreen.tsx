@@ -197,12 +197,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginBottom: 30,
   },
-  errorText: {
-    color: '#FF5252',
-    marginBottom: 16,
-    textAlign: 'center',
-    fontSize: 14,
-  },
   forgotText: {
     color: '#81C784',
     fontSize: 14,
