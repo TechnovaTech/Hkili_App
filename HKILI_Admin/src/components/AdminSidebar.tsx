@@ -7,12 +7,17 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   const useRouterObj = useRouter()
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+    
     // Clear local storage
     localStorage.removeItem('token')
-    // Clear cookie by setting it to expire
-    document.cookie = 'token=; Max-Age=0; path=/;'
     useRouterObj.push('/login')
+    useRouterObj.refresh() // Force refresh to update server components
   }
 
   const isActive = (path: string) => {
