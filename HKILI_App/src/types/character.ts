@@ -9,7 +9,6 @@ export interface Character {
   };
   interests: string[];
   isMainCharacter: boolean;
-  avatarConfig?: Record<string, any>;
   avatarUrl?: string;
 }
 

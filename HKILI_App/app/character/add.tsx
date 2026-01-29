@@ -31,17 +31,6 @@ export default function AddCharacterScreen() {
     eyeColor: '#8B4513',
     interests: [],
     customInterests: [],
-    avatarConfig: {
-      top: ['shortHair'],
-      accessories: ['none'],
-      hairColor: ['brown'],
-      facialHair: ['none'],
-      clothes: ['shirtCrewNeck'],
-      eyes: ['default'],
-      eyebrow: ['default'],
-      mouth: ['default'],
-      skinColor: ['light'],
-    }
   });
 
   const updateFormData = (updates: Partial<CharacterFormData>) => {

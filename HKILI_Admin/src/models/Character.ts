@@ -37,10 +37,6 @@ const CharacterSchema = new mongoose.Schema({
     type: String,
     required: false,
   }],
-  avatarConfig: {
-    type: mongoose.Schema.Types.Mixed,
-    required: false,
-  },
   description: {
     type: String,
     required: false,
