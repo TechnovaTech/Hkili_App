@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import { SignJWT } from 'jose'
 import dbConnect from '../../../../lib/mongodb'
 import User from '../../../../models/User'
 
@@ -33,21 +33,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: '24h' }
-    )
+    // Create JWT token using jose
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+    const token = await new SignJWT({ 
+      userId: user._id.toString(), 
+      email: user.email, 
+      role: user.role 
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime('24h')
+      .sign(secret)
 
-    return NextResponse.json({
+    // Create response
+    const response = NextResponse.json({
       message: 'Login successful',
-      token,
       user: {
         id: user._id,
         email: user.email,
         role: user.role,
       },
     })
+
+    // Set HTTP-only cookie
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

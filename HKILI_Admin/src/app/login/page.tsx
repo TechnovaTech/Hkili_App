@@ -29,7 +29,7 @@ export default function LoginPage() {
       if (res.ok) {
         localStorage.setItem('token', data.token)
         console.log('Token saved, redirecting to admin...')
-        window.location.href = '/admin' // Force redirect
+        window.location.href = '/admin/dashboard' // Force redirect
       } else {
         setError(data.message || 'Login failed')
       }

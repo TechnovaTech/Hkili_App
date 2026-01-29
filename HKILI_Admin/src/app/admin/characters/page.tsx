@@ -90,76 +90,37 @@ export default function CharactersManagement() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="h-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-sm border-r border-gray-200 fixed h-full z-10">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">H</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
+        <div className="px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Characters Management</h2>
+              <p className="text-gray-600 mt-1">Manage story characters and their attributes</p>
             </div>
-            <div className="ml-3">
-              <h1 className="text-xl font-bold text-gray-900">HKILI</h1>
-              <p className="text-sm text-gray-500">Admin Panel</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
+              >
+                Add Character
+              </button>
+              
             </div>
           </div>
         </div>
-        <nav className="mt-6">
-          <Link href="/admin" className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-medium transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/admin/users" className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-medium transition-colors">
-            Users Management
-          </Link>
-          <Link href="/admin/stories" className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-medium transition-colors">
-            Stories Management
-          </Link>
-          <Link href="/admin/characters" className="flex items-center px-6 py-3 text-blue-600 bg-blue-50 border-r-4 border-blue-600 font-medium">
-            Characters
-          </Link>
-          <Link href="/admin/settings" className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-medium transition-colors">
-            Settings
-          </Link>
-        </nav>
-      </div>
+      </header>
 
-      {/* Main Content */}
-      <div className="flex-1 ml-64">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
-          <div className="px-8 py-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Characters Management</h2>
-                <p className="text-gray-600 mt-1">Manage story characters and their attributes</p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
-                >
-                  Add Character
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="p-8">
+      {/* Content */}
+      <main className="p-8">
           {/* Characters Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {characters.map((character) => (
@@ -226,7 +187,6 @@ export default function CharactersManagement() {
             </div>
           )}
         </main>
-      </div>
 
       {/* Character Form Modal */}
       {(editingCharacter || showAddForm) && (
