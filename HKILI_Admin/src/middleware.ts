@@ -8,11 +8,6 @@ export async function middleware(request: NextRequest) {
 
   // Check if trying to access admin pages
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    // Allow access to login page
-    if (request.nextUrl.pathname === '/admin/login' || request.nextUrl.pathname === '/login') {
-      return NextResponse.next()
-    }
-
     if (!token) {
       // Redirect to login if no token
       return NextResponse.redirect(new URL('/login', request.url))

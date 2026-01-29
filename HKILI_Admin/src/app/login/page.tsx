@@ -27,9 +27,8 @@ export default function LoginPage() {
       console.log('Login response:', data)
 
       if (res.ok) {
-        localStorage.setItem('token', data.token)
-        console.log('Token saved, redirecting to admin...')
-        window.location.href = '/admin/dashboard' // Force redirect
+        console.log('Login successful, redirecting to admin...')
+        router.push('/admin/dashboard')
       } else {
         setError(data.message || 'Login failed')
       }
