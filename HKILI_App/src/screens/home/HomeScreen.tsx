@@ -95,7 +95,7 @@ export default function HomeScreen() {
                 >
                   <View style={styles.avatarContainer}>
                     <View style={[styles.characterAvatar, { backgroundColor: c.hairColor || '#8B4513' }]}>
-                      <View style={[styles.characterFace, { backgroundColor: '#FDBCB4' }]}>
+                      <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
                         <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
                         <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
                       </View>
