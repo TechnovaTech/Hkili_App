@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { characterService } from '@/services/characterService';
+import CharacterAvatar from '@/components/character/CharacterAvatar';
 import { useCallback } from 'react';
 
 export default function HomeScreen() {
@@ -94,14 +95,14 @@ export default function HomeScreen() {
                   onPress={handleSelectCharacter}
                 >
                   <View style={styles.avatarContainer}>
-                    <View style={[styles.characterAvatar, { backgroundColor: c.hairColor || '#8B4513' }]}>
-                      <View style={[styles.characterFace, { backgroundColor: '#FDBCB4' }]}>
-                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                      </View>
-                    </View>
+                    <CharacterAvatar 
+                      config={c.avatarConfig} 
+                      seed={c.name}
+                      size={70}
+                    />
                   </View>
                   <Text style={styles.characterName}>{c.name}</Text>
+                  {/* Selection Indicator */}
                 </TouchableOpacity>
               ))}
               
