@@ -3,17 +3,10 @@ export interface Character {
   name: string;
   age?: number;
   gender: 'male' | 'female' | 'n/a';
-  hairColor: string;
-  eyeColor: string;
-  skinColor: string;
-  hairStyle: string;
-  faceShape: string;
-  facialHair?: string;
-  glasses?: string;
-  mouth?: string;
-  eyebrows?: string;
-  clothing?: string;
-  clothingColor?: string;
+  appearance: {
+    hairColor: string;
+    eyeColor: string;
+  };
   interests: string[];
   isMainCharacter: boolean;
   avatarUrl?: string;
@@ -25,15 +18,6 @@ export interface CharacterFormData {
   gender: 'male' | 'female' | 'n/a';
   hairColor: string;
   eyeColor: string;
-  skinColor: string;
-  hairStyle: string;
-  faceShape: string;
-  facialHair?: string;
-  glasses?: string;
-  mouth?: string;
-  eyebrows?: string;
-  clothing?: string;
-  clothingColor?: string;
   interests: string[];
   customInterests: string[];
   avatarId?: number;

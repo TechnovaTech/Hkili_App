@@ -29,9 +29,6 @@ export default function AddCharacterScreen() {
     gender: 'n/a',
     hairColor: '#8B4513',
     eyeColor: '#8B4513',
-    skinColor: '#F1C27D',
-    hairStyle: 'Short',
-    faceShape: 'Round',
     interests: [],
     customInterests: [],
   });

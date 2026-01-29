@@ -5,15 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/theme';
-import { CharacterFormData, HAIR_COLORS } from '@/types/character';
-import { AvatarPreview } from './AvatarRender';
-import { AvatarOptionGrid } from './AvatarOptionGrid';
-
-const { width } = Dimensions.get('window');
+import { CharacterFormData, HAIR_COLORS, EYE_COLORS } from '@/types/character';
 
 interface AppearanceTabProps {
   formData: CharacterFormData;
@@ -21,221 +16,244 @@ interface AppearanceTabProps {
   onNext: () => void;
 }
 
-const SKIN_COLORS = [
-  '#FDBCB4', '#F1C27D', '#E0AC69', '#C68642', '#8D5524', '#654321', '#FFDFC4', '#F0D5BE', '#EECEB3', '#3E2723'
+const MALE_FACES = [
+  { id: 1, name: 'Classic', shape: 'square' },
+  { id: 2, name: 'Round', shape: 'round' },
+  { id: 3, name: 'Angular', shape: 'angular' },
+  { id: 4, name: 'Oval', shape: 'oval' },
+  { id: 5, name: 'Heart', shape: 'heart' },
+  { id: 6, name: 'Diamond', shape: 'diamond' },
+  { id: 7, name: 'Long', shape: 'long' },
+  { id: 8, name: 'Wide', shape: 'wide' },
+  { id: 9, name: 'Narrow', shape: 'narrow' },
+  { id: 10, name: 'Strong', shape: 'strong' },
 ];
 
-// DiceBear Avataaars Options
-const AVATAR_TOPS = {
-  male: [
-    'shortHair', 'shortHairTheCaesar', 'shortHairTheCaesarSidePart', 'shortHairSides', 
-    'shortHairShortWaved', 'shortHairShortRound', 'shortHairShortFlat', 'shortHairShortCurly',
-    'shortHairShaggyMullet', 'shortHairFrizzle', 'shortHairDreads01', 'shortHairDreads02',
-    'turban', 'winterHat1', 'winterHat2', 'hat', 'noHair'
-  ],
-  female: [
-    'longHairBigHair', 'longHairBob', 'longHairBun', 'longHairCurly', 'longHairCurvy', 
-    'longHairDreads', 'longHairFrida', 'longHairFro', 'longHairFroBand', 'longHairMiaWallace', 
-    'longHairNotTooLong', 'longHairShavedSides', 'longHairStraight', 'longHairStraight2', 
-    'longHairStraightStrand', 'hijab', 'shortHair', 'noHair'
-  ],
-  'n/a': [
-    'shortHair', 'longHairStraight', 'longHairCurly', 'shortHairDreads01', 'longHairBob', 
-    'hat', 'winterHat1', 'noHair', 'eyepatch'
-  ]
+const FEMALE_FACES = [
+  { id: 1, name: 'Soft', shape: 'soft' },
+  { id: 2, name: 'Round', shape: 'round' },
+  { id: 3, name: 'Elegant', shape: 'elegant' },
+  { id: 4, name: 'Oval', shape: 'oval' },
+  { id: 5, name: 'Heart', shape: 'heart' },
+  { id: 6, name: 'Diamond', shape: 'diamond' },
+  { id: 7, name: 'Delicate', shape: 'delicate' },
+  { id: 8, name: 'Classic', shape: 'classic' },
+  { id: 9, name: 'Sweet', shape: 'sweet' },
+  { id: 10, name: 'Bold', shape: 'bold' },
+];
+
+const SKIN_COLORS = [
+  '#FDBCB4', '#F1C27D', '#E0AC69', '#C68642', '#8D5524', '#654321'
+];
+
+const HAIR_STYLES = {
+  male: ['Short', 'Buzz Cut', 'Wavy', 'Curly', 'Spiky', 'Long', 'Bald'],
+  female: ['Long', 'Bob', 'Curly', 'Wavy', 'Straight', 'Pixie', 'Braided']
 };
 
-const FACIAL_HAIR = [
-  'none', 'beardLight', 'beardMagestic', 'beardMedium', 'moustacheFancy', 'moustacheMagnum'
-];
-
-const GLASSES = [
-  'none', 'kurt', 'prescription01', 'prescription02', 'round', 'sunglasses', 'wayfarers'
-];
-
-const EYES = [
-  'default', 'happy', 'wink', 'hearts', 'side', 'squint', 'surprised', 'cry', 'eyeRoll'
-];
-
-const MOUTHS = [
-  'default', 'smile', 'sad', 'serious', 'concerned', 'grimace', 'tongue', 'twinkle', 'eating', 'vomit'
-];
-
-const EYEBROWS = [
-  'default', 'defaultNatural', 'angry', 'angryNatural', 'flatNatural', 'raisedExcited', 'raisedExcitedNatural', 'sadConcerned', 'sadConcernedNatural', 'unibrowNatural', 'upDown', 'upDownNatural'
-];
-
-const CLOTHING = [
-  'blazerAndShirt', 'blazerAndSweater', 'collarAndSweater', 'graphicShirt', 'hoodie', 'overall', 'shirtCrewNeck', 'shirtScoopNeck', 'shirtVNeck'
-];
-
-const CLOTHING_COLORS = [
-  '#262E33', '#65C9FF', '#5199E4', '#25557C', '#E6E6E6', '#929598', '#3C4F5C', '#B1E2FF', '#A7FFC4', '#FFDEB5', '#FFAAF0', '#FF5C5C', '#FF4D4D'
-];
+const FACIAL_HAIR = ['None', 'Mustache', 'Beard', 'Goatee', 'Full Beard'];
 
 export default function AppearanceTab({ formData, updateFormData, onNext }: AppearanceTabProps) {
-  const [activeSection, setActiveSection] = useState('Hair'); // Hair, Face, Features, Outfit
+  const [selectedFace, setSelectedFace] = useState(1);
+  const [selectedSkinColor, setSelectedSkinColor] = useState('#FDBCB4');
+  const [selectedHairStyle, setSelectedHairStyle] = useState('Short');
+  const [selectedFacialHair, setSelectedFacialHair] = useState('None');
 
-  const renderSectionTabs = () => (
-    <View style={styles.sectionTabs}>
-      {['Hair', 'Face', 'Features', 'Outfit'].map((section) => (
-        <TouchableOpacity
-          key={section}
-          style={[styles.sectionTab, activeSection === section && styles.activeSectionTab]}
-          onPress={() => setActiveSection(section)}
-        >
-          <Text style={[styles.sectionTabText, activeSection === section && styles.activeSectionTabText]}>
-            {section}
-          </Text>
-        </TouchableOpacity>
-      ))}
+  const faces = formData.gender === 'male' ? MALE_FACES : 
+               formData.gender === 'female' ? FEMALE_FACES : 
+               [...MALE_FACES.slice(0, 5), ...FEMALE_FACES.slice(0, 5)];
+
+  const renderFaceSelector = () => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="person-outline" size={20} color="#4CAF50" />
+        <Text style={styles.sectionTitle}>Face Shape</Text>
+      </View>
+      <View style={styles.faceGrid}>
+        {faces.map((face) => (
+          <TouchableOpacity
+            key={face.id}
+            style={[
+              styles.faceButton,
+              selectedFace === face.id && styles.selectedFaceButton,
+            ]}
+            onPress={() => setSelectedFace(face.id)}
+          >
+            <View style={[styles.facePreview, { backgroundColor: selectedSkinColor }]}>
+              <View style={[styles.faceEyes, { backgroundColor: formData.eyeColor, left: 10 }]} />
+              <View style={[styles.faceEyes, { backgroundColor: formData.eyeColor, right: 10 }]} />
+            </View>
+            <Text style={styles.faceName}>{face.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 
-  const renderOptions = () => {
-    switch (activeSection) {
-      case 'Hair':
-        const gender = formData.gender === 'male' || formData.gender === 'female' ? formData.gender : 'n/a';
-        const stylesList = AVATAR_TOPS[gender] || AVATAR_TOPS['n/a'];
-        
-        return (
-          <View style={styles.optionsGrid}>
-            <Text style={styles.optionTitle}>Hair Style</Text>
-            <AvatarOptionGrid
-              formData={formData}
-              options={stylesList}
-              optionType="hairStyle"
-              selectedOption={formData.hairStyle}
-              onSelect={(val) => updateFormData({ hairStyle: val })}
-            />
+  const renderSkinColorPicker = () => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="color-palette-outline" size={20} color="#4CAF50" />
+        <Text style={styles.sectionTitle}>Skin Color</Text>
+      </View>
+      <View style={styles.colorGrid}>
+        {SKIN_COLORS.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.colorButton,
+              { backgroundColor: color },
+              selectedSkinColor === color && styles.selectedColorButton,
+            ]}
+            onPress={() => setSelectedSkinColor(color)}
+          >
+            {selectedSkinColor === color && (
+              <View style={styles.selectedIndicator} />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
 
-            <Text style={[styles.optionTitle, { marginTop: 20 }]}>Hair Color</Text>
-            <View style={styles.colorGrid}>
-              {HAIR_COLORS.map(color => (
-                <TouchableOpacity
-                  key={color}
-                  style={[styles.colorOption, { backgroundColor: color }, formData.hairColor === color && styles.selectedColorOption]}
-                  onPress={() => updateFormData({ hairColor: color })}
-                >
-                   {formData.hairColor === color && <Ionicons name="checkmark" size={16} color={color === '#FFFFFF' ? '#000' : '#FFF'} />}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        );
-
-      case 'Face':
-        return (
-           <View style={styles.optionsGrid}>
-             <Text style={styles.optionTitle}>Skin Tone</Text>
-             <View style={styles.colorGrid}>
-               {SKIN_COLORS.map(color => (
-                 <TouchableOpacity
-                   key={color}
-                   style={[styles.colorOption, { backgroundColor: color }, formData.skinColor === color && styles.selectedColorOption]}
-                   onPress={() => updateFormData({ skinColor: color })}
-                 >
-                   {formData.skinColor === color && <Ionicons name="checkmark" size={16} color={color === '#3E2723' || color === '#654321' ? '#FFF' : '#000'} />}
-                 </TouchableOpacity>
-               ))}
-             </View>
-
-             <Text style={[styles.optionTitle, { marginTop: 20 }]}>Mouth Expression</Text>
-             <AvatarOptionGrid
-              formData={formData}
-              options={MOUTHS}
-              optionType="mouth"
-              selectedOption={formData.mouth}
-              onSelect={(val) => updateFormData({ mouth: val })}
-            />
-            
-            <Text style={[styles.optionTitle, { marginTop: 20 }]}>Eyebrows</Text>
-             <AvatarOptionGrid
-              formData={formData}
-              options={EYEBROWS}
-              optionType="eyebrows"
-              selectedOption={formData.eyebrows}
-              onSelect={(val) => updateFormData({ eyebrows: val })}
-            />
-           </View>
-        );
-
-      case 'Features':
-        return (
-          <View style={styles.optionsGrid}>
-             <Text style={styles.optionTitle}>Facial Hair</Text>
-             <AvatarOptionGrid
-              formData={formData}
-              options={FACIAL_HAIR}
-              optionType="facialHair"
-              selectedOption={formData.facialHair}
-              onSelect={(val) => updateFormData({ facialHair: val })}
-            />
-
-             <Text style={[styles.optionTitle, { marginTop: 20 }]}>Glasses</Text>
-             <AvatarOptionGrid
-              formData={formData}
-              options={GLASSES}
-              optionType="glasses"
-              selectedOption={formData.glasses}
-              onSelect={(val) => updateFormData({ glasses: val })}
-            />
-          </View>
-        );
-      
-      case 'Outfit':
-        return (
-          <View style={styles.optionsGrid}>
-            <Text style={styles.optionTitle}>Clothing</Text>
-             <AvatarOptionGrid
-              formData={formData}
-              options={CLOTHING}
-              optionType="clothing"
-              selectedOption={formData.clothing}
-              onSelect={(val) => updateFormData({ clothing: val })}
-            />
-            
-            <Text style={[styles.optionTitle, { marginTop: 20 }]}>Clothing Color</Text>
-            <View style={styles.colorGrid}>
-              {CLOTHING_COLORS.map(color => (
-                <TouchableOpacity
-                  key={color}
-                  style={[styles.colorOption, { backgroundColor: color }, formData.clothingColor === color && styles.selectedColorOption]}
-                  onPress={() => updateFormData({ clothingColor: color })}
-                >
-                   {formData.clothingColor === color && <Ionicons name="checkmark" size={16} color={color === '#FFFFFF' || color === '#E6E6E6' ? '#000' : '#FFF'} />}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        );
-      
-      default:
-        return null;
-    }
+  const renderHairStylePicker = () => {
+    const hairStyles = formData.gender === 'male' || formData.gender === 'female' 
+      ? HAIR_STYLES[formData.gender] 
+      : HAIR_STYLES.male.slice(0, 4);
+    
+    return (
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="cut-outline" size={20} color="#4CAF50" />
+          <Text style={styles.sectionTitle}>Hair Style</Text>
+        </View>
+        <View style={styles.styleGrid}>
+          {hairStyles.map((style, index) => (
+            <TouchableOpacity
+              key={`hair-${index}`}
+              style={[
+                styles.styleButton,
+                selectedHairStyle === style && styles.selectedStyleButton,
+              ]}
+              onPress={() => setSelectedHairStyle(style)}
+            >
+              <Text style={styles.styleName}>{style}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
   };
+
+  const renderFacialHairPicker = () => {
+    if (formData.gender !== 'male') return null;
+    
+    return (
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="man-outline" size={20} color="#4CAF50" />
+          <Text style={styles.sectionTitle}>Facial Hair</Text>
+        </View>
+        <View style={styles.styleGrid}>
+          {FACIAL_HAIR.map((style, index) => (
+            <TouchableOpacity
+              key={`facial-${index}`}
+              style={[
+                styles.styleButton,
+                selectedFacialHair === style && styles.selectedStyleButton,
+              ]}
+              onPress={() => setSelectedFacialHair(style)}
+            >
+              <Text style={styles.styleName}>{style}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const renderColorPicker = (
+    title: string,
+    colors: string[],
+    selectedColor: string,
+    onColorSelect: (color: string) => void,
+    icon: string
+  ) => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Ionicons name={icon as any} size={20} color="#4CAF50" />
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      <View style={styles.colorGrid}>
+        {colors.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.colorButton,
+              { backgroundColor: color },
+              selectedColor === color && styles.selectedColorButton,
+            ]}
+            onPress={() => onColorSelect(color)}
+          >
+            {selectedColor === color && (
+              <View style={styles.selectedIndicator} />
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderPreview = () => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Ionicons name="eye-outline" size={20} color="#4CAF50" />
+        <Text style={styles.sectionTitle}>Preview</Text>
+      </View>
+      <View style={styles.previewContainer}>
+        <View style={styles.avatarContainer}>
+          <View style={[styles.face, { backgroundColor: selectedSkinColor }]}>
+            <View style={[styles.hair, { backgroundColor: formData.hairColor }]} />
+            <View style={styles.eyesContainer}>
+              <View style={[styles.eye, { backgroundColor: formData.eyeColor }]} />
+              <View style={[styles.eye, { backgroundColor: formData.eyeColor }]} />
+            </View>
+            {selectedFacialHair !== 'None' && (
+              <View style={[styles.facialHair, { backgroundColor: formData.hairColor }]} />
+            )}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Preview Section */}
-      <View style={styles.previewContainer}>
-        <View style={styles.previewBg} />
-        <AvatarPreview formData={formData} size={260} />
-      </View>
+      <View style={styles.content}>
+        {renderPreview()}
+        {renderFaceSelector()}
+        {renderSkinColorPicker()}
+        {renderHairStylePicker()}
+        {renderColorPicker(
+          'Hair Color',
+          HAIR_COLORS,
+          formData.hairColor,
+          (color) => updateFormData({ hairColor: color }),
+          'cut-outline'
+        )}
+        {renderColorPicker(
+          'Eye Color',
+          EYE_COLORS,
+          formData.eyeColor,
+          (color) => updateFormData({ eyeColor: color }),
+          'eye-outline'
+        )}
+        {renderFacialHairPicker()}
 
-      {/* Controls Section */}
-      <View style={styles.controlsContainer}>
-        {renderSectionTabs()}
-        {renderOptions()}
+        <TouchableOpacity style={styles.nextButton} onPress={onNext}>
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Next Button */}
-      <TouchableOpacity style={styles.nextButton} onPress={onNext}>
-        <Text style={styles.nextButtonText}>Next</Text>
-        <Ionicons name="arrow-forward" size={20} color="#FFF" />
-      </TouchableOpacity>
-      
-      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
@@ -243,120 +261,177 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1929',
   },
-  previewContainer: {
-    height: 320,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    marginBottom: 20,
+  content: {
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
   },
-  previewBg: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  section: {
+    marginBottom: theme.spacing.lg,
   },
-  controlsContainer: {
-    paddingHorizontal: 20,
-  },
-  sectionTabs: {
+  sectionHeader: {
     flexDirection: 'row',
-    marginBottom: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: 4,
-  },
-  sectionTab: {
-    flex: 1,
-    paddingVertical: 12,
     alignItems: 'center',
-    borderRadius: 10,
+    marginBottom: theme.spacing.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.md,
   },
-  activeSectionTab: {
-    backgroundColor: theme.colors.primary,
+  sectionTitle: {
+    ...theme.typography.h3,
+    color: theme.colors.text,
+    marginLeft: theme.spacing.sm,
   },
-  sectionTabText: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 12, // Slightly smaller to fit 4 tabs
-    fontWeight: '600',
-  },
-  activeSectionTabText: {
-    color: '#FFF',
-    fontWeight: '700',
-  },
-  optionsGrid: {
-    gap: 16,
-  },
-  optionTitle: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  gridRow: {
+  faceGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+  },
+  faceButton: {
+    width: 60,
+    alignItems: 'center',
+    padding: theme.spacing.xs,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedFaceButton: {
+    borderColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+  },
+  facePreview: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+    position: 'relative',
+  },
+  faceEyes: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    top: 12,
+  },
+  faceName: {
+    fontSize: 10,
+    color: theme.colors.text,
+    textAlign: 'center',
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
+    gap: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
   },
-  colorOption: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  colorButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  selectedColorButton: {
+    borderColor: '#4CAF50',
+    borderWidth: 3,
+  },
+  selectedIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+  },
+  styleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+  },
+  styleButton: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 2,
     borderColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  selectedColorOption: {
-    borderColor: '#FFF',
-    transform: [{ scale: 1.1 }],
+  selectedStyleButton: {
+    borderColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
   },
-  horizontalScroll: {
-    flexGrow: 0,
+  styleName: {
+    fontSize: 12,
+    color: theme.colors.text,
   },
-  styleOption: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+  previewContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
   },
-  selectedStyleOption: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.secondary,
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  styleOptionText: {
-    color: '#FFF',
-    fontSize: 14,
+  face: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  selectedStyleOptionText: {
-    fontWeight: '700',
+  hair: {
+    position: 'absolute',
+    top: -5,
+    left: 5,
+    right: 5,
+    height: 35,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+  },
+  eyesContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    top: 22,
+    gap: 12,
+  },
+  eye: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  facialHair: {
+    position: 'absolute',
+    bottom: 15,
+    width: 30,
+    height: 15,
+    borderRadius: 8,
   },
   nextButton: {
-    flexDirection: 'row',
+    backgroundColor: '#4CAF50',
+    borderRadius: theme.borderRadius.md,
+    paddingVertical: theme.spacing.md,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.primary,
-    marginHorizontal: 20,
-    marginTop: 30,
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
+    marginTop: theme.spacing.lg,
   },
   nextButtonText: {
-    color: '#FFF',
-    fontSize: 18,
+    ...theme.typography.body,
+    color: theme.colors.text,
     fontWeight: '600',
   },
 });
