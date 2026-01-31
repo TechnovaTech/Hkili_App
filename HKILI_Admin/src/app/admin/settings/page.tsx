@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface AppSettings {
+  signupBonusCoins: number | string
   languages: {
     EN: boolean
     FR: boolean
@@ -21,6 +22,7 @@ interface AppSettings {
 
 export default function SettingsManagement() {
   const [settings, setSettings] = useState<AppSettings>({
+    signupBonusCoins: 0,
     languages: {
       EN: true,
       FR: true,
@@ -45,12 +47,30 @@ export default function SettingsManagement() {
 
   const fetchSettings = async () => {
     try {
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false)
-      }, 500)
+      const token = localStorage.getItem('adminToken')
+      if (!token) {
+        router.push('/admin/login')
+        return
+      }
+
+      const response = await fetch('/api/settings', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSettings(data)
+      } else {
+        if (response.status === 401) {
+          router.push('/admin/login')
+        }
+        console.error('Failed to fetch settings')
+      }
     } catch (error) {
       console.error('Error fetching settings:', error)
+    } finally {
       setLoading(false)
     }
   }
@@ -60,17 +80,45 @@ export default function SettingsManagement() {
     setSaveMessage('')
 
     try {
-      // Simulate API call
-      setTimeout(() => {
+      const token = localStorage.getItem('adminToken')
+      if (!token) {
+        router.push('/admin/login')
+        return
+      }
+
+      const settingsToSave = {
+        ...settings,
+        signupBonusCoins: Number(settings.signupBonusCoins)
+      }
+
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(settingsToSave)
+      })
+
+      if (response.ok) {
         setSaveMessage('Settings saved successfully!')
-        setSaving(false)
         setTimeout(() => setSaveMessage(''), 3000)
-      }, 1000)
+      } else {
+        setSaveMessage('Error saving settings')
+      }
     } catch (error) {
       console.error('Error saving settings:', error)
       setSaveMessage('Error saving settings')
+    } finally {
       setSaving(false)
     }
+  }
+
+  const handleBonusCoinsChange = (value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      signupBonusCoins: value
+    }))
   }
 
   const handleLanguageToggle = (language: keyof AppSettings['languages']) => {
@@ -131,6 +179,25 @@ export default function SettingsManagement() {
         {/* Content */}
         <main className="p-8">
           <div className="max-w-4xl space-y-8">
+            {/* Signup Bonus Coins */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Sign Up Bonus</h3>
+              <p className="text-sm text-gray-600 mb-6">Set the number of free coins new users receive upon sign up</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bonus Coins
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={settings.signupBonusCoins}
+                  onChange={(e) => handleBonusCoinsChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
             {/* Language Settings */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Language Settings</h3>

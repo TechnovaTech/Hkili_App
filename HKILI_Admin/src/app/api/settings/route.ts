@@ -1,31 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock settings data - replace with actual database operations
-let appSettings = {
-  languages: {
-    EN: true,
-    FR: true,
-    AR: true
-  },
-  maxStoryLength: 1000,
-  storyModes: {
-    adventure: true,
-    educational: true,
-    bedtime: true,
-    interactive: false
-  }
-}
+import jwt from 'jsonwebtoken'
+import dbConnect from '../../../lib/mongodb'
+import Setting from '../../../models/Setting'
 
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    return NextResponse.json(appSettings)
+    const token = authHeader.replace('Bearer ', '')
+    try {
+      jwt.verify(token, process.env.JWT_SECRET!)
+    } catch (e) {
+      return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
+
+    await dbConnect()
+
+    let settings = await Setting.findOne()
+    if (!settings) {
+      settings = await Setting.create({
+        signupBonusCoins: 0,
+        languages: { EN: true, FR: true, AR: true },
+        maxStoryLength: 1000,
+        storyModes: { adventure: true, educational: true, bedtime: true, interactive: false }
+      })
+    }
+
+    return NextResponse.json(settings)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error fetching settings:', error)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -33,15 +40,29 @@ export async function PUT(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
+    const token = authHeader.replace('Bearer ', '')
+    try {
+      jwt.verify(token, process.env.JWT_SECRET!)
+    } catch (e) {
+      return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
+
+    await dbConnect()
     const body = await request.json()
-    appSettings = { ...appSettings, ...body }
+
+    let settings = await Setting.findOne()
+    if (!settings) {
+      settings = await Setting.create(body)
+    } else {
+      settings = await Setting.findOneAndUpdate({}, body, { new: true })
+    }
     
-    // In a real app, save to database
-    return NextResponse.json(appSettings)
+    return NextResponse.json(settings)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error updating settings:', error)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
