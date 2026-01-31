@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 interface User {
   _id: string
@@ -22,14 +21,25 @@ export default function UsersManagement() {
     fetchUsers()
   }, [])
 
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('adminToken')
+    return token ? { 'Authorization': `Bearer ${token}` } : {}
+  }
+
   const fetchUsers = async () => {
     try {
-      setUsers([
-        { _id: '1', email: 'user1@test.com', name: 'John Doe', createdAt: new Date().toISOString(), status: 'active' },
-        { _id: '2', email: 'user2@test.com', name: 'Jane Smith', createdAt: new Date().toISOString(), status: 'active' },
-        { _id: '3', email: 'user3@test.com', name: 'Bob Wilson', createdAt: new Date().toISOString(), status: 'blocked' },
-        { _id: '4', email: 'user4@test.com', name: 'Alice Johnson', createdAt: new Date().toISOString(), status: 'active' }
-      ])
+      const res = await fetch('/api/users', {
+        headers: getAuthHeader()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setUsers(data)
+      } else {
+        console.error('Failed to fetch users')
+        if (res.status === 401) {
+          router.push('/login')
+        }
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
     } finally {
@@ -39,14 +49,45 @@ export default function UsersManagement() {
 
   const handleBlockUnblock = async (userId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'blocked' : 'active'
-    setUsers(users.map(user => 
-      user._id === userId ? { ...user, status: newStatus as 'active' | 'blocked' } : user
-    ))
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (res.ok) {
+        setUsers(users.map(user => 
+          user._id === userId ? { ...user, status: newStatus as 'active' | 'blocked' } : user
+        ))
+      } else {
+        console.error('Failed to update user status')
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error)
+    }
   }
 
   const handleDelete = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return
-    setUsers(users.filter(user => user._id !== userId))
+
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: getAuthHeader()
+      })
+
+      if (res.ok) {
+        setUsers(users.filter(user => user._id !== userId))
+      } else {
+        console.error('Failed to delete user')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+    }
   }
 
   const filteredUsers = users.filter(user =>
@@ -115,7 +156,7 @@ export default function UsersManagement() {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                    {user.status ? (user.status.charAt(0).toUpperCase() + user.status.slice(1)) : 'Unknown'}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-500">
@@ -143,6 +184,11 @@ export default function UsersManagement() {
             ))}
           </tbody>
         </table>
+        {filteredUsers.length === 0 && (
+          <div className="p-8 text-center text-gray-500">
+            No users found
+          </div>
+        )}
       </div>
     </div>
   )

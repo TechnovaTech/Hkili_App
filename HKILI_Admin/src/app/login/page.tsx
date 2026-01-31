@@ -27,6 +27,10 @@ export default function LoginPage() {
       console.log('Login response:', data)
 
       if (res.ok) {
+        // Save token to localStorage for API calls
+        if (data.data?.tokens?.accessToken) {
+          localStorage.setItem('adminToken', data.data.tokens.accessToken)
+        }
         console.log('Login successful, redirecting to admin...')
         router.push('/admin/dashboard')
       } else {
