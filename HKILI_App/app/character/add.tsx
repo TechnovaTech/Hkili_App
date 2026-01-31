@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     paddingTop: 70, // Extra space for mobile date/time area + more padding
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#0A1929', // Fixed background
+    backgroundColor: '#0A1929',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     // Keep header fixed
