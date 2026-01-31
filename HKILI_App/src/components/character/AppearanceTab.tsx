@@ -104,6 +104,108 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
     </View>
   );
 
+  const renderHair = () => {
+    if (selectedHairStyle === 'Bald') {
+      return null;
+    }
+
+    const colorStyle = { backgroundColor: formData.hairColor };
+
+    if (selectedHairStyle === 'Buzz Cut') {
+      return <View style={[styles.avatarHairBuzz, colorStyle]} />;
+    }
+
+    if (selectedHairStyle === 'Pixie') {
+      return <View style={[styles.avatarHairPixie, colorStyle]} />;
+    }
+
+    if (selectedHairStyle === 'Spiky') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeOne, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeTwo, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeThree, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Wavy') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveOne, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveTwo, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveThree, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Curly') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlOne, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlTwo, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlThree, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlFour, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Long') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBack, colorStyle]} />
+          <View style={[styles.hairSideLeft, colorStyle]} />
+          <View style={[styles.hairSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Bob') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBobBack, colorStyle]} />
+          <View style={[styles.hairBobSideLeft, colorStyle]} />
+          <View style={[styles.hairBobSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Straight') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairStraightBack, colorStyle]} />
+          <View style={[styles.hairSideLeft, colorStyle]} />
+          <View style={[styles.hairSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (selectedHairStyle === 'Braided') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBraid, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentOne, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentTwo, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentThree, colorStyle]} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <View style={[styles.avatarHairBase, colorStyle]} />
+        <View style={[styles.hairFringe, colorStyle]} />
+      </>
+    );
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
@@ -117,7 +219,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
             <View style={styles.avatarArc} />
             <View style={styles.avatarFrame}>
               <View style={[styles.avatarFace, { backgroundColor: selectedSkinColor }]}>
-                <View style={[styles.avatarHair, { backgroundColor: formData.hairColor }]} />
+                {renderHair()}
                 <View style={styles.avatarEyes}>
                   <View style={[styles.avatarEye, { backgroundColor: formData.eyeColor }]} />
                   <View style={[styles.avatarEye, { backgroundColor: formData.eyeColor }]} />
@@ -231,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarHair: {
+  avatarHairBase: {
     position: 'absolute',
     top: -6,
     left: 10,
@@ -239,6 +341,172 @@ const styles = StyleSheet.create({
     height: 55,
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
+  },
+  avatarHairBuzz: {
+    position: 'absolute',
+    top: 10,
+    left: 16,
+    right: 16,
+    height: 36,
+    borderRadius: 18,
+  },
+  avatarHairPixie: {
+    position: 'absolute',
+    top: -2,
+    left: 14,
+    right: 14,
+    height: 42,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+  },
+  hairFringe: {
+    position: 'absolute',
+    top: 32,
+    left: 24,
+    width: 36,
+    height: 14,
+    borderRadius: 8,
+  },
+  hairWave: {
+    position: 'absolute',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    top: 16,
+  },
+  hairWaveOne: {
+    left: 18,
+  },
+  hairWaveTwo: {
+    left: 48,
+  },
+  hairWaveThree: {
+    right: 18,
+  },
+  hairCurl: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    top: 20,
+  },
+  hairCurlOne: {
+    left: 14,
+  },
+  hairCurlTwo: {
+    left: 36,
+  },
+  hairCurlThree: {
+    right: 36,
+  },
+  hairCurlFour: {
+    right: 14,
+  },
+  hairSpike: {
+    position: 'absolute',
+    width: 10,
+    height: 22,
+    borderRadius: 6,
+    top: -8,
+  },
+  hairSpikeOne: {
+    left: 24,
+    transform: [{ rotate: '-18deg' }],
+  },
+  hairSpikeTwo: {
+    left: 50,
+    transform: [{ rotate: '8deg' }],
+  },
+  hairSpikeThree: {
+    right: 24,
+    transform: [{ rotate: '18deg' }],
+  },
+  hairBack: {
+    position: 'absolute',
+    top: 44,
+    left: 8,
+    right: 8,
+    height: 52,
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
+  },
+  hairSideLeft: {
+    position: 'absolute',
+    left: 4,
+    top: 38,
+    width: 18,
+    height: 46,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  hairSideRight: {
+    position: 'absolute',
+    right: 4,
+    top: 38,
+    width: 18,
+    height: 46,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  hairBobBack: {
+    position: 'absolute',
+    top: 44,
+    left: 12,
+    right: 12,
+    height: 36,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+  },
+  hairBobSideLeft: {
+    position: 'absolute',
+    left: 8,
+    top: 40,
+    width: 16,
+    height: 30,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+  },
+  hairBobSideRight: {
+    position: 'absolute',
+    right: 8,
+    top: 40,
+    width: 16,
+    height: 30,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  hairStraightBack: {
+    position: 'absolute',
+    top: 42,
+    left: 10,
+    right: 10,
+    height: 56,
+    borderBottomLeftRadius: 26,
+    borderBottomRightRadius: 26,
+  },
+  hairBraid: {
+    position: 'absolute',
+    right: 18,
+    top: 46,
+    width: 14,
+    height: 46,
+    borderRadius: 7,
+  },
+  hairBraidSegment: {
+    position: 'absolute',
+    right: 18,
+    width: 14,
+    height: 10,
+    borderRadius: 5,
+  },
+  hairBraidSegmentOne: {
+    top: 50,
+  },
+  hairBraidSegmentTwo: {
+    top: 62,
+  },
+  hairBraidSegmentThree: {
+    top: 74,
   },
   avatarEyes: {
     flexDirection: 'row',
