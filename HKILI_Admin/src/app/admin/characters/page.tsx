@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import CharacterAvatar from '@/components/CharacterAvatar'
 
 interface User {
   _id: string
@@ -16,6 +17,8 @@ interface Character {
   age: number
   gender: string
   hairColor: string
+  hairStyle: string
+  skinColor: string
   eyeColor: string
   interests: string[]
   customInterests: string[]
@@ -113,11 +116,15 @@ export default function CharactersManagement() {
               <tr key={character._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex items-center">
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3"
-                      style={{ backgroundColor: character.hairColor || '#8B4513' }}
-                    >
-                      {character.name.charAt(0).toUpperCase()}
+                    <div className="mr-3 w-10 h-10 flex items-center justify-center overflow-hidden">
+                      <div className="transform scale-50 origin-center">
+                        <CharacterAvatar 
+                          skinColor={character.skinColor}
+                          hairColor={character.hairColor}
+                          hairStyle={character.hairStyle}
+                          eyeColor={character.eyeColor}
+                        />
+                      </div>
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">{character.name}</div>
@@ -198,11 +205,15 @@ export default function CharactersManagement() {
             <div className="p-6 space-y-6">
               {/* Identity Section */}
               <div className="flex items-start space-x-6">
-                <div 
-                  className="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white font-bold shadow-md"
-                  style={{ backgroundColor: selectedCharacter.hairColor || '#8B4513' }}
-                >
-                  {selectedCharacter.name.charAt(0).toUpperCase()}
+                <div className="w-24 h-24 flex items-center justify-center overflow-visible">
+                  <div className="transform scale-125 origin-center">
+                    <CharacterAvatar 
+                      skinColor={selectedCharacter.skinColor}
+                      hairColor={selectedCharacter.hairColor}
+                      hairStyle={selectedCharacter.hairStyle}
+                      eyeColor={selectedCharacter.eyeColor}
+                    />
+                  </div>
                 </div>
                 <div className="flex-1 space-y-3">
                   <div className="grid grid-cols-2 gap-4">

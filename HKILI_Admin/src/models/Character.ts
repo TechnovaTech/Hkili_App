@@ -25,6 +25,14 @@ const CharacterSchema = new mongoose.Schema({
     type: String,
     default: '#8B4513',
   },
+  hairStyle: {
+    type: String,
+    default: 'Short',
+  },
+  skinColor: {
+    type: String,
+    default: '#FDBCB4',
+  },
   eyeColor: {
     type: String,
     default: '#8B4513',
