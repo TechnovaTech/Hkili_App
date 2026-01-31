@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,36 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { planService, Plan } from '../../services/planService';
+import { authService } from '../../services/authService';
 
 export default function SubscribeScreen() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [coins, setCoins] = useState(0);
 
   useEffect(() => {
     loadPlans();
   }, []);
+
+  const fetchUserCoins = useCallback(async () => {
+    try {
+      const res = await authService.getCurrentUser();
+      if (res.success && res.data) {
+        setCoins(res.data.coins || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user coins:', error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserCoins();
+    }, [fetchUserCoins])
+  );
 
   const loadPlans = async () => {
     try {
@@ -49,7 +68,7 @@ export default function SubscribeScreen() {
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Plans</Text>
         <View style={styles.coinsContainer}>
-          <Text style={styles.coinsText}>2</Text>
+          <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>
       </View>

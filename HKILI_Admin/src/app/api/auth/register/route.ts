@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 import dbConnect from '../../../../lib/mongodb'
 import User from '../../../../models/User'
+import Setting from '../../../../models/Setting'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,11 +26,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch signup bonus coins from settings
+    let bonusCoins = 0;
+    try {
+      const settings = await Setting.findOne();
+      console.log('Found settings:', settings); // Debug log
+      if (settings && settings.signupBonusCoins) {
+        bonusCoins = Number(settings.signupBonusCoins);
+      }
+    } catch (err) {
+      console.error('Error fetching signup bonus settings:', err);
+    }
+
+    console.log('Creating user with bonus coins:', bonusCoins); // Debug log
+
     const hashedPassword = await bcrypt.hash(password, 12)
 
     const user = await User.create({
       email,
       password: hashedPassword,
+      coins: bonusCoins
     })
 
     // Create JWT token using jose
@@ -50,6 +66,7 @@ export async function POST(request: NextRequest) {
           id: user._id.toString(),
           email: user.email,
           role: user.role,
+          coins: user.coins
         },
         tokens: {
           accessToken: token,

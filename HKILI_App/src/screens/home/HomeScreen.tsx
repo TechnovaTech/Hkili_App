@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { characterService } from '@/services/characterService';
+import { authService } from '@/services/authService';
 import { useCallback } from 'react';
 
 export default function HomeScreen() {
@@ -20,6 +21,7 @@ export default function HomeScreen() {
   const [hasSelectedCharacter, setHasSelectedCharacter] = useState(false);
   const [characters, setCharacters] = useState<any[]>([]);
   const [loadingCharacters, setLoadingCharacters] = useState(false);
+  const [coins, setCoins] = useState(0);
 
   const fetchCharacters = useCallback(async () => {
     setLoadingCharacters(true);
@@ -34,10 +36,22 @@ export default function HomeScreen() {
     }
   }, []);
 
+  const fetchUserCoins = useCallback(async () => {
+    try {
+      const res = await authService.getCurrentUser();
+      if (res.success && res.data) {
+        setCoins(res.data.coins || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user coins:', error);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       fetchCharacters();
-    }, [fetchCharacters])
+      fetchUserCoins();
+    }, [fetchCharacters, fetchUserCoins])
   );
 
   const handleAddMainCharacter = () => {
@@ -174,7 +188,7 @@ export default function HomeScreen() {
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Home</Text>
         <View style={styles.coinsContainer}>
-          <Text style={styles.coinsText}>2</Text>
+          <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>
       </View>
