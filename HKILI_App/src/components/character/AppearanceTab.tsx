@@ -109,13 +109,9 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       <View style={styles.content}>
         <View style={styles.avatarCard}>
           <View style={styles.avatarTop}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="arrow-back" size={18} color="#2D2D2D" />
-            </TouchableOpacity>
-            <Text style={styles.avatarTitle}>ZEGO Avatar</Text>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="settings-outline" size={18} color="#2D2D2D" />
-            </TouchableOpacity>
+           
+            <Text style={styles.avatarTitle}>Preview Avatar</Text>
+           
           </View>
           <View style={styles.avatarStage}>
             <View style={styles.avatarArc} />
@@ -213,7 +209,7 @@ const styles = StyleSheet.create({
     height: 160,
     borderBottomLeftRadius: 160,
     borderBottomRightRadius: 160,
-    backgroundColor: '#1E3A8A',
+    backgroundColor: 'transparent',
   },
   avatarFrame: {
     width: 160,
