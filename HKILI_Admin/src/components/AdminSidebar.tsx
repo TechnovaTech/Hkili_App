@@ -15,7 +15,7 @@ export default function AdminSidebar() {
     }
     
     // Clear local storage
-    localStorage.removeItem('token')
+    localStorage.removeItem('adminToken')
     useRouterObj.push('/login')
     useRouterObj.refresh() // Force refresh to update server components
   }
@@ -50,6 +50,9 @@ export default function AdminSidebar() {
           </Link>
           <Link href="/admin/characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/characters')}`}>
             Characters
+          </Link>
+          <Link href="/admin/plans" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/plans')}`}>
+            Plans
           </Link>
           <Link href="/admin/settings" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/settings')}`}>
             Settings
