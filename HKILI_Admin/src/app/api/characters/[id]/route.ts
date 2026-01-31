@@ -14,7 +14,12 @@ export async function GET(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    } catch (e) {
+      return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
     
     await dbConnect()
     
@@ -47,7 +52,12 @@ export async function PUT(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    } catch (e) {
+      return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
     
     const body = await request.json()
     await dbConnect()
@@ -89,7 +99,12 @@ export async function DELETE(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    } catch (e) {
+      return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
     
     await dbConnect()
     

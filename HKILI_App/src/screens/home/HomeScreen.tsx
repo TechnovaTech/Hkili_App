@@ -554,6 +554,12 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)', // Match AppearanceTab frame
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 }, // Scaled down from 6
+    shadowOpacity: 0.25,
+    shadowRadius: 5, // Scaled down from 10
+    elevation: 3, // Scaled down
   },
   characterFace: {
     width: 60,
@@ -561,8 +567,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
+    // Removed flexDirection: 'row' to stack eyes and mouth vertically
   },
   characterEyes: {
     width: 8,
