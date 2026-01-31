@@ -19,5 +19,13 @@ export const characterService = {
   
   async getById(id: string): Promise<ApiResponse<Character>> {
     return apiClient.get<Character>(`/characters/${id}`);
+  },
+
+  async update(id: string, data: CharacterFormData): Promise<ApiResponse<Character>> {
+    const payload = {
+      ...data,
+      age: data.age ? parseInt(data.age, 10) : undefined,
+    };
+    return apiClient.put<Character>(`/characters/${id}`, payload);
   }
 };

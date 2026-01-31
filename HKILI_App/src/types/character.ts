@@ -18,6 +18,8 @@ export interface CharacterFormData {
   gender: 'male' | 'female' | 'n/a';
   hairColor: string;
   eyeColor: string;
+  skinColor: string;
+  hairStyle: string;
   interests: string[];
   customInterests: string[];
   avatarId?: number;

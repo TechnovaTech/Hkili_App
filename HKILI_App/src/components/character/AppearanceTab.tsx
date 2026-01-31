@@ -27,8 +27,6 @@ const HAIR_STYLES = {
 
 export default function AppearanceTab({ formData, updateFormData, onNext }: AppearanceTabProps) {
   const [activeSection, setActiveSection] = useState<'skin' | 'hair' | 'eyes'>('skin');
-  const [selectedSkinColor, setSelectedSkinColor] = useState('#F1C27D');
-  const [selectedHairStyle, setSelectedHairStyle] = useState('Short');
 
   const hairStyles = formData.gender === 'male' || formData.gender === 'female'
     ? HAIR_STYLES[formData.gender]
@@ -90,12 +88,12 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
   const renderStyleChips = () => (
     <View style={styles.chipRow}>
       {hairStyles.map((style) => {
-        const isActive = selectedHairStyle === style;
+        const isActive = formData.hairStyle === style;
         return (
           <TouchableOpacity
             key={style}
             style={[styles.chip, isActive && styles.chipActive]}
-            onPress={() => setSelectedHairStyle(style)}
+            onPress={() => updateFormData({ hairStyle: style })}
           >
             <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{style}</Text>
           </TouchableOpacity>
@@ -105,21 +103,21 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
   );
 
   const renderHair = () => {
-    if (selectedHairStyle === 'Bald') {
+    if (formData.hairStyle === 'Bald') {
       return null;
     }
 
     const colorStyle = { backgroundColor: formData.hairColor };
 
-    if (selectedHairStyle === 'Buzz Cut') {
+    if (formData.hairStyle === 'Buzz Cut') {
       return <View style={[styles.avatarHairBuzz, colorStyle]} />;
     }
 
-    if (selectedHairStyle === 'Pixie') {
+    if (formData.hairStyle === 'Pixie') {
       return <View style={[styles.avatarHairPixie, colorStyle]} />;
     }
 
-    if (selectedHairStyle === 'Spiky') {
+    if (formData.hairStyle === 'Spiky') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -130,7 +128,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Wavy') {
+    if (formData.hairStyle === 'Wavy') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -141,7 +139,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Curly') {
+    if (formData.hairStyle === 'Curly') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -153,7 +151,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Long') {
+    if (formData.hairStyle === 'Long') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -164,7 +162,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Bob') {
+    if (formData.hairStyle === 'Bob') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -175,7 +173,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Straight') {
+    if (formData.hairStyle === 'Straight') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -186,7 +184,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       );
     }
 
-    if (selectedHairStyle === 'Braided') {
+    if (formData.hairStyle === 'Braided') {
       return (
         <>
           <View style={[styles.avatarHairBase, colorStyle]} />
@@ -218,7 +216,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
           <View style={styles.avatarStage}>
             <View style={styles.avatarArc} />
             <View style={styles.avatarFrame}>
-              <View style={[styles.avatarFace, { backgroundColor: selectedSkinColor }]}>
+              <View style={[styles.avatarFace, { backgroundColor: formData.skinColor }]}>
                 {renderHair()}
                 <View style={styles.avatarEyes}>
                   <View style={[styles.avatarEye, { backgroundColor: formData.eyeColor }]} />
@@ -236,7 +234,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
           {activeSection === 'skin' && (
             <>
               <Text style={styles.sectionLabel}>Skin tone</Text>
-              {renderColorRow(SKIN_COLORS, selectedSkinColor, setSelectedSkinColor)}
+              {renderColorRow(SKIN_COLORS, formData.skinColor, (color) => updateFormData({ skinColor: color }))}
             </>
           )}
 

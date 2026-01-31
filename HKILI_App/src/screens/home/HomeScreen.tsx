@@ -41,7 +41,17 @@ export default function HomeScreen() {
   );
 
   const handleAddMainCharacter = () => {
-    router.push('/character/add');
+    router.push({
+      pathname: '/character/add',
+      params: { mode: 'create' }
+    });
+  };
+
+  const handleEditCharacter = (character: any) => {
+    router.push({
+      pathname: '/character/add',
+      params: { mode: 'edit', id: character.id || character._id }
+    });
   };
 
   const handleSelectCharacter = () => {
@@ -52,6 +62,108 @@ export default function HomeScreen() {
     if (hasSelectedCharacter) {
       router.push('/story/mode-selection');
     }
+  };
+
+  const renderCharacterHair = (c: any) => {
+    const style = c.hairStyle || 'Short';
+    const color = c.hairColor || '#8B4513';
+    const colorStyle = { backgroundColor: color };
+
+    if (style === 'Bald') return null;
+
+    if (style === 'Buzz Cut') {
+      return <View style={[styles.avatarHairBuzz, colorStyle]} />;
+    }
+
+    if (style === 'Pixie') {
+      return <View style={[styles.avatarHairPixie, colorStyle]} />;
+    }
+
+    if (style === 'Spiky') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeOne, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeTwo, colorStyle]} />
+          <View style={[styles.hairSpike, styles.hairSpikeThree, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Wavy') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveOne, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveTwo, colorStyle]} />
+          <View style={[styles.hairWave, styles.hairWaveThree, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Curly') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlOne, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlTwo, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlThree, colorStyle]} />
+          <View style={[styles.hairCurl, styles.hairCurlFour, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Long') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBack, colorStyle]} />
+          <View style={[styles.hairSideLeft, colorStyle]} />
+          <View style={[styles.hairSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Bob') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBobBack, colorStyle]} />
+          <View style={[styles.hairBobSideLeft, colorStyle]} />
+          <View style={[styles.hairBobSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Straight') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairStraightBack, colorStyle]} />
+          <View style={[styles.hairSideLeft, colorStyle]} />
+          <View style={[styles.hairSideRight, colorStyle]} />
+        </>
+      );
+    }
+
+    if (style === 'Braided') {
+      return (
+        <>
+          <View style={[styles.avatarHairBase, colorStyle]} />
+          <View style={[styles.hairBraid, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentOne, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentTwo, colorStyle]} />
+          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentThree, colorStyle]} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <View style={[styles.avatarHairBase, colorStyle]} />
+        <View style={[styles.hairFringe, colorStyle]} />
+      </>
+    );
   };
 
   return (
@@ -94,12 +206,25 @@ export default function HomeScreen() {
                   onPress={handleSelectCharacter}
                 >
                   <View style={styles.avatarContainer}>
-                    <View style={[styles.characterAvatar, { backgroundColor: c.hairColor || '#8B4513' }]}>
-                      <View style={[styles.characterFace, { backgroundColor: '#FDBCB4' }]}>
-                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                        <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                    <View style={styles.characterAvatar}>
+                      <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
+                        {renderCharacterHair(c)}
+                        <View style={styles.characterEyesRow}>
+                          <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                          <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                        </View>
+                        <View style={styles.characterMouth} />
                       </View>
                     </View>
+                    <TouchableOpacity 
+                      style={styles.cardEditButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleEditCharacter(c);
+                      }}
+                    >
+                      <Ionicons name="pencil" size={14} color="#FFFFFF" />
+                    </TouchableOpacity>
                   </View>
                   <Text style={styles.characterName}>{c.name}</Text>
                 </TouchableOpacity>
@@ -168,6 +293,183 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+   // Character Appearance Styles
+  characterEyesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+    zIndex: 2,
+  },
+  characterMouth: {
+    width: 14,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    marginTop: 5,
+    zIndex: 2,
+  },
+  avatarHairBase: {
+    position: 'absolute',
+    top: -3,
+    left: 5,
+    right: 5,
+    height: 27.5,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    zIndex: 1,
+  },
+  avatarHairBuzz: {
+    position: 'absolute',
+    top: 5,
+    left: 8,
+    right: 8,
+    height: 18,
+    borderRadius: 9,
+    zIndex: 1,
+  },
+  avatarHairPixie: {
+    position: 'absolute',
+    top: -1,
+    left: 7,
+    right: 7,
+    height: 21,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    zIndex: 1,
+  },
+  hairFringe: {
+    position: 'absolute',
+    top: 16,
+    left: 12,
+    width: 18,
+    height: 7,
+    borderRadius: 4,
+    zIndex: 1,
+  },
+  hairWave: {
+    position: 'absolute',
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    top: 8,
+    zIndex: 1,
+  },
+  hairWaveOne: { left: 9 },
+  hairWaveTwo: { left: 24 },
+  hairWaveThree: { right: 9 },
+  hairCurl: {
+    position: 'absolute',
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    top: 10,
+    zIndex: 1,
+  },
+  hairCurlOne: { left: 7 },
+  hairCurlTwo: { left: 18 },
+  hairCurlThree: { right: 18 },
+  hairCurlFour: { right: 7 },
+  hairSpike: {
+    position: 'absolute',
+    width: 5,
+    height: 11,
+    borderRadius: 3,
+    top: -4,
+    zIndex: 1,
+  },
+  hairSpikeOne: { left: 12, transform: [{ rotate: '-18deg' }] },
+  hairSpikeTwo: { left: 25, transform: [{ rotate: '8deg' }] },
+  hairSpikeThree: { right: 12, transform: [{ rotate: '18deg' }] },
+  hairBack: {
+    position: 'absolute',
+    top: 22,
+    left: 4,
+    right: 4,
+    height: 26,
+    borderBottomLeftRadius: 13,
+    borderBottomRightRadius: 13,
+    zIndex: 0,
+  },
+  hairSideLeft: {
+    position: 'absolute',
+    left: 2,
+    top: 19,
+    width: 9,
+    height: 23,
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
+    zIndex: 2,
+  },
+  hairSideRight: {
+    position: 'absolute',
+    right: 2,
+    top: 19,
+    width: 9,
+    height: 23,
+    borderTopRightRadius: 6,
+    borderBottomRightRadius: 6,
+    zIndex: 2,
+  },
+  hairBobBack: {
+    position: 'absolute',
+    top: 22,
+    left: 6,
+    right: 6,
+    height: 18,
+    borderBottomLeftRadius: 9,
+    borderBottomRightRadius: 9,
+    zIndex: 0,
+  },
+  hairBobSideLeft: {
+    position: 'absolute',
+    left: 4,
+    top: 20,
+    width: 8,
+    height: 15,
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
+    zIndex: 2,
+  },
+  hairBobSideRight: {
+    position: 'absolute',
+    right: 4,
+    top: 20,
+    width: 8,
+    height: 15,
+    borderTopRightRadius: 5,
+    borderBottomRightRadius: 5,
+    zIndex: 2,
+  },
+  hairStraightBack: {
+    position: 'absolute',
+    top: 21,
+    left: 5,
+    right: 5,
+    height: 28,
+    borderBottomLeftRadius: 13,
+    borderBottomRightRadius: 13,
+    zIndex: 0,
+  },
+  hairBraid: {
+    position: 'absolute',
+    right: 9,
+    top: 23,
+    width: 7,
+    height: 23,
+    borderRadius: 3.5,
+    zIndex: 2,
+  },
+  hairBraidSegment: {
+    position: 'absolute',
+    right: 9,
+    width: 7,
+    height: 5,
+    borderRadius: 2.5,
+    zIndex: 2,
+  },
+  hairBraidSegmentOne: { top: 25 },
+  hairBraidSegmentTwo: { top: 31 },
+  hairBraidSegmentThree: { top: 37 },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,6 +535,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cardEditButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
   },
   characterAvatar: {
     width: 80,

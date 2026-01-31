@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
 import { CharacterFormData } from '@/types/character';
 import BasicInfoTab from '@/components/character/BasicInfoTab';
@@ -21,6 +21,7 @@ import { characterService } from '@/services/characterService';
 type TabType = 'basic' | 'appearance' | 'interests';
 
 export default function AddCharacterScreen() {
+  const { mode, id } = useLocalSearchParams<{ mode: string; id: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CharacterFormData>({
@@ -29,9 +30,60 @@ export default function AddCharacterScreen() {
     gender: 'n/a',
     hairColor: '#8B4513',
     eyeColor: '#8B4513',
+    skinColor: '#F1C27D',
+    hairStyle: 'Short',
     interests: [],
     customInterests: [],
   });
+
+  useEffect(() => {
+    if (mode === 'create') {
+      setFormData({
+        name: '',
+        age: '',
+        gender: 'n/a',
+        hairColor: '#8B4513',
+        eyeColor: '#8B4513',
+        skinColor: '#F1C27D',
+        hairStyle: 'Short',
+        interests: [],
+        customInterests: [],
+      });
+      setActiveTab('basic');
+    } else if (mode === 'edit' && id) {
+      loadCharacter(id);
+    }
+  }, [mode, id]);
+
+  const loadCharacter = async (characterId: string) => {
+    setLoading(true);
+    try {
+      const res = await characterService.getById(characterId);
+      if (res.success && res.data) {
+        const c = res.data as any; // Using any to handle potential structure mismatch
+        
+        // Handle potential nested appearance object or flat structure
+        const appearance = c.appearance || {};
+        
+        setFormData({
+          name: c.name || '',
+          age: c.age?.toString() || '',
+          gender: (c.gender || 'n/a').toLowerCase(), // Normalize gender
+          hairColor: c.hairColor || appearance.hairColor || '#8B4513',
+          eyeColor: c.eyeColor || appearance.eyeColor || '#8B4513',
+          skinColor: c.skinColor || appearance.skinColor || '#F1C27D',
+          hairStyle: c.hairStyle || appearance.hairStyle || 'Short',
+          interests: c.interests || [],
+          customInterests: [],
+        });
+      }
+    } catch (error) {
+      console.error('Error loading character:', error);
+      Alert.alert('Error', 'Failed to load character');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateFormData = (updates: Partial<CharacterFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -42,16 +94,22 @@ export default function AddCharacterScreen() {
     
     setLoading(true);
     try {
-      console.log('Creating character with data:', formData);
-      const response = await characterService.create(formData);
-      console.log('Character service response:', response);
+      if (mode === 'edit' && id) {
+        console.log('Updating character with data:', formData);
+        const response = await characterService.update(id, formData);
+        console.log('Character service update response:', response);
+      } else {
+        console.log('Creating character with data:', formData);
+        const response = await characterService.create(formData);
+        console.log('Character service create response:', response);
+      }
       
       // Always redirect regardless of API response for now
       console.log('Redirecting to home...');
       router.push('/home');
       
     } catch (error: any) {
-      console.error('Character creation error:', error);
+      console.error('Character save error:', error);
       // Still redirect even on error
       router.push('/home');
     } finally {
