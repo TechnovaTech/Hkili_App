@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,56 @@ import {
   StatusBar,
   Image,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { storyCharacterService, StoryCharacter } from '@/services/storyCharacterService';
 
 export default function StoryPlaceSelectionScreen() {
   const { mode, character } = useLocalSearchParams<{ mode: string; character: string }>();
   const [storyPlace, setStoryPlace] = useState('');
+  const [characterData, setCharacterData] = useState<StoryCharacter | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (character) {
+      fetchCharacter(character);
+    }
+  }, [character]);
+
+  const fetchCharacter = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await storyCharacterService.getById(id);
+      if (response.success && response.data) {
+        setCharacterData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching character:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return { uri: imagePath };
+    
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+    let baseUrl = apiUrl;
+    
+    try {
+      const url = new URL(apiUrl);
+      baseUrl = url.origin;
+    } catch (e) {
+      baseUrl = apiUrl.replace(/\/api\/?$/, '');
+    }
+
+    const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    return { uri: `${baseUrl}/${cleanPath}` };
+  };
 
   const handleSave = () => {
     console.log('Save clicked, navigating to moral selection');
@@ -24,6 +66,8 @@ export default function StoryPlaceSelectionScreen() {
       params: { mode, character, place: storyPlace || 'Default Place' }
     });
   };
+
+  const imageSource = characterData ? getImageUrl(characterData.image) : null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,11 +84,19 @@ export default function StoryPlaceSelectionScreen() {
 
       <View style={styles.content}>
         <View style={styles.imageContainer}>
-          <Image 
-            source={require('../../../assets/i1.jpg')} 
-            style={styles.placeImage}
-            resizeMode="cover"
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color="#FFFFFF" />
+          ) : imageSource ? (
+            <Image 
+              source={imageSource} 
+              style={styles.placeImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.placeImage, { backgroundColor: '#2A3B4D', justifyContent: 'center', alignItems: 'center' }]}>
+               <Ionicons name="person-outline" size={60} color="#FFFFFF" />
+            </View>
+          )}
         </View>
 
         <View style={styles.inputSection}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,61 +9,39 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { storyCharacterService, StoryCharacter } from '@/services/storyCharacterService';
 
 const { width } = Dimensions.get('window');
 
-interface Character {
-  id: string;
-  name: string;
-  image: any;
-}
-
-const charactersByMode: Record<string, Character[]> = {
-  vegetable: [
-    { id: '1', name: 'Carrot Kid', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'Broccoli Boy', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Tomato Girl', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'Potato Pete', image: require('../../../assets/i1.jpg') },
-  ],
-  environment: [
-    { id: '1', name: 'Tree Guardian', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'River Spirit', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Mountain Bear', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'Forest Fox', image: require('../../../assets/i1.jpg') },
-  ],
-  'jungle-book': [
-    { id: '1', name: 'Mowgli', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'Baloo', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Bagheera', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'King Louie', image: require('../../../assets/i1.jpg') },
-  ],
-  'alice-wonderland': [
-    { id: '1', name: 'Alice', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'Mad Hatter', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Cheshire Cat', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'White Rabbit', image: require('../../../assets/i1.jpg') },
-  ],
-  'grimms-tales': [
-    { id: '1', name: 'Hansel', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'Gretel', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Little Red', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'Goldilocks', image: require('../../../assets/i1.jpg') },
-  ],
-  'wizard-oz': [
-    { id: '1', name: 'Dorothy', image: require('../../../assets/i1.jpg') },
-    { id: '2', name: 'Scarecrow', image: require('../../../assets/i2.jpg') },
-    { id: '3', name: 'Tin Man', image: require('../../../assets/i3.jpg') },
-    { id: '4', name: 'Cowardly Lion', image: require('../../../assets/i1.jpg') },
-  ],
-};
-
 export default function ModeCharacterSelectionScreen() {
   const { mode } = useLocalSearchParams<{ mode: string }>();
-  const characters = charactersByMode[mode || 'vegetable'] || [];
+  const [characters, setCharacters] = useState<StoryCharacter[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (mode) {
+      fetchCharacters(mode);
+    }
+  }, [mode]);
+
+  const fetchCharacters = async (categoryId: string) => {
+    try {
+      setLoading(true);
+      const response = await storyCharacterService.getByCategoryId(categoryId);
+      if (response.success && response.data) {
+        setCharacters(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching story characters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCharacterSelect = (characterId: string) => {
     router.push({
@@ -72,22 +50,47 @@ export default function ModeCharacterSelectionScreen() {
     });
   };
 
-  const renderCharacter = (character: Character, index: number) => {
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return { uri: imagePath };
+    
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+    let baseUrl = apiUrl;
+    
+    try {
+      const url = new URL(apiUrl);
+      baseUrl = url.origin;
+    } catch (e) {
+      baseUrl = apiUrl.replace(/\/api\/?$/, '');
+    }
+
+    const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    return { uri: `${baseUrl}/${cleanPath}` };
+  };
+
+  const renderCharacter = (character: StoryCharacter, index: number) => {
     const cardWidth = (width - 60) / 2;
+    const imageSource = getImageUrl(character.image);
     
     return (
       <TouchableOpacity
-        key={character.id}
+        key={character._id}
         style={[styles.characterCard, { width: cardWidth }]}
-        onPress={() => handleCharacterSelect(character.id)}
+        onPress={() => handleCharacterSelect(character._id)}
         activeOpacity={0.8}
       >
         <View style={styles.imageContainer}>
-          <Image 
-            source={character.image} 
-            style={styles.characterImage}
-            resizeMode="cover"
-          />
+          {imageSource ? (
+            <Image 
+              source={imageSource} 
+              style={styles.characterImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.characterImage, { backgroundColor: '#2A3B4D', justifyContent: 'center', alignItems: 'center' }]}>
+               <Ionicons name="person-outline" size={40} color="#FFFFFF" />
+            </View>
+          )}
         </View>
         <Text style={styles.characterName}>{character.name}</Text>
       </TouchableOpacity>
@@ -106,11 +109,23 @@ export default function ModeCharacterSelectionScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.charactersGrid}>
-          {characters.map(renderCharacter)}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.charactersGrid}>
+            {characters.length > 0 ? (
+              characters.map(renderCharacter)
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No characters found for this category.</Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -174,6 +189,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: theme.colors.text,
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
     textAlign: 'center',
   },
 });

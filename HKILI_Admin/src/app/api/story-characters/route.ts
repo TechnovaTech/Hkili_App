@@ -20,7 +20,15 @@ export async function GET(request: NextRequest) {
     
     await dbConnect()
 
-    const characters = await StoryCharacter.find({})
+    const { searchParams } = new URL(request.url)
+    const categoryId = searchParams.get('categoryId')
+    
+    const query: any = {}
+    if (categoryId) {
+      query.categoryId = categoryId
+    }
+
+    const characters = await StoryCharacter.find(query)
       .sort({ createdAt: -1 })
       .populate('categoryId', 'name')
 
