@@ -107,6 +107,26 @@ class StoryService {
   async getAvailableVoices(): Promise<ApiResponse<{ id: string; name: string; language: string }[]>> {
     return apiClient.get('/voices');
   }
+
+  async addToLibrary(storyId: string): Promise<ApiResponse<any>> {
+    return apiClient.post('/user-stories', { storyId });
+  }
+
+  async getLibraryStories(): Promise<ApiResponse<Story[]>> {
+    const response = await apiClient.get<any>('/user-stories');
+    
+    if (response && (response as any).success && Array.isArray((response as any).data)) {
+        const stories = (response as any).data.map((story: any) => ({
+            ...story,
+            id: story._id || story.id,
+            content: typeof story.content === 'string' 
+              ? this.parseContent(story.content) 
+              : (story.content || [])
+        }));
+        return { success: true, data: stories };
+    }
+    return response as any;
+  }
 }
 
 export const storyService = new StoryService();

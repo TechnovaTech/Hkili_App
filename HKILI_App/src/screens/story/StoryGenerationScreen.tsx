@@ -99,6 +99,9 @@ export default function StoryGenerationScreen() {
       
       console.log(`Navigating to story: ${storyId}`);
       
+      // Save to library before navigating (fire and forget)
+      storyService.addToLibrary(storyId).catch(err => console.error('Failed to save to library:', err));
+
       // Navigate to viewer
       router.replace({
         pathname: '/story/viewer',

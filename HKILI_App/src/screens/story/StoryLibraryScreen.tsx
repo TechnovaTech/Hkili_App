@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,58 +6,58 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-
-const mockStories = [
-  {
-    id: '1',
-    title: 'The Brave Little Dragon',
-    genre: 'Adventure',
-    childName: 'Alex',
-    childAge: 6,
-    createdAt: '2024-01-20',
-    emoji: '🐉',
-  },
-  {
-    id: '2',
-    title: 'Magic Forest Friends',
-    genre: 'Fantasy',
-    childName: 'Emma',
-    childAge: 5,
-    createdAt: '2024-01-19',
-    emoji: '🧚♀️',
-  },
-  {
-    id: '3',
-    title: 'The Counting Adventure',
-    genre: 'Educational',
-    childName: 'Sam',
-    childAge: 4,
-    createdAt: '2024-01-18',
-    emoji: '🔢',
-  },
-];
+import { useRouter, useFocusEffect } from 'expo-router';
+import { storyService } from '@/services/storyService';
+import { Story } from '@/types';
 
 export default function StoryLibraryScreen() {
   const router = useRouter();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const renderStoryItem = ({ item }: { item: any }) => (
+  const fetchLibrary = async () => {
+    try {
+      setLoading(true);
+      const response = await storyService.getLibraryStories();
+      if (response.success && response.data) {
+        setStories(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching library:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchLibrary();
+    }, [])
+  );
+
+  const renderStoryItem = ({ item }: { item: Story }) => (
     <TouchableOpacity
       style={styles.storyCard}
-      onPress={() => router.push(`/story/viewer` as any)}
+      onPress={() => router.push({
+        pathname: '/story/viewer',
+        params: { storyId: item.id }
+      })}
     >
       <View style={styles.storyImage}>
-        <Text style={styles.storyEmoji}>{item.emoji}</Text>
+        <Text style={styles.storyEmoji}>📚</Text>
       </View>
       <View style={styles.storyContent}>
-        <Text style={styles.storyTitle}>{item.title}</Text>
-        <Text style={styles.storyGenre}>{item.genre}</Text>
+        <Text style={styles.storyTitle} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.storyGenre}>{item.genre || 'Story'}</Text>
         <Text style={styles.storyInfo}>
           {item.childName}, {item.childAge} years old
         </Text>
-        <Text style={styles.storyDate}>{item.createdAt}</Text>
+        <Text style={styles.storyDate}>
+          {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
       </View>
       <TouchableOpacity style={styles.playButton}>
         <Ionicons name="play" size={20} color="#FFFFFF" />
@@ -78,27 +78,33 @@ export default function StoryLibraryScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={mockStories}
-        renderItem={renderStoryItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.storiesList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIcon}>
-              <Ionicons name="book-outline" size={60} color="#81C784" />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      ) : (
+        <FlatList
+          data={stories}
+          renderItem={renderStoryItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.storiesList}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="book-outline" size={60} color="#81C784" />
+              </View>
+              <Text style={styles.emptyText}>No stories yet</Text>
+              <Text style={styles.emptySubtext}>
+                Create your first story to get started!
+              </Text>
+              <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(tabs)/home')}>
+                <Text style={styles.createButtonText}>Create Story</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.emptyText}>No stories yet</Text>
-            <Text style={styles.emptySubtext}>
-              Create your first story to get started!
-            </Text>
-            <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(tabs)/home')}>
-              <Text style={styles.createButtonText}>Create Story</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
+          }
+        />
+      )}
     </View>
   );
 }
