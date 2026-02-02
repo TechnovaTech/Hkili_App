@@ -6,9 +6,12 @@ import User from '../../../../models/User'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Login attempt started')
     await dbConnect()
+    console.log('Database connected')
     
     const { email, password } = await request.json()
+    console.log('Login attempt for email:', email)
 
     if (!email || !password) {
       return NextResponse.json(
@@ -18,6 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await User.findOne({ email })
+    console.log('User found:', user ? 'Yes' : 'No')
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials', message: 'Invalid credentials' },
@@ -25,7 +29,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Comparing passwords...')
     const isPasswordValid = await bcrypt.compare(password, user.password)
+    console.log('Password valid:', isPasswordValid)
     if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials', message: 'Invalid credentials' },
@@ -33,7 +39,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create JWT token using jose
+    console.log('Creating JWT token...')
     const secret = new TextEncoder().encode(process.env.JWT_SECRET)
     const token = await new SignJWT({ 
       userId: user._id.toString(), 
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
       .setExpirationTime('24h')
       .sign(secret)
 
-    // Create response (ApiResponse shape)
+    console.log('Token created successfully')
     const response = NextResponse.json({
       success: true,
       data: {
@@ -62,22 +68,23 @@ export async function POST(request: NextRequest) {
       message: 'Login successful'
     })
 
-    // Set HTTP-only cookie
     response.cookies.set({
       name: 'token',
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24,
       path: '/',
     })
 
     return response
-  } catch (error) {
-    console.error('Login error:', error)
+  } catch (error: any) {
+    console.error('Login error details:', error)
+    console.error('Error message:', error?.message)
+    console.error('Error stack:', error?.stack)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { success: false, message: error?.message || 'Internal server error' },
       { status: 500 }
     )
   }
