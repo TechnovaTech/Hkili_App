@@ -14,6 +14,16 @@ const StorySchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: false,
+  },
+  storyCharacterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'StoryCharacter',
+    required: false,
+  },
   characters: [{
     name: String,
     description: String,

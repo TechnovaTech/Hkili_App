@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
 
     await dbConnect()
     
-    const stories = await Story.find({}).populate('userId', 'email').sort({ createdAt: -1 })
+    const stories = await Story.find({})
+      .populate('userId', 'email')
+      .populate('categoryId', 'name')
+      .populate('storyCharacterId', 'name image')
+      .sort({ createdAt: -1 })
 
     return NextResponse.json(stories)
   } catch (error) {
@@ -42,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-    const { title, content, characters, genre } = await request.json()
+    const { title, content, characters, genre, categoryId, storyCharacterId } = await request.json()
 
     if (!title || !content) {
       return NextResponse.json(
@@ -59,6 +63,8 @@ export async function POST(request: NextRequest) {
       userId: decoded.userId,
       characters: characters || [],
       genre: genre || 'general',
+      categoryId,
+      storyCharacterId,
     })
 
     return NextResponse.json({
