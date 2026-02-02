@@ -22,6 +22,7 @@ interface StoryCharacter {
   interests: string[]
   customInterests: string[]
   description?: string
+  image?: string
   createdAt: string
 }
 
@@ -265,15 +266,23 @@ export default function StoryCharactersManagement() {
                 <tr key={character._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="mr-3 w-10 h-10 flex items-center justify-center overflow-hidden">
-                        <div className="transform scale-50 origin-center">
-                          <CharacterAvatar 
-                            skinColor={character.skinColor}
-                            hairColor={character.hairColor}
-                            hairStyle={character.hairStyle}
-                            eyeColor={character.eyeColor}
+                      <div className="mr-3 w-10 h-10 flex items-center justify-center overflow-hidden rounded-full bg-gray-100">
+                        {character.image ? (
+                          <img 
+                            src={character.image} 
+                            alt={character.name} 
+                            className="w-full h-full object-cover"
                           />
-                        </div>
+                        ) : (
+                          <div className="transform scale-50 origin-center">
+                            <CharacterAvatar 
+                              skinColor={character.skinColor}
+                              hairColor={character.hairColor}
+                              hairStyle={character.hairStyle}
+                              eyeColor={character.eyeColor}
+                            />
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">{character.name}</div>

@@ -5,9 +5,10 @@ import StoryCharacter from '../../../../models/StoryCharacter'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -22,7 +23,7 @@ export async function GET(
     
     await dbConnect()
     
-    const character = await StoryCharacter.findById(params.id)
+    const character = await StoryCharacter.findById(id)
 
     if (!character) {
       return NextResponse.json({ success: false, error: 'Story Character not found' }, { status: 404 })
@@ -37,9 +38,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -61,7 +63,7 @@ export async function PUT(
     await dbConnect()
     
     const updatedCharacter = await StoryCharacter.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true }
     )
@@ -79,9 +81,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -101,7 +104,7 @@ export async function DELETE(
     
     await dbConnect()
     
-    const deletedCharacter = await StoryCharacter.findByIdAndDelete(params.id)
+    const deletedCharacter = await StoryCharacter.findByIdAndDelete(id)
 
     if (!deletedCharacter) {
       return NextResponse.json({ success: false, error: 'Story Character not found' }, { status: 404 })

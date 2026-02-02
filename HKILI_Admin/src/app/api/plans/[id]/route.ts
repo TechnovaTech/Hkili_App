@@ -5,9 +5,10 @@ import Plan from '../../../../models/Plan'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -29,7 +30,7 @@ export async function PUT(
     await dbConnect()
 
     const plan = await Plan.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: body },
       { new: true, runValidators: true }
     )
@@ -47,9 +48,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -68,8 +70,8 @@ export async function DELETE(
     }
 
     await dbConnect()
-
-    const plan = await Plan.findByIdAndDelete(params.id)
+    
+    const plan = await Plan.findByIdAndDelete(id)
 
     if (!plan) {
       return NextResponse.json({ success: false, error: 'Plan not found' }, { status: 404 })

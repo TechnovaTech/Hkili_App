@@ -3,8 +3,9 @@ import jwt from 'jsonwebtoken'
 import dbConnect from '../../../../lib/mongodb'
 import Category from '../../../../models/Category'
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -25,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const body = await request.json()
     await dbConnect()
 
-    const category = await Category.findByIdAndUpdate(params.id, body, { new: true })
+    const category = await Category.findByIdAndUpdate(id, body, { new: true })
     if (!category) {
       return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 })
     }
@@ -37,8 +38,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -57,7 +59,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     await dbConnect()
-    const category = await Category.findByIdAndDelete(params.id)
+    const category = await Category.findByIdAndDelete(id)
     
     if (!category) {
       return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 })

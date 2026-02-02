@@ -5,9 +5,10 @@ import Character from '../../../../models/Character'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -23,7 +24,7 @@ export async function GET(
     
     await dbConnect()
     
-    const character = await Character.findById(params.id)
+    const character = await Character.findById(id)
 
     if (!character) {
       return NextResponse.json({ success: false, error: 'Character not found' }, { status: 404 })
@@ -43,9 +44,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -63,7 +65,7 @@ export async function PUT(
     await dbConnect()
     
     // First find the character to check ownership
-    const character = await Character.findById(params.id)
+    const character = await Character.findById(id)
 
     if (!character) {
       return NextResponse.json({ success: false, error: 'Character not found' }, { status: 404 })
@@ -76,7 +78,7 @@ export async function PUT(
     
     // Perform update
     const updatedCharacter = await Character.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true }
     )
@@ -90,9 +92,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -108,7 +111,7 @@ export async function DELETE(
     
     await dbConnect()
     
-    const character = await Character.findById(params.id)
+    const character = await Character.findById(id)
 
     if (!character) {
       return NextResponse.json({ success: false, error: 'Character not found' }, { status: 404 })
@@ -121,7 +124,7 @@ export async function DELETE(
       }
     }
     
-    await Character.findByIdAndDelete(params.id)
+    await Character.findByIdAndDelete(id)
 
     return NextResponse.json({ success: true, message: 'Character deleted successfully' })
   } catch (error) {

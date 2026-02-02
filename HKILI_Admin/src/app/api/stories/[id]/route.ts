@@ -5,9 +5,10 @@ import Story from '../../../../models/Story'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     
     if (!token) {
@@ -28,7 +29,7 @@ export async function DELETE(
 
     await dbConnect()
     
-    const story = await Story.findByIdAndDelete(params.id)
+    const story = await Story.findByIdAndDelete(id)
 
     if (!story) {
       return NextResponse.json(

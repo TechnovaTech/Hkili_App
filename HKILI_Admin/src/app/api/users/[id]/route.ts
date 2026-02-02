@@ -5,9 +5,10 @@ import User from '../../../../models/User'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     
     if (!token) {
@@ -38,7 +39,7 @@ export async function PATCH(
     await dbConnect()
     
     const user = await User.findByIdAndUpdate(
-      params.id,
+      id,
       { status: body.status },
       { new: true }
     )
@@ -62,9 +63,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     
     if (!token) {
@@ -93,7 +95,7 @@ export async function DELETE(
 
     await dbConnect()
     
-    const user = await User.findByIdAndDelete(params.id)
+    const user = await User.findByIdAndDelete(id)
 
     if (!user) {
       return NextResponse.json(
