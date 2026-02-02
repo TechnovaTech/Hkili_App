@@ -39,6 +39,7 @@ export default function StoryCharactersManagement() {
     gender: 'n/a',
     categoryId: '',
     description: '',
+    image: '',
     hairColor: '#8B4513',
     hairStyle: 'Short',
     skinColor: '#FDBCB4',
@@ -54,9 +55,12 @@ export default function StoryCharactersManagement() {
     fetchCategories()
   }, [])
 
-  const getAuthHeader = () => {
+  const getAuthHeader = (): Record<string, string> => {
     const token = localStorage.getItem('adminToken')
-    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+    if (token) {
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    }
+    return { 'Content-Type': 'application/json' }
   }
 
   const fetchCharacters = async () => {
@@ -136,7 +140,7 @@ export default function StoryCharactersManagement() {
         gender: character.gender,
         categoryId: typeof character.categoryId === 'string' ? character.categoryId : character.categoryId?._id || '',
         description: character.description || '',
-        image: (character as any).image || '',
+        image: character.image || '',
         hairColor: character.hairColor,
         hairStyle: character.hairStyle,
         skinColor: character.skinColor,

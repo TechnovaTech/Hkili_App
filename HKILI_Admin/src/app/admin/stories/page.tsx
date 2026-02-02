@@ -53,9 +53,12 @@ export default function StoriesManagement() {
     fetchStoryCharacters()
   }, [])
 
-  const getAuthHeader = () => {
+  const getAuthHeader = (): Record<string, string> => {
     const token = localStorage.getItem('adminToken')
-    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+    if (token) {
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    }
+    return { 'Content-Type': 'application/json' }
   }
 
   const fetchStories = async () => {

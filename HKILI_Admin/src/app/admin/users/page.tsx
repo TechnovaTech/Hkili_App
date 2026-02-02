@@ -21,9 +21,12 @@ export default function UsersManagement() {
     fetchUsers()
   }, [])
 
-  const getAuthHeader = () => {
+  const getAuthHeader = (): Record<string, string> => {
     const token = localStorage.getItem('adminToken')
-    return token ? { 'Authorization': `Bearer ${token}` } : {}
+    if (token) {
+      return { 'Authorization': `Bearer ${token}` }
+    }
+    return {}
   }
 
   const fetchUsers = async () => {
