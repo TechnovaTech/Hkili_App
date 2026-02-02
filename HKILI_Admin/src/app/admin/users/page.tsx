@@ -135,7 +135,7 @@ export default function UsersManagement() {
         <table className="w-full text-left">
           <thead>
             <tr className="bg-gray-50 text-gray-600 text-sm">
-              <th className="px-6 py-4 font-medium">User</th>
+              <th className="px-6 py-4 font-medium">Email</th>
               <th className="px-6 py-4 font-medium">Status</th>
               <th className="px-6 py-4 font-medium">Joined Date</th>
               <th className="px-6 py-4 font-medium">Actions</th>
@@ -145,10 +145,7 @@ export default function UsersManagement() {
             {filteredUsers.map((user) => (
               <tr key={user._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div>
-                    <div className="font-medium text-gray-900">{user.name || 'N/A'}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
+                  <div className="font-medium text-gray-900">{user.email}</div>
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-3 py-1 text-xs font-medium rounded-full ${

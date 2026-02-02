@@ -79,8 +79,10 @@ export default function CharactersManagement() {
       } else {
         if (res.status === 401) {
           router.push('/login')
+          return
         }
-        console.error('Failed to fetch characters')
+        const errorText = await res.text()
+        console.error(`Failed to fetch characters: ${res.status} ${res.statusText}`, errorText)
       }
     } catch (error) {
       console.error('Error fetching characters:', error)
@@ -223,7 +225,6 @@ export default function CharactersManagement() {
           <thead>
             <tr className="bg-gray-50 text-gray-600 text-sm">
               <th className="px-6 py-4 font-medium">Character</th>
-              <th className="px-6 py-4 font-medium">Category</th>
               <th className="px-6 py-4 font-medium">Owner</th>
               <th className="px-6 py-4 font-medium">Details</th>
               <th className="px-6 py-4 font-medium">Created At</th>
@@ -252,20 +253,8 @@ export default function CharactersManagement() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  {character.categoryId ? (
-                     typeof character.categoryId === 'object' && 'name' in character.categoryId 
-                     ? (character.categoryId as Category).name 
-                     : 'Category ID: ' + character.categoryId
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4">
                   {character.userId ? (
-                    <div>
-                      <div className="font-medium text-gray-900">{character.userId.name || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">{character.userId.email}</div>
-                    </div>
+                    <div className="font-medium text-gray-900">{character.userId.email}</div>
                   ) : (
                     <span className="text-gray-500 italic">System / Admin</span>
                   )}

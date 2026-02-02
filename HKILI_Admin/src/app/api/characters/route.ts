@@ -5,8 +5,13 @@ import Character from '../../../models/Character'
 import User from '../../../models/User'
 import Category from '../../../models/Category'
 
+// Ensure models are registered
+const models = { User, Category }
+
 export async function GET(request: NextRequest) {
   try {
+    await dbConnect()
+
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -20,8 +25,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
     
-    await dbConnect()
-
     let query = {}
     if (decoded.role !== 'admin') {
       query = { userId: decoded.userId }
