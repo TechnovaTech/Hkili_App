@@ -1,0 +1,87 @@
+Initialized native services in: C:\Users\manoj\.gradle\native
+Initialized jansi services in: C:\Users\manoj\.gradle\native
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot, JAVA_VERSION=21.0.9, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.9+10-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.9+10-LTS, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Found daemon DaemonInfo{pid=15476, address=[e5695257-152f-4a1a-a373-25f5680c09a2 port:60553, addresses:[/127.0.0.1]], state=Idle, lastBusy=1770040978251, context=DefaultDaemonContext[uid=7da6847e-f43e-479b-abd9-dbbe770e4637,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=15476,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]} however its context does not match the desired criteria.
+At least one daemon option is different.
+Wanted: DefaultDaemonContext[uid=null,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=41620,idleTimeout=null,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=512m,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx2048m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]
+Actual: DefaultDaemonContext[uid=7da6847e-f43e-479b-abd9-dbbe770e4637,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=15476,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]
+
+  Looking for a different daemon...
+Removing 0 daemon stop events from registry
+Previous Daemon (41228) stopped at Mon Feb 02 19:23:42 IST 2026 stop command received
+Previous Daemon (31488) stopped at Mon Feb 02 19:23:42 IST 2026 stop command received
+Previous Daemon (28072) stopped at Mon Feb 02 18:40:16 IST 2026 other compatible daemons were started and after being idle for 0 minutes and not recently used
+Previous Daemon (40980) stopped at Mon Feb 02 18:40:26 IST 2026 other compatible daemons were started and after being idle for 0 minutes and not recently used
+Previous Daemon (42444) stopped at Mon Feb 02 19:33:31 IST 2026 other compatible daemons were started and after being idle for 0 minutes and not recently used
+Previous Daemon (32444) stopped at Mon Feb 02 19:33:50 IST 2026 other compatible daemons were started and after being idle for 0 minutes and not recently used
+Starting a Gradle Daemon, 1 busy and 1 incompatible and 6 stopped Daemons could not be reused, use --status for details
+Starting process 'Gradle build daemon'. Working directory: C:\Users\manoj\.gradle\daemon\8.6 Command: C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot\bin\java.exe -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED -Xmx2048m -Dfile.encoding=UTF-8 -Duser.country=GB -Duser.language=en -Duser.variant -cp C:\Users\manoj\.gradle\wrapper\dists\gradle-8.6-all\3mbtmo166bl6vumsh5k2lkq5h\gradle-8.6\lib\gradle-launcher-8.6.jar -javaagent:C:\Users\manoj\.gradle\wrapper\dists\gradle-8.6-all\3mbtmo166bl6vumsh5k2lkq5h\gradle-8.6\lib\agents\gradle-instrumentation-agent-8.6.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.6
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 5.039 secs.
+The client will now receive all logging from the daemon (pid: 26036). The daemon log file: C:\Users\manoj\.gradle\daemon\8.6\daemon-26036.out.log
+Starting build in new daemon [memory: 2 GiB]
+Using 16 worker leases.
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot, JAVA_VERSION=21.0.9, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.9+10-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.9+10-LTS, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Now considering [D:\Office\Hkili_App\HKILI_App\android] as hierarchies to watch
+File system watching is active
+Starting Build
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\resourceHashesCache.bin
+:ReactNative:Automatically adding native module '@react-native-async-storage/async-storage'
+:ReactNative:Automatically adding native module '@react-native-community/slider'
+:ReactNative:Automatically adding native module '@react-native-picker/picker'
+:ReactNative:Automatically adding native module 'expo'
+:ReactNative:Automatically adding native module 'react-native-gesture-handler'
+:ReactNative:Automatically adding native module 'react-native-reanimated'
+:ReactNative:Automatically adding native module 'react-native-safe-area-context'
+:ReactNative:Automatically adding native module 'react-native-screens'
+:ReactNative:Automatically adding native module 'react-native-svg'
+Settings evaluated using settings file 'D:\Office\Hkili_App\HKILI_App\android\settings.gradle'.
+Now considering [D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin, D:\Office\Hkili_App\HKILI_App\android] as hierarchies to watch
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\resourceHashesCache.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\journal-1\file-access.bin
+Projects loaded. Root project using build file 'D:\Office\Hkili_App\HKILI_App\android\build.gradle'.
+Included projects: [root project 'AI Storytelling', project ':app', project ':expo', project ':expo-application', project ':expo-av', project ':expo-constants', project ':expo-file-system', project ':expo-font', project ':expo-keep-awake', project ':expo-modules-core', project ':expo-modules-core$android-annotation', project ':expo-modules-core$android-annotation-processor', project ':expo-secure-store', project ':expo-splash-screen', project ':expo-system-ui', project ':expo-web-browser', project ':react-native-async-storage_async-storage', project ':react-native-community_slider', project ':react-native-gesture-handler', project ':react-native-picker_picker', project ':react-native-reanimated', project ':react-native-safe-area-context', project ':react-native-screens', project ':react-native-svg']
+
+> Configure project :gradle-plugin
+Evaluating project ':gradle-plugin' using build file 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build.gradle.kts'.
+Transforming kotlin-gradle-plugin-model-1.9.20.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-model:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-1.9.20-gradle81.jar (org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-api-1.9.20.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-native-utils-1.9.20.jar (org.jetbrains.kotlin:kotlin-native-utils:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-klib-commonizer-api-1.9.20.jar (org.jetbrains.kotlin:kotlin-klib-commonizer-api:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-idea-proto-1.9.20.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-idea-proto:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-idea-1.9.20.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-idea:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-util-klib-1.9.20.jar (org.jetbrains.kotlin:kotlin-util-klib:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-build-tools-api-1.9.20.jar (org.jetbrains.kotlin:kotlin-build-tools-api:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-compiler-runner-1.9.20.jar (org.jetbrains.kotlin:kotlin-compiler-runner:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-android-extensions-1.9.20.jar (org.jetbrains.kotlin:kotlin-android-extensions:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-compiler-embeddable-1.9.20.jar (org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-compiler-embeddable-1.9.20.jar (org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-annotations-1.9.20.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-project-model-1.9.20.jar (org.jetbrains.kotlin:kotlin-project-model:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-compiler-impl-embeddable-1.9.20.jar (org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-tooling-core-1.9.20.jar (org.jetbrains.kotlin:kotlin-tooling-core:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-util-io-1.9.20.jar (org.jetbrains.kotlin:kotlin-util-io:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-daemon-embeddable-1.9.20.jar (org.jetbrains.kotlin:kotlin-daemon-embeddable:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming trove4j-1.0.20200330.jar (org.jetbrains.intellij.deps:trove4j:1.0.20200330) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-daemon-client-1.9.20.jar (org.jetbrains.kotlin:kotlin-daemon-client:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlinx-coroutines-core-jvm-1.5.0.jar (org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-jvm-1.9.20.jar (org.jetbrains.kotlin:kotlin-scripting-jvm:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-common-1.9.20.jar (org.jetbrains.kotlin:kotlin-scripting-common:1.9.20) with ExternalDependencyInstrumentingArtifactTransform
+Using Kotlin Gradle Plugin gradle81 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\resourceHashesCache.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\journal-1\file-access.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\journal-1\file-access.bin
+Registering project ':gradle-plugin' in composite build. Will substitute for module 'com.facebook.react:react-native-gradle-plugin'.
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\journal-1\file-access.bin
+
+> Configure project :
+Evaluating root project 'AI Storytelling' using build file 'D:\Office\Hkili_App\HKILI_App\android\build.gradle'.
+Found project 'project :gradle-plugin' as substitute for module 'com.facebook.react:react-native-gradle-plugin'.
+Watched directory hierarchies: []

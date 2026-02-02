@@ -1,0 +1,1 @@
+[CXX1101] NDK at C:\Users\manoj\AppData\Local\Android\Sdk\ndk\23.1.7779620 did not have a source.properties file

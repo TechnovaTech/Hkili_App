@@ -1,0 +1,112 @@
+Initialized native services in: C:\Users\manoj\.gradle\native
+Initialized jansi services in: C:\Users\manoj\.gradle\native
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot, JAVA_VERSION=21.0.9, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.9+10-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.9+10-LTS, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Found daemon DaemonInfo{pid=15476, address=[e5695257-152f-4a1a-a373-25f5680c09a2 port:60553, addresses:[/127.0.0.1]], state=Idle, lastBusy=1770040978251, context=DefaultDaemonContext[uid=7da6847e-f43e-479b-abd9-dbbe770e4637,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=15476,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]} however its context does not match the desired criteria.
+At least one daemon option is different.
+Wanted: DefaultDaemonContext[uid=null,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=32660,idleTimeout=null,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=-XX:MaxMetaspaceSize=512m,--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-Xmx2048m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]
+Actual: DefaultDaemonContext[uid=7da6847e-f43e-479b-abd9-dbbe770e4637,javaHome=C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot,daemonRegistryDir=C:\Users\manoj\.gradle\daemon,pid=15476,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,daemonOpts=--add-opens=java.base/java.util=ALL-UNNAMED,--add-opens=java.base/java.lang=ALL-UNNAMED,--add-opens=java.base/java.lang.invoke=ALL-UNNAMED,--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED,--add-opens=java.base/java.nio.charset=ALL-UNNAMED,--add-opens=java.base/java.net=ALL-UNNAMED,--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED,-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=GB,-Duser.language=en,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 21360). The daemon log file: C:\Users\manoj\.gradle\daemon\8.6\daemon-21360.out.log
+Starting 4th build in daemon [uptime: 13 mins 2.543 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 14% of 512 MiB]
+Using 16 worker leases.
+Now considering [D:\Office\Hkili_App\HKILI_App\android, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Invalidating in-memory cache of D:\Office\Hkili_App\HKILI_App\android\.gradle\8.6\fileHashes\fileHashes.bin
+Invalidating in-memory cache of D:\Office\Hkili_App\HKILI_App\android\.gradle\8.6\fileHashes\resourceHashesCache.bin
+Starting Build
+:ReactNative:Automatically adding native module '@react-native-async-storage/async-storage'
+:ReactNative:Automatically adding native module '@react-native-community/slider'
+:ReactNative:Automatically adding native module '@react-native-picker/picker'
+:ReactNative:Automatically adding native module 'expo'
+:ReactNative:Automatically adding native module 'react-native-gesture-handler'
+:ReactNative:Automatically adding native module 'react-native-reanimated'
+:ReactNative:Automatically adding native module 'react-native-safe-area-context'
+:ReactNative:Automatically adding native module 'react-native-screens'
+:ReactNative:Automatically adding native module 'react-native-svg'
+Settings evaluated using settings file 'D:\Office\Hkili_App\HKILI_App\android\settings.gradle'.
+Now considering [D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin, D:\Office\Hkili_App\HKILI_App\android] as hierarchies to watch
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\8.6\fileHashes\resourceHashesCache.bin
+Projects loaded. Root project using build file 'D:\Office\Hkili_App\HKILI_App\android\build.gradle'.
+Included projects: [root project 'AI Storytelling', project ':app', project ':expo', project ':expo-application', project ':expo-av', project ':expo-constants', project ':expo-file-system', project ':expo-font', project ':expo-keep-awake', project ':expo-modules-core', project ':expo-modules-core$android-annotation', project ':expo-modules-core$android-annotation-processor', project ':expo-secure-store', project ':expo-splash-screen', project ':expo-system-ui', project ':expo-web-browser', project ':react-native-async-storage_async-storage', project ':react-native-community_slider', project ':react-native-gesture-handler', project ':react-native-picker_picker', project ':react-native-reanimated', project ':react-native-safe-area-context', project ':react-native-screens', project ':react-native-svg']
+
+> Configure project :gradle-plugin
+Evaluating project ':gradle-plugin' using build file 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build.gradle.kts'.
+Invalidating in-memory cache of D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\.gradle\buildOutputCleanup\outputFiles.bin
+Invalidating in-memory cache of C:\Users\manoj\.gradle\caches\journal-1\file-access.bin
+Transforming kotlin-gradle-plugin-1.7.22-gradle71.jar (org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-api-1.7.22-gradle71.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-model-1.7.22.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-model:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-api-1.7.22.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-idea-1.7.22.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-idea:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-gradle-plugin-idea-proto-1.7.22.jar (org.jetbrains.kotlin:kotlin-gradle-plugin-idea-proto:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-project-model-1.7.22.jar (org.jetbrains.kotlin:kotlin-project-model:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-util-klib-1.7.22.jar (org.jetbrains.kotlin:kotlin-util-klib:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-tooling-core-1.7.22.jar (org.jetbrains.kotlin:kotlin-tooling-core:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-klib-commonizer-api-1.7.22.jar (org.jetbrains.kotlin:kotlin-klib-commonizer-api:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-annotation-processing-gradle-1.7.22.jar (org.jetbrains.kotlin:kotlin-annotation-processing-gradle:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-android-extensions-1.7.22.jar (org.jetbrains.kotlin:kotlin-android-extensions:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-compiler-runner-1.7.22.jar (org.jetbrains.kotlin:kotlin-compiler-runner:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-compiler-embeddable-1.7.22.jar (org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-jvm-1.7.22.jar (org.jetbrains.kotlin:kotlin-scripting-jvm:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-compiler-embeddable-1.7.22.jar (org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming jna-5.6.0.jar (net.java.dev.jna:jna:5.6.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlinx-coroutines-core-jvm-1.5.0.jar (org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-build-common-1.7.22.jar (org.jetbrains.kotlin:kotlin-build-common:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-compiler-impl-embeddable-1.7.22.jar (org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-scripting-common-1.7.22.jar (org.jetbrains.kotlin:kotlin-scripting-common:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-daemon-embeddable-1.7.22.jar (org.jetbrains.kotlin:kotlin-daemon-embeddable:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-util-io-1.7.22.jar (org.jetbrains.kotlin:kotlin-util-io:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-native-utils-1.7.22.jar (org.jetbrains.kotlin:kotlin-native-utils:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Transforming trove4j-1.0.20200330.jar (org.jetbrains.intellij.deps:trove4j:1.0.20200330) with ExternalDependencyInstrumentingArtifactTransform
+Transforming kotlin-daemon-client-1.7.22.jar (org.jetbrains.kotlin:kotlin-daemon-client:1.7.22) with ExternalDependencyInstrumentingArtifactTransform
+Using Kotlin Gradle Plugin gradle71 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+Registering project ':gradle-plugin' in composite build. Will substitute for module 'com.facebook.react:react-native-gradle-plugin'.
+Resolve mutations for :gradle-plugin:compileKotlin (Thread[#326,Execution worker,5,main]) started.
+:gradle-plugin:compileKotlin (Thread[#326,Execution worker,5,main]) started.
+Resolve mutations for :gradle-plugin:pluginDescriptors (Thread[#331,Execution worker Thread 6,5,main]) started.
+:gradle-plugin:pluginDescriptors (Thread[#331,Execution worker Thread 6,5,main]) started.
+
+> Task :gradle-plugin:pluginDescriptors UP-TO-DATE
+Caching disabled for task ':gradle-plugin:pluginDescriptors' because:
+  Build cache is disabled
+Skipping task ':gradle-plugin:pluginDescriptors' as it is up-to-date.
+Resolve mutations for :gradle-plugin:processResources (Thread[#335,Execution worker Thread 10,5,main]) started.
+:gradle-plugin:processResources (Thread[#335,Execution worker Thread 10,5,main]) started.
+
+> Task :gradle-plugin:processResources UP-TO-DATE
+Caching disabled for task ':gradle-plugin:processResources' because:
+  Build cache is disabled
+Skipping task ':gradle-plugin:processResources' as it is up-to-date.
+
+> Configure project :
+Evaluating root project 'AI Storytelling' using build file 'D:\Office\Hkili_App\HKILI_App\android\build.gradle'.
+Found project 'project :gradle-plugin' as substitute for module 'com.facebook.react:react-native-gradle-plugin'.
+Invalidating in-memory cache of D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\.gradle\8.6\executionHistory\executionHistory.bin
+
+> Task :gradle-plugin:compileKotlin FAILED
+Caching disabled for task ':gradle-plugin:compileKotlin' because:
+  Build cache is disabled
+Task ':gradle-plugin:compileKotlin' is not up-to-date because:
+  Task has failed previously.
+The input changes require a full rebuild for incremental task ':gradle-plugin:compileKotlin'.
+file or directory 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\java', not found
+file or directory 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\java', not found
+file or directory 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\java', not found
+Using Kotlin/JVM incremental compilation
+Kotlin source files: D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\internal\PrivateReactExtension.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\model\ModelCodegenConfig.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\model\ModelCodegenConfigAndroid.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\model\ModelPackageJson.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\ReactExtension.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\ReactPlugin.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\TaskConfiguration.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\BuildCodegenCLITask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\BundleHermesCTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\GenerateCodegenArtifactsTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\GenerateCodegenSchemaTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\PrepareBoostTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\PrepareGlogTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\PrepareJSCTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\PrepareLibeventTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\PreparePrefabHeadersTask.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\tasks\internal\utils\PrefabPreprocessingEntry.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\AgpConfiguratorUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\BackwardCompatUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\DependencyUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\FileUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\JdkConfiguratorUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\JsonUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\KotlinStdlibCompatUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\NdkConfiguratorUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\Os.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\PathUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\ProjectUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\PropertyUtils.kt, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\kotlin\com\facebook\react\utils\TaskUtils.kt
+file or directory 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\java', not found
+Java source files: 
+Script source files: 
+Script file extensions: 
+file or directory 'D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\src\main\java', not found
+[KOTLIN] Kotlin compilation 'jdkHome' argument: C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot
+i: found daemon on port 17307 (701926 ms old), trying to connect
+i: connected to the daemon
+Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0]kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=ClasspathSnapshotDisabled, workingDir=D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build\kotlin\compileKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build\kotlin\compileKotlin\local-state\build-history.bin, useModuleDetection=false), usePreciseJavaTracking=trueoutputFiles=[D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build\classes\kotlin\main, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build\kotlin\compileKotlin\cacheable, D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin\build\kotlin\compileKotlin\local-state])
+3 actionable tasks: 1 executed, 2 up-to-date
+Watched directory hierarchies: [D:\Office\Hkili_App\HKILI_App\node_modules\@react-native\gradle-plugin]

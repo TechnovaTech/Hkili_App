@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
+import { theme } from '@/theme';
 
 export default function StoryLibraryScreen() {
   const router = useRouter();
