@@ -16,6 +16,7 @@ export default function CategoriesManagement() {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -53,6 +54,36 @@ export default function CategoriesManagement() {
       console.error('Error fetching categories:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setFormData(prev => ({ ...prev, image: data.url }))
+        }
+      } else {
+        alert('Failed to upload image')
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error uploading image')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -154,11 +185,22 @@ export default function CategoriesManagement() {
         {categories.map((category) => (
           <div key={category._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
-                {category.description && (
-                  <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+              <div className="flex items-start space-x-4">
+                {category.image && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
+                    <img 
+                      src={category.image} 
+                      alt={category.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 )}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+                  {category.description && (
+                    <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+                  )}
+                </div>
               </div>
               <div className="flex space-x-2">
                 <button
@@ -211,14 +253,31 @@ export default function CategoriesManagement() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL (Optional)
+                  Category Image
                 </label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="flex items-center space-x-4">
+                  {formData.image && (
+                    <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
+                      <img 
+                        src={formData.image} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <label className="cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors">
+                    <span className="text-sm text-gray-600">
+                      {uploading ? 'Uploading...' : 'Choose File'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button

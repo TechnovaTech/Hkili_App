@@ -44,6 +44,7 @@ export default function StoryCharactersManagement() {
     eyeColor: '#8B4513',
     interests: '' // comma separated
   })
+  const [uploading, setUploading] = useState(false)
 
   const router = useRouter()
 
@@ -95,6 +96,36 @@ export default function StoryCharactersManagement() {
     }
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setFormData(prev => ({ ...prev, image: data.url }))
+        }
+      } else {
+        alert('Failed to upload image')
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error uploading image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleOpenFormModal = (character?: StoryCharacter) => {
     if (character) {
       setEditingCharacter(character)
@@ -104,6 +135,7 @@ export default function StoryCharactersManagement() {
         gender: character.gender,
         categoryId: typeof character.categoryId === 'string' ? character.categoryId : character.categoryId?._id || '',
         description: character.description || '',
+        image: (character as any).image || '',
         hairColor: character.hairColor,
         hairStyle: character.hairStyle,
         skinColor: character.skinColor,
@@ -118,6 +150,7 @@ export default function StoryCharactersManagement() {
         gender: 'n/a',
         categoryId: '',
         description: '',
+        image: '',
         hairColor: '#8B4513',
         hairStyle: 'Short',
         skinColor: '#FDBCB4',
@@ -308,7 +341,7 @@ export default function StoryCharactersManagement() {
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 {/* Basic Info */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Basic Information</h3>
@@ -365,6 +398,33 @@ export default function StoryCharactersManagement() {
                   </div>
 
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Character Image</label>
+                    <div className="flex items-center space-x-4">
+                      {formData.image && (
+                        <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
+                          <img 
+                            src={formData.image} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <label className="cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors">
+                        <span className="text-sm text-gray-600">
+                          {uploading ? 'Uploading...' : 'Choose File'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                     <textarea
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -386,67 +446,7 @@ export default function StoryCharactersManagement() {
                   </div>
                 </div>
 
-                {/* Appearance */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Appearance</h3>
-                  
-                  <div className="flex justify-center py-4 bg-gray-50 rounded-lg mb-4">
-                    <div className="transform scale-150">
-                      <CharacterAvatar 
-                        skinColor={formData.skinColor}
-                        hairColor={formData.hairColor}
-                        hairStyle={formData.hairStyle}
-                        eyeColor={formData.eyeColor}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Skin Color</label>
-                      <input
-                        type="color"
-                        className="w-full h-10 p-1 border border-gray-300 rounded-lg"
-                        value={formData.skinColor}
-                        onChange={(e) => setFormData({...formData, skinColor: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Eye Color</label>
-                      <input
-                        type="color"
-                        className="w-full h-10 p-1 border border-gray-300 rounded-lg"
-                        value={formData.eyeColor}
-                        onChange={(e) => setFormData({...formData, eyeColor: e.target.value})}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Hair Color</label>
-                      <input
-                        type="color"
-                        className="w-full h-10 p-1 border border-gray-300 rounded-lg"
-                        value={formData.hairColor}
-                        onChange={(e) => setFormData({...formData, hairColor: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Hair Style</label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={formData.hairStyle}
-                        onChange={(e) => setFormData({...formData, hairStyle: e.target.value})}
-                      >
-                        <option value="Short">Short</option>
-                        <option value="Long">Long</option>
-                        <option value="Curly">Curly</option>
-                        <option value="Bald">Bald</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+                
               </div>
 
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-100">
