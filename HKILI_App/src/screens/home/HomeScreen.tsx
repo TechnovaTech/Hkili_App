@@ -269,9 +269,7 @@ export default function HomeScreen() {
       </KeyboardAvoidingView>
 
       <View style={styles.startButtonContainer}>
-        <TouchableOpacity style={styles.languageButton}>
-          <Text style={styles.languageText}>🇬🇧 EN</Text>
-        </TouchableOpacity>
+       
 
         <TouchableOpacity 
           style={[styles.startButton, !hasSelectedCharacter && styles.startButtonDisabled]} 

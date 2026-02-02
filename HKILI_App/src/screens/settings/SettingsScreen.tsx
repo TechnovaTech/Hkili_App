@@ -29,23 +29,9 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name="language-outline" size={24} color="#4CAF50" />
-          <View style={styles.settingContent}>
-            <Text style={styles.settingTitle}>Language</Text>
-            <Text style={styles.settingSubtitle}>English</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#81C784" />
-        </TouchableOpacity>
+       
 
-        <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name="text-outline" size={24} color="#4CAF50" />
-          <View style={styles.settingContent}>
-            <Text style={styles.settingTitle}>Text Size</Text>
-            <Text style={styles.settingSubtitle}>Medium</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#81C784" />
-        </TouchableOpacity>
+     
 
         <TouchableOpacity style={styles.settingItem}>
           <Ionicons name="information-circle-outline" size={24} color="#4CAF50" />
