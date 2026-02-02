@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
 import { storyCharacterService, StoryCharacter } from '@/services/storyCharacterService';
+import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -43,7 +44,8 @@ export default function ModeCharacterSelectionScreen() {
     }
   };
 
-  const handleCharacterSelect = (characterId: string) => {
+  const handleCharacterSelect = async (characterId: string) => {
+    await playClickSound();
     router.push({
       pathname: '/story/story-place-selection',
       params: { mode, character: characterId }

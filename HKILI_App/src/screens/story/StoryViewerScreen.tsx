@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,112 +6,271 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Audio } from 'expo-av';
+import { storyService } from '@/services/storyService';
+import { Story } from '@/types';
+import { theme } from '@/theme';
 
-const mockStory = {
-  title: 'The Brave Little Dragon',
-  content: [
-    {
-      text: 'Once upon a time, in a magical kingdom far away, there lived a little dragon named Spark. Unlike other dragons, Spark was small and couldn\'t breathe fire yet.',
-      image: '🐲',
-    },
-    {
-      text: 'One day, the kingdom was in trouble. A dark cloud covered the sun, and all the flowers began to wilt. The wise owl told everyone that only a brave heart could save the day.',
-      image: '☁️',
-    },
-    {
-      text: 'Spark knew he had to help, even though he was small. He flew up to the dark cloud and discovered it was just a lonely storm cloud that needed a friend.',
-      image: '⛈️',
-    },
-    {
-      text: 'With kindness and friendship, Spark helped the cloud find its way home to the sky. The sun shone bright again, and Spark learned that being brave means being kind.',
-      image: '☀️',
-    },
-  ],
-};
+const { width } = Dimensions.get('window');
 
 export default function StoryViewerScreen() {
   const router = useRouter();
-  const { storyId } = useLocalSearchParams();
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
+  const id = Array.isArray(storyId) ? storyId[0] : storyId;
+  const [story, setStory] = useState<Story | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Audio State
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
 
-  const nextPage = () => {
-    if (currentPage < mockStory.content.length - 1) {
-      setCurrentPage(currentPage + 1);
+  useEffect(() => {
+    if (storyData) {
+      // Use passed data if available (e.g. fallback story)
+      try {
+        const parsedStory = JSON.parse(storyData);
+        setStory(parsedStory);
+        if (parsedStory.audioUrl) {
+          loadAudio(parsedStory.audioUrl);
+        }
+        setLoading(false);
+      } catch (e) {
+        console.error('Error parsing story data', e);
+        if (id) fetchStory(id);
+      }
+    } else if (id) {
+      fetchStory(id);
+    }
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [id, storyData]);
+
+  const fetchStory = async (sid: string) => {
+    try {
+      const response = await storyService.getStory(sid);
+      if (response.success && response.data) {
+        setStory(response.data);
+        if (response.data.audioUrl) {
+          loadAudio(response.data.audioUrl);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching story:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const prevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
+  const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return { uri: imagePath };
+    
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
+    let baseUrl = apiUrl;
+    
+    try {
+      const url = new URL(apiUrl);
+      baseUrl = url.origin;
+    } catch (e) {
+      baseUrl = apiUrl.replace(/\/api\/?$/, '');
+    }
+
+    const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    return { uri: `${baseUrl}/${cleanPath}` };
+  };
+
+  const loadAudio = async (uri: string) => {
+    try {
+      const audioUri = getImageUrl(uri)?.uri;
+      if (!audioUri) return;
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: false },
+        onPlaybackStatusUpdate
+      );
+      setSound(newSound);
+    } catch (error) {
+      console.error('Error loading audio:', error);
     }
   };
 
-  const currentSegment = mockStory.content[currentPage];
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (status.isLoaded) {
+      setDuration(status.durationMillis);
+      setPosition(status.positionMillis);
+      setIsPlaying(status.isPlaying);
+      
+      if (status.didJustFinish) {
+        setIsPlaying(false);
+        // Optional: reset to start
+        // sound?.setPositionAsync(0);
+      }
+    }
+  };
+
+  const togglePlayback = async () => {
+    if (!sound) return;
+    if (isPlaying) {
+      await sound.pauseAsync();
+    } else {
+      await sound.playAsync();
+    }
+  };
+
+  const skipForward = async () => {
+    if (!sound) return;
+    const newPos = Math.min(position + 10000, duration);
+    await sound.setPositionAsync(newPos);
+  };
+
+  const skipBackward = async () => {
+    if (!sound) return;
+    const newPos = Math.max(position - 10000, 0);
+    await sound.setPositionAsync(newPos);
+  };
+
+  const handleSeek = async (value: number) => {
+    if (!sound) return;
+    await sound.setPositionAsync(value);
+  };
+
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#FF9800" />
+      </View>
+    );
+  }
+
+  if (!story) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>Story not found</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const imageSource = getImageUrl(story.imageUrl || (story.content && story.content[0]?.image));
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
+      <StatusBar barStyle="light-content" backgroundColor="#1A0B2E" />
       
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#4CAF50" />
+        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} style={styles.iconButton}>
+          <Ionicons name="arrow-back" size={24} color="#FF9800" />
         </TouchableOpacity>
-        <Text style={styles.title}>{mockStory.title}</Text>
-        <TouchableOpacity style={styles.audioButton}>
-          <Ionicons name="volume-high" size={24} color="#4CAF50" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Your Story</Text>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="print-outline" size={24} color="#FF9800" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="share-social-outline" size={24} color="#FF9800" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* Story Title */}
+        <Text style={styles.storyTitle}>{story.title}</Text>
+
+        {/* Image with Play Overlay */}
         <View style={styles.imageContainer}>
-          <Text style={styles.storyImage}>{currentSegment.image}</Text>
+          {imageSource ? (
+            <Image source={imageSource} style={styles.storyImage} resizeMode="cover" />
+          ) : (
+            <View style={[styles.storyImage, styles.placeholderImage]}>
+              <Ionicons name="image-outline" size={60} color="rgba(255,255,255,0.3)" />
+            </View>
+          )}
+          {/* Play Overlay (Visual only, controls are at bottom, or could trigger start) */}
+          <TouchableOpacity style={styles.playOverlay} onPress={togglePlayback}>
+             <View style={styles.playCircleSmall}>
+               <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="#FF9800" style={{ marginLeft: isPlaying ? 0 : 4 }} />
+             </View>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.textContainer}>
-          <Text style={styles.storyText}>{currentSegment.text}</Text>
+        {/* Subtitle / Section Header */}
+        <Text style={styles.sectionTitle}>The Story</Text>
+
+        {/* Story Text */}
+        <View style={styles.textWrapper}>
+          {story.content && story.content.map((segment, index) => (
+            <Text key={index} style={styles.storyText}>
+              {segment.text}
+            </Text>
+          ))}
         </View>
+        
+        {/* Spacer for bottom player */}
+        <View style={{ height: 100 }} />
       </ScrollView>
 
-      <View style={styles.navigation}>
-        <TouchableOpacity
-          style={[styles.navButton, currentPage === 0 && styles.navButtonDisabled]}
-          onPress={prevPage}
-          disabled={currentPage === 0}
-        >
-          <Ionicons name="chevron-back" size={20} color={currentPage === 0 ? '#8A7CA8' : '#FFFFFF'} />
-          <Text style={[styles.navButtonText, currentPage === 0 && styles.navButtonTextDisabled]}>
-            Previous
-          </Text>
-        </TouchableOpacity>
+      {/* Bottom Player */}
+      {story.audioUrl && (
+        <View style={styles.playerContainer}>
+          {/* Progress Slider */}
+          <View style={styles.sliderContainer}>
+            <Text style={styles.timeText}>{formatTime(position)}</Text>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={duration}
+              value={position}
+              onSlidingComplete={handleSeek}
+              minimumTrackTintColor="#FF9800"
+              maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+              thumbTintColor="#FF9800"
+            />
+            <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          </View>
 
-        <View style={styles.pageIndicator}>
-          <Text style={styles.pageText}>
-            {currentPage + 1} of {mockStory.content.length}
-          </Text>
+          {/* Controls */}
+          <View style={styles.controlsRow}>
+            <TouchableOpacity onPress={skipBackward} style={styles.controlButton}>
+              <Ionicons name="play-skip-back" size={24} color="#FF9800" />
+              <Text style={styles.skipText}>10</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={togglePlayback} style={styles.playButtonLarge}>
+              <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="#FFFFFF" style={{ marginLeft: isPlaying ? 0 : 4 }} />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={skipForward} style={styles.controlButton}>
+              <Text style={styles.skipText}>10</Text>
+              <Ionicons name="play-skip-forward" size={24} color="#FF9800" />
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            currentPage === mockStory.content.length - 1 && styles.navButtonDisabled,
-          ]}
-          onPress={nextPage}
-          disabled={currentPage === mockStory.content.length - 1}
-        >
-          <Text
-            style={[
-              styles.navButtonText,
-              currentPage === mockStory.content.length - 1 && styles.navButtonTextDisabled,
-            ]}
-          >
-            Next
-          </Text>
-          <Ionicons name="chevron-forward" size={20} color={currentPage === mockStory.content.length - 1 ? '#8A7CA8' : '#FFFFFF'} />
-        </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 }
@@ -119,100 +278,173 @@ export default function StoryViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1929',
+    backgroundColor: '#1A0B2E', // Dark Purple Background
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 10 : 50,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    backgroundColor: '#0A1929',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: 15,
   },
-  backButton: {
-    padding: 8,
-  },
-  title: {
+  headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 16,
+    fontWeight: 'bold',
+    color: '#FF9800', // Orange
   },
-  audioButton: {
-    padding: 8,
+  headerRight: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  iconButton: {
+    padding: 5,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    flexGrow: 1,
+    padding: 20,
+    paddingBottom: 40,
   },
-  imageContainer: {
-    height: 250,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 16,
-  },
-  storyImage: {
-    fontSize: 100,
-  },
-  textContainer: {
-    padding: 24,
-    minHeight: 200,
-    justifyContent: 'center',
-  },
-  storyText: {
-    fontSize: 18,
-    lineHeight: 28,
+  storyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: '#FFFFFF',
+    marginBottom: 20,
     textAlign: 'left',
   },
-  navigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 25,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  navButton: {
+  storyImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderImage: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2A1B3E',
+  },
+  playOverlay: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  playCircleSmall: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FF9800',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 15,
+  },
+  textWrapper: {
+    marginBottom: 20,
+  },
+  storyText: {
+    fontSize: 16,
+    lineHeight: 26,
+    color: '#E0E0E0',
+    marginBottom: 15,
+  },
+  playerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#2A1B3E', // Slightly lighter than background
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
+  },
+  sliderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#4CAF50',
-    gap: 8,
+    marginBottom: 15,
   },
-  navButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  slider: {
+    flex: 1,
+    marginHorizontal: 10,
+    height: 40,
   },
-  navButtonText: {
+  timeText: {
+    color: '#B0B0B0',
+    fontSize: 12,
+    width: 40,
+    textAlign: 'center',
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 40,
+  },
+  controlButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  skipText: {
+    color: '#FF9800',
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+  playButtonLarge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FF9800',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#FF9800',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  errorText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 18,
+    marginBottom: 20,
   },
-  navButtonTextDisabled: {
-    color: '#8A7CA8',
-  },
-  pageIndicator: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  backButton: {
+    backgroundColor: '#FF9800',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 8,
   },
-  pageText: {
-    color: '#B8A9C9',
-    fontSize: 14,
-    fontWeight: '500',
+  backButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
 });

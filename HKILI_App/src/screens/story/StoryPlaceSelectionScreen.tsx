@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
 import { storyCharacterService, StoryCharacter } from '@/services/storyCharacterService';
+import { playClickSound } from '@/utils/soundUtils';
 
 export default function StoryPlaceSelectionScreen() {
   const { mode, character } = useLocalSearchParams<{ mode: string; character: string }>();
@@ -59,7 +60,8 @@ export default function StoryPlaceSelectionScreen() {
     return { uri: `${baseUrl}/${cleanPath}` };
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await playClickSound();
     console.log('Save clicked, navigating to moral selection');
     router.push({
       pathname: '/story/moral-selection',

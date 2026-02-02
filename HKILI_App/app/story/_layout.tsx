@@ -9,17 +9,18 @@ export default function StoryLayout() {
         contentStyle: { backgroundColor: '#0f0f0f' },
       }}
     >
-      <Stack.Screen name="viewer" />
-      <Stack.Screen name="generate" />
-      <Stack.Screen name="library" />
-      <Stack.Screen name="offline" />
-      <Stack.Screen name="character-selection" />
+      <Stack.Screen name="mode-selection" />
+      <Stack.Screen name="mode-character-selection" />
+      <Stack.Screen name="story-place-selection" />
+      <Stack.Screen name="moral-selection" />
       <Stack.Screen 
         name="story-generation" 
         options={{
           presentation: 'fullScreenModal',
         }}
       />
+      <Stack.Screen name="viewer" />
+      <Stack.Screen name="offline" />
     </Stack>
   );
 }

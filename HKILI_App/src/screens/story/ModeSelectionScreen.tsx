@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { theme } from '@/theme';
 import { categoryService, Category } from '@/services/categoryService';
+import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -39,7 +40,8 @@ export default function ModeSelectionScreen() {
     }
   };
 
-  const handleModeSelect = (modeId: string) => {
+  const handleModeSelect = async (modeId: string) => {
+    await playClickSound();
     router.push({
       pathname: '/story/mode-character-selection',
       params: { mode: modeId }

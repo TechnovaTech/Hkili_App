@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -41,10 +42,12 @@ export default function MoralSelectionScreen() {
     mode: string; 
     character: string; 
     place: string; 
+    moral: string;
   }>();
   const [selectedMoral, setSelectedMoral] = useState<string | null>(null);
 
-  const handleMoralSelect = (moralId: string) => {
+  const handleMoralSelect = async (moralId: string) => {
+    await playClickSound();
     setSelectedMoral(moralId);
     router.push({
       pathname: '/story/story-generation',

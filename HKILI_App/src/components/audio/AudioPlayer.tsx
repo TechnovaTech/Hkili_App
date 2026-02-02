@@ -4,8 +4,8 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Slider,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/theme';

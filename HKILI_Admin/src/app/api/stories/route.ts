@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import dbConnect from '../../../lib/mongodb'
 import Story from '../../../models/Story'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     
@@ -17,20 +17,28 @@ export async function GET(request: NextRequest) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
 
     await dbConnect()
+    const { searchParams } = new URL(request.url)
+    const categoryId = searchParams.get('categoryId')
+    const storyCharacterId = searchParams.get('storyCharacterId')
+
+    console.log(`[API] Fetching stories. Filters: categoryId=${categoryId}, storyCharacterId=${storyCharacterId}`);
+
+    const query: any = {}
+    if (categoryId) query.categoryId = categoryId
+    if (storyCharacterId) query.storyCharacterId = storyCharacterId
     
-    const stories = await Story.find({})
+    const stories = await Story.find(query)
       .populate('userId', 'email')
       .populate('categoryId', 'name')
       .populate('storyCharacterId', 'name image')
       .sort({ createdAt: -1 })
+    
+    console.log(`[API] Found ${stories.length} stories matching criteria.`);
 
     return NextResponse.json(stories)
   } catch (error) {
-    console.error('Stories fetch error:', error)
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('[API] Error fetching stories:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
