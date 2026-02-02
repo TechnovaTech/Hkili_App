@@ -32,3 +32,6 @@ Thumbs.db
 # Logs
 logs
 *.log
+
+# Keep uploads folder
+!public/uploads/
