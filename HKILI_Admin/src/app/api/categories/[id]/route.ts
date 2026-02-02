@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
-import dbConnect from '../../../lib/mongodb'
-import Character from '../../../models/Character'
-import User from '../../../models/User'
-import Category from '../../../models/Category'
+import dbConnect from '../../../../lib/mongodb'
+import Category from '../../../../models/Category'
 
-export async function GET(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
@@ -19,27 +17,27 @@ export async function GET(request: NextRequest) {
     } catch (e) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
-    
-    await dbConnect()
 
-    let query = {}
     if (decoded.role !== 'admin') {
-      query = { userId: decoded.userId }
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
-    const characters = await Character.find(query)
-      .sort({ createdAt: -1 })
-      .populate('userId', 'name email')
-      .populate('categoryId', 'name')
+    const body = await request.json()
+    await dbConnect()
 
-    return NextResponse.json({ success: true, data: characters })
+    const category = await Category.findByIdAndUpdate(params.id, body, { new: true })
+    if (!category) {
+      return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data: category })
   } catch (error) {
-    console.error('Characters fetch error:', error)
+    console.error('Category update error:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
@@ -53,22 +51,21 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
-    
-    const body = await request.json()
-    await dbConnect()
-    
-    const characterData = { ...body }
-    
-    // Assign userId if not admin, or if admin chooses to assign it (though usually admin creates system chars)
-    // If admin and no userId provided, it remains undefined (system character)
+
     if (decoded.role !== 'admin') {
-      characterData.userId = decoded.userId
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
+
+    await dbConnect()
+    const category = await Category.findByIdAndDelete(params.id)
     
-    const character = await Character.create(characterData)
-    return NextResponse.json({ success: true, data: character }, { status: 201 })
+    if (!category) {
+      return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: 'Category deleted successfully' })
   } catch (error) {
-    console.error('Character creation error:', error)
+    console.error('Category deletion error:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }

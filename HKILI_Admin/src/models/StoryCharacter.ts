@@ -1,11 +1,6 @@
 import mongoose from 'mongoose'
 
-const CharacterSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: false, // Changed to false for admin-created characters
-  },
+const StoryCharacterSchema = new mongoose.Schema({
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
@@ -54,10 +49,14 @@ const CharacterSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  image: {
+    type: String,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 })
 
-export default mongoose.models.Character || mongoose.model('Character', CharacterSchema)
+export default mongoose.models.StoryCharacter || mongoose.model('StoryCharacter', StoryCharacterSchema)

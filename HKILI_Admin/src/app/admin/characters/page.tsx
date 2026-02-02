@@ -10,9 +10,15 @@ interface User {
   email: string
 }
 
+interface Category {
+  _id: string
+  name: string
+}
+
 interface Character {
   _id: string
-  userId: User
+  userId?: User
+  categoryId?: Category | string
   name: string
   age: number
   gender: string
@@ -28,17 +34,35 @@ interface Character {
 
 export default function CharactersManagement() {
   const [characters, setCharacters] = useState<Character[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null) // For View Details
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false)
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null) // For Edit/Create
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    age: 5,
+    gender: 'n/a',
+    categoryId: '',
+    description: '',
+    hairColor: '#8B4513',
+    hairStyle: 'Short',
+    skinColor: '#FDBCB4',
+    eyeColor: '#8B4513',
+    interests: '' // comma separated
+  })
+
   const router = useRouter()
 
   useEffect(() => {
     fetchCharacters()
+    fetchCategories()
   }, [])
 
   const getAuthHeader = () => {
     const token = localStorage.getItem('adminToken')
-    return token ? { 'Authorization': `Bearer ${token}` } : {}
+    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
   }
 
   const fetchCharacters = async () => {
@@ -65,6 +89,92 @@ export default function CharactersManagement() {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories', { headers: getAuthHeader() })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setCategories(data.data)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    }
+  }
+
+  const handleOpenFormModal = (character?: Character) => {
+    if (character) {
+      setEditingCharacter(character)
+      setFormData({
+        name: character.name,
+        age: character.age,
+        gender: character.gender,
+        categoryId: typeof character.categoryId === 'string' ? character.categoryId : character.categoryId?._id || '',
+        description: character.description || '',
+        hairColor: character.hairColor,
+        hairStyle: character.hairStyle,
+        skinColor: character.skinColor,
+        eyeColor: character.eyeColor,
+        interests: character.interests.join(', ')
+      })
+    } else {
+      setEditingCharacter(null)
+      setFormData({
+        name: '',
+        age: 5,
+        gender: 'n/a',
+        categoryId: '',
+        description: '',
+        hairColor: '#8B4513',
+        hairStyle: 'Short',
+        skinColor: '#FDBCB4',
+        eyeColor: '#8B4513',
+        interests: ''
+      })
+    }
+    setIsFormModalOpen(true)
+  }
+
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false)
+    setEditingCharacter(null)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const url = editingCharacter ? `/api/characters/${editingCharacter._id}` : '/api/characters'
+      const method = editingCharacter ? 'PUT' : 'POST'
+
+      const submitData = {
+        ...formData,
+        interests: formData.interests.split(',').map(s => s.trim()).filter(s => s),
+        age: Number(formData.age)
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: getAuthHeader(),
+        body: JSON.stringify(submitData)
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          fetchCharacters()
+          handleCloseFormModal()
+        }
+      } else {
+        const errorData = await res.json()
+        alert(errorData.error || 'Failed to save character')
+      }
+    } catch (error) {
+      console.error('Error saving character:', error)
+    }
+  }
+
   const handleDelete = async (characterId: string) => {
     if (!confirm('Are you sure you want to delete this character?')) return
 
@@ -77,6 +187,8 @@ export default function CharactersManagement() {
       if (res.ok) {
         setCharacters(characters.filter(c => c._id !== characterId))
         if (selectedCharacter?._id === characterId) setSelectedCharacter(null)
+      } else {
+        alert('Failed to delete character')
       }
     } catch (error) {
       console.error('Error deleting character:', error)
@@ -95,9 +207,15 @@ export default function CharactersManagement() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Characters Management</h1>
-          <p className="text-gray-600 mt-1">View and manage all user characters</p>
+          <h1 className="text-2xl font-bold text-gray-900">User Characters Management</h1>
+          <p className="text-gray-600 mt-1">View and manage user created characters</p>
         </div>
+        <button
+          onClick={() => handleOpenFormModal()}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+        >
+          <span className="mr-2">+</span> Add Character
+        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -105,7 +223,8 @@ export default function CharactersManagement() {
           <thead>
             <tr className="bg-gray-50 text-gray-600 text-sm">
               <th className="px-6 py-4 font-medium">Character</th>
-              <th className="px-6 py-4 font-medium">Owner (User)</th>
+              <th className="px-6 py-4 font-medium">Category</th>
+              <th className="px-6 py-4 font-medium">Owner</th>
               <th className="px-6 py-4 font-medium">Details</th>
               <th className="px-6 py-4 font-medium">Created At</th>
               <th className="px-6 py-4 font-medium">Actions</th>
@@ -133,13 +252,22 @@ export default function CharactersManagement() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
+                  {character.categoryId ? (
+                     typeof character.categoryId === 'object' && 'name' in character.categoryId 
+                     ? (character.categoryId as Category).name 
+                     : 'Category ID: ' + character.categoryId
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
                   {character.userId ? (
                     <div>
-                      <div className="font-medium text-gray-900">{character.userId.name || 'Unknown Name'}</div>
+                      <div className="font-medium text-gray-900">{character.userId.name || 'Unknown'}</div>
                       <div className="text-xs text-gray-500">{character.userId.email}</div>
                     </div>
                   ) : (
-                    <span className="text-gray-400 italic">User not found</span>
+                    <span className="text-gray-500 italic">System / Admin</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
@@ -149,11 +277,6 @@ export default function CharactersManagement() {
                         {interest}
                       </span>
                     ))}
-                    {character.interests.length > 3 && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                        +{character.interests.length - 3}
-                      </span>
-                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
@@ -162,10 +285,10 @@ export default function CharactersManagement() {
                 <td className="px-6 py-4">
                   <div className="flex space-x-3">
                     <button 
-                      onClick={() => setSelectedCharacter(character)}
+                      onClick={() => handleOpenFormModal(character)}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
-                      View Full Details
+                      Edit
                     </button>
                     <button 
                       onClick={() => handleDelete(character._id)}
@@ -186,135 +309,149 @@ export default function CharactersManagement() {
         )}
       </div>
 
-      {/* Character Details Modal */}
-      {selectedCharacter && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">Character Details</h3>
-              <button 
-                onClick={() => setSelectedCharacter(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              {/* Identity Section */}
-              <div className="flex items-start space-x-6">
-                <div className="w-24 h-24 flex items-center justify-center overflow-visible">
-                  <div className="transform scale-125 origin-center">
-                    <CharacterAvatar 
-                      skinColor={selectedCharacter.skinColor}
-                      hairColor={selectedCharacter.hairColor}
-                      hairStyle={selectedCharacter.hairStyle}
-                      eyeColor={selectedCharacter.eyeColor}
+      {/* Create/Edit Modal */}
+      {isFormModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-6">
+              {editingCharacter ? 'Edit Character' : 'Add Character'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="n/a">N/A</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">None</option>
+                    {categories.map(c => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Interests (comma separated)</label>
+                <input
+                  type="text"
+                  value={formData.interests}
+                  onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="e.g. Reading, Running, Gaming"
+                />
+              </div>
+
+              {/* Appearance Fields */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-md font-medium mb-3">Appearance</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Hair Style</label>
+                    <select
+                      value={formData.hairStyle}
+                      onChange={(e) => setFormData({ ...formData, hairStyle: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      {['Bald', 'Buzz Cut', 'Pixie', 'Spiky', 'Wavy', 'Curly', 'Long', 'Bob', 'Straight', 'Braided', 'Short'].map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                     {/* Colors would ideally be color pickers, keeping simple for now */}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Hair Color</label>
+                    <input
+                      type="color"
+                      value={formData.hairColor}
+                      onChange={(e) => setFormData({ ...formData, hairColor: e.target.value })}
+                      className="w-full h-10 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Skin Color</label>
+                    <input
+                      type="color"
+                      value={formData.skinColor}
+                      onChange={(e) => setFormData({ ...formData, skinColor: e.target.value })}
+                      className="w-full h-10 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Eye Color</label>
+                    <input
+                      type="color"
+                      value={formData.eyeColor}
+                      onChange={(e) => setFormData({ ...formData, eyeColor: e.target.value })}
+                      className="w-full h-10 rounded-lg cursor-pointer"
                     />
                   </div>
                 </div>
-                <div className="flex-1 space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Name</label>
-                      <p className="text-lg font-medium text-gray-900">{selectedCharacter.name}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Age</label>
-                      <p className="text-lg font-medium text-gray-900">{selectedCharacter.age}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Gender</label>
-                      <p className="text-lg font-medium text-gray-900 capitalize">{selectedCharacter.gender}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase">Created</label>
-                      <p className="text-sm text-gray-900">{new Date(selectedCharacter.createdAt).toLocaleString()}</p>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Appearance Section */}
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Appearance</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs text-gray-500 block mb-1">Hair Color</label>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded-full border border-gray-200" style={{ backgroundColor: selectedCharacter.hairColor }}></div>
-                      <span className="text-sm text-gray-700">{selectedCharacter.hairColor}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 block mb-1">Eye Color</label>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 rounded-full border border-gray-200" style={{ backgroundColor: selectedCharacter.eyeColor }}></div>
-                      <span className="text-sm text-gray-700">{selectedCharacter.eyeColor}</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={handleCloseFormModal}
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {editingCharacter ? 'Save Changes' : 'Create Character'}
+                </button>
               </div>
-
-              {/* Interests Section */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Interests</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCharacter.interests.map((interest, i) => (
-                    <span key={i} className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
-                      {interest}
-                    </span>
-                  ))}
-                  {selectedCharacter.customInterests?.map((interest, i) => (
-                    <span key={`custom-${i}`} className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm font-medium">
-                      {interest}
-                    </span>
-                  ))}
-                  {(!selectedCharacter.interests.length && !selectedCharacter.customInterests?.length) && (
-                    <span className="text-gray-500 text-sm italic">No interests listed</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Description Section */}
-              {selectedCharacter.description && (
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wider">Description</h4>
-                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg text-sm leading-relaxed">
-                    {selectedCharacter.description}
-                  </p>
-                </div>
-              )}
-
-              {/* Owner Section */}
-              <div className="border-t border-gray-100 pt-4 mt-4">
-                <h4 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wider">Owner Details</h4>
-                {selectedCharacter.userId ? (
-                  <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{selectedCharacter.userId.name || 'Unknown Name'}</p>
-                      <p className="text-xs text-gray-600">{selectedCharacter.userId.email}</p>
-                    </div>
-                    <span className="text-xs bg-white px-2 py-1 rounded border border-blue-100 text-blue-600 font-mono">
-                      ID: {selectedCharacter.userId._id}
-                    </span>
-                  </div>
-                ) : (
-                  <p className="text-sm text-red-500">Orphaned Character (No User Linked)</p>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-              <button 
-                onClick={() => setSelectedCharacter(null)}
-                className="w-full bg-white border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Close Details
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

@@ -49,7 +49,13 @@ export default function AdminSidebar() {
             Stories Management
           </Link>
           <Link href="/admin/characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/characters')}`}>
-            Characters
+            User Characters
+          </Link>
+          <Link href="/admin/story-characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/story-characters')}`}>
+            Story Characters
+          </Link>
+          <Link href="/admin/categories" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/categories')}`}>
+            Categories
           </Link>
           <Link href="/admin/plans" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/plans')}`}>
             Plans
