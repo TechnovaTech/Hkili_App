@@ -73,11 +73,11 @@ export default function StoryPlaceSelectionScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
       
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push({ pathname: '/story/mode-character-selection', params: { mode } })}>
-          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           Choose a place for <Text style={styles.highlightText}>the story</Text>
@@ -87,7 +87,7 @@ export default function StoryPlaceSelectionScreen() {
       <View style={styles.content}>
         <View style={styles.imageContainer}>
           {loading ? (
-            <ActivityIndicator size="large" color="#FFFFFF" />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
           ) : imageSource ? (
             <Image 
               source={imageSource} 
@@ -95,8 +95,8 @@ export default function StoryPlaceSelectionScreen() {
               resizeMode="cover"
             />
           ) : (
-            <View style={[styles.placeImage, { backgroundColor: '#2A3B4D', justifyContent: 'center', alignItems: 'center' }]}>
-               <Ionicons name="person-outline" size={60} color="#FFFFFF" />
+            <View style={[styles.placeImage, { backgroundColor: theme.colors.surface, justifyContent: 'center', alignItems: 'center' }]}>
+               <Ionicons name="person-outline" size={60} color={theme.colors.text} />
             </View>
           )}
         </View>

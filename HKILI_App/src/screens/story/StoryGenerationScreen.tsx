@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { theme } from '@/theme';
 import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
 

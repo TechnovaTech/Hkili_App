@@ -89,8 +89,8 @@ export default function ModeCharacterSelectionScreen() {
               resizeMode="cover"
             />
           ) : (
-            <View style={[styles.characterImage, { backgroundColor: '#2A3B4D', justifyContent: 'center', alignItems: 'center' }]}>
-               <Ionicons name="person-outline" size={40} color="#FFFFFF" />
+            <View style={[styles.characterImage, { backgroundColor: theme.colors.surface, justifyContent: 'center', alignItems: 'center' }]}>
+               <Ionicons name="person-outline" size={40} color={theme.colors.text} />
             </View>
           )}
         </View>
@@ -105,7 +105,7 @@ export default function ModeCharacterSelectionScreen() {
       
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/story/mode-selection')}>
-          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Which character should be part of the story?</Text>
         <View style={{ width: 24 }} />
@@ -113,7 +113,7 @@ export default function ModeCharacterSelectionScreen() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -135,7 +135,7 @@ export default function ModeCharacterSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1929',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#0A1929',
+    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     shadowColor: '#000',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#888',
+    color: theme.colors.textMuted,
     textAlign: 'center',
   },
 });

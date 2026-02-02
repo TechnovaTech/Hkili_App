@@ -159,7 +159,7 @@ export default function StoryViewerScreen() {
   if (loading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FF9800" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -179,20 +179,20 @@ export default function StoryViewerScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A0B2E" />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
       
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/home')} style={styles.iconButton}>
-          <Ionicons name="arrow-back" size={24} color="#FF9800" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Your Story</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="print-outline" size={24} color="#FF9800" />
+            <Ionicons name="print-outline" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="share-social-outline" size={24} color="#FF9800" />
+            <Ionicons name="share-social-outline" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -213,7 +213,7 @@ export default function StoryViewerScreen() {
           {/* Play Overlay (Visual only, controls are at bottom, or could trigger start) */}
           <TouchableOpacity style={styles.playOverlay} onPress={togglePlayback}>
              <View style={styles.playCircleSmall}>
-               <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="#FF9800" style={{ marginLeft: isPlaying ? 0 : 4 }} />
+               <Ionicons name={isPlaying ? "pause" : "play"} size={32} color={theme.colors.primary} style={{ marginLeft: isPlaying ? 0 : 4 }} />
              </View>
           </TouchableOpacity>
         </View>
@@ -246,9 +246,9 @@ export default function StoryViewerScreen() {
               maximumValue={duration}
               value={position}
               onSlidingComplete={handleSeek}
-              minimumTrackTintColor="#FF9800"
+              minimumTrackTintColor={theme.colors.primary}
               maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-              thumbTintColor="#FF9800"
+              thumbTintColor={theme.colors.primary}
             />
             <Text style={styles.timeText}>{formatTime(duration)}</Text>
           </View>
@@ -256,7 +256,7 @@ export default function StoryViewerScreen() {
           {/* Controls */}
           <View style={styles.controlsRow}>
             <TouchableOpacity onPress={skipBackward} style={styles.controlButton}>
-              <Ionicons name="play-skip-back" size={24} color="#FF9800" />
+              <Ionicons name="play-skip-back" size={24} color={theme.colors.primary} />
               <Text style={styles.skipText}>10</Text>
             </TouchableOpacity>
 
@@ -266,7 +266,7 @@ export default function StoryViewerScreen() {
 
             <TouchableOpacity onPress={skipForward} style={styles.controlButton}>
               <Text style={styles.skipText}>10</Text>
-              <Ionicons name="play-skip-forward" size={24} color="#FF9800" />
+              <Ionicons name="play-skip-forward" size={24} color={theme.colors.primary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -278,7 +278,7 @@ export default function StoryViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A0B2E', // Dark Purple Background
+    backgroundColor: theme.colors.background,
   },
   centerContent: {
     justifyContent: 'center',
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF9800', // Orange
+    color: theme.colors.primary,
   },
   headerRight: {
     flexDirection: 'row',
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   storyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.text,
     marginBottom: 20,
     textAlign: 'left',
   },
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   placeholderImage: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2A1B3E',
+    backgroundColor: theme.colors.surface,
   },
   playOverlay: {
     position: 'absolute',
@@ -354,12 +354,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FF9800',
+    borderColor: theme.colors.primary,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.text,
     marginBottom: 15,
   },
   textWrapper: {
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   storyText: {
     fontSize: 16,
     lineHeight: 26,
-    color: '#E0E0E0',
+    color: theme.colors.textSecondary,
     marginBottom: 15,
   },
   playerContainer: {
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#2A1B3E', // Slightly lighter than background
+    backgroundColor: theme.colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   timeText: {
-    color: '#B0B0B0',
+    color: theme.colors.textMuted,
     fontSize: 12,
     width: 40,
     textAlign: 'center',
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   skipText: {
-    color: '#FF9800',
+    color: theme.colors.primary,
     fontSize: 10,
     fontWeight: 'bold',
     marginTop: -2,
@@ -423,22 +423,22 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#FF9800',
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#FF9800',
+    shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
   errorText: {
-    color: '#FFFFFF',
+    color: theme.colors.text,
     fontSize: 18,
     marginBottom: 20,
   },
   backButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,

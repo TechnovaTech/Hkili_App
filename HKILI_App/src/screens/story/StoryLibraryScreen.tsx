@@ -112,7 +112,7 @@ export default function StoryLibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1929',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#0A1929',
+    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.text,
   },
   headerSpacer: {
     width: 32,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   coinsText: {
     fontSize: 16,
-    color: '#4CAF50',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   storiesList: {
@@ -174,28 +174,28 @@ const styles = StyleSheet.create({
   storyTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.text,
     marginBottom: 4,
   },
   storyGenre: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: theme.colors.primary,
     marginBottom: 4,
   },
   storyInfo: {
     fontSize: 12,
-    color: '#81C784',
+    color: theme.colors.textSecondary,
     marginBottom: 2,
   },
   storyDate: {
     fontSize: 12,
-    color: '#64B5F6',
+    color: theme.colors.textMuted,
   },
   playButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#2196F3',
+    backgroundColor: theme.colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -210,17 +210,17 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.text,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#81C784',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
   createButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -228,6 +228,6 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.text,
   },
 });
