@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
+import { v2 as cloudinary } from 'cloudinary'
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,24 +19,18 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
-    try {
-      await mkdir(uploadsDir, { recursive: true })
-    } catch (e) {
-      // Ignore if exists
-    }
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'hkili-categories' },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      ).end(buffer)
+    })
 
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${uuidv4()}`
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '') // Sanitize filename
-    const ext = path.extname(originalName) || '.jpg' // Default extension if missing
-    const filename = `category-${uniqueSuffix}${ext}`
-    
-    const filePath = path.join(uploadsDir, filename)
-    await writeFile(filePath, buffer)
-    
-    const fileUrl = `/uploads/${filename}`
+    const fileUrl = (result as any).secure_url
 
     return NextResponse.json({ success: true, url: fileUrl })
   } catch (error) {
