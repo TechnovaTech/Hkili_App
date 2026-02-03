@@ -5,6 +5,7 @@ import User from '@/models/User';
 import Setting from '@/models/Setting';
 import Category from '@/models/Category';
 import StoryCharacter from '@/models/StoryCharacter';
+import UserStory from '@/models/UserStory';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
@@ -39,13 +40,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    if (user.coins < storyCost) {
-      return NextResponse.json(
-        { success: false, error: 'Insufficient coins to generate story' },
-        { status: 403 }
-      );
-    }
-
     // 3. Parse Request
     const body = await request.json();
     const { 
@@ -56,14 +50,7 @@ export async function POST(request: NextRequest) {
       language = 'EN' 
     } = body;
 
-    // 4. Fetch details for prompt (Kept for compatibility or logging, but not used for AI anymore)
-    let categoryName = 'General';
-    if (categoryId) {
-      const category = await Category.findById(categoryId);
-      if (category) categoryName = category.name;
-    }
-
-    // 5. Find Existing Stories from Admin
+    // 4. Find Existing Stories from Admin
     // Find all admin users
     const admins = await User.find({ role: 'admin' }).select('_id');
     const adminIds = admins.map(a => a._id);
@@ -75,54 +62,69 @@ export async function POST(request: NextRequest) {
       userId: { $in: adminIds }
     };
 
-    const count = await Story.countDocuments(query);
+    // Get all matching candidates
+    const candidates = await Story.find(query);
 
-    if (count === 0) {
+    if (candidates.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No stories available for this selection. Please try different options.' },
         { status: 404 }
       );
     }
 
-    // 6. Select Random Story
-    const random = Math.floor(Math.random() * count);
-    const templateStory = await Story.findOne(query).skip(random);
+    // 5. Filter out stories already in user's library
+    const userLibrary = await UserStory.find({ userId }).select('storyId');
+    const userStoryIds = new Set(userLibrary.map(ul => ul.storyId.toString()));
 
-    if (!templateStory) {
-       return NextResponse.json(
-        { success: false, error: 'Failed to retrieve story.' },
-        { status: 500 }
+    const freshStories = candidates.filter(story => !userStoryIds.has(story._id.toString()));
+    
+    let selectedStory;
+    let coinsDeducted = 0;
+
+    if (freshStories.length > 0) {
+      // Pick a random NEW story
+      const random = Math.floor(Math.random() * freshStories.length);
+      selectedStory = freshStories[random];
+      
+      // Check coins before deducting
+      if (user.coins < storyCost) {
+         return NextResponse.json(
+          { success: false, error: 'Insufficient coins to unlock a new story' },
+          { status: 403 }
+        );
+      }
+
+      // Deduct coins
+      user.coins -= storyCost;
+      await user.save();
+      coinsDeducted = storyCost;
+
+      // Add to Library
+      await UserStory.create({
+        userId,
+        storyId: selectedStory._id,
+        savedAt: new Date(),
+        isFavorite: false
+      });
+
+    } else {
+      // All stories unlocked - pick a random one from candidates (re-read)
+      // Do not deduct coins for re-reading
+      const random = Math.floor(Math.random() * candidates.length);
+      selectedStory = candidates[random];
+      
+      // Update last read time
+      await UserStory.findOneAndUpdate(
+        { userId, storyId: selectedStory._id },
+        { lastReadAt: new Date() }
       );
     }
 
-    // 7. Clone Story for User
-    const newStory = await Story.create({
-      title: templateStory.title,
-      content: templateStory.content,
-      userId: userId, // Assigned to the current user
-      genre: templateStory.genre || categoryName,
-      categoryId: categoryId,
-      storyCharacterId: storyCharacterId,
-      language: language, // Keep requested language or template language? User asked for specific language in request. 
-                         // If template is fixed language, this might be a mismatch. 
-                         // But for now, let's assume we just copy the story. 
-                         // If the user requested 'FR' but story is 'EN', we can't magically translate without AI.
-                         // For now, I'll use the template's language or default to requested.
-                         // Actually, better to store the template's language if available.
-      video1: templateStory.video1,
-      video2: templateStory.video2,
-      video3: templateStory.video3,
-      createdAt: new Date(),
-    });
-
-    // 8. Deduct Coins
-    user.coins -= storyCost;
-    await user.save();
-
     return NextResponse.json({ 
       success: true, 
-      data: newStory, 
-      remainingCoins: user.coins 
+      data: selectedStory, 
+      remainingCoins: user.coins,
+      message: coinsDeducted > 0 ? 'New story unlocked!' : 'Story retrieved from library.'
     });
 
   } catch (error: any) {
