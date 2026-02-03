@@ -59,99 +59,61 @@ export async function POST(request: NextRequest) {
     
     const { prompts } = JSON.parse(result);
     
-    // 4. Generate Videos using Hugging Face (or Mock if key missing for testing)
-    const generatedVideoUrls: string[] = [];
+    // 4. Generate Images using OpenAI DALL-E 3 (More reliable than free video APIs)
+    const generatedContentUrls: string[] = [];
 
-    // Fallback if no HF key provided, to prevent crash and show instructions
-    if (!HF_API_KEY) {
-       console.warn("HUGGINGFACE_API_KEY missing. Returning mock response or error.");
+    // Check for OpenAI Key again (redundant but safe)
+    if (!process.env.OPENAI_API_KEY) {
        return NextResponse.json(
-        { success: false, error: 'HUGGINGFACE_API_KEY is missing in .env' },
+        { success: false, error: 'OPENAI_API_KEY is missing.' },
         { status: 500 }
       );
     }
 
-    // Helper for retry logic
-    const fetchWithRetry = async (url: string, body: any, retries = 3) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const res = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${HF_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            method: "POST",
-            body: JSON.stringify(body),
-          });
-
-          if (res.ok) {
-            return await res.arrayBuffer();
-          }
-
-          const errorText = await res.text();
-          
-          // Handle 503 Model Loading
-          if (res.status === 503) {
-            const errorJson = JSON.parse(errorText);
-            const waitTime = errorJson.estimated_time || 20;
-            console.log(`Model is loading. Waiting ${waitTime}s... (Attempt ${i + 1}/${retries})`);
-            await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-            continue;
-          }
-
-          // Handle other server errors with simple backoff
-          if (res.status >= 500) {
-             console.warn(`Server error ${res.status}: ${errorText}. Retrying...`);
-             await new Promise(resolve => setTimeout(resolve, 3000));
-             continue;
-          }
-
-          throw new Error(`HF Error ${res.status}: ${errorText}`);
-        } catch (err) {
-           if (i === retries - 1) throw err;
-           console.log(`Fetch error: ${err}. Retrying...`);
-           await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-      }
-      throw new Error("Max retries exceeded");
-    };
-
     for (const prompt of prompts.slice(0, 4)) { // Limit to 4
       try {
-        console.log(`Generating video for prompt: ${prompt}`);
+        console.log(`Generating image for prompt: ${prompt}`);
         
-        const videoBuffer = await fetchWithRetry(HF_API_URL, { inputs: prompt });
-        const buffer = Buffer.from(videoBuffer as ArrayBuffer);
+        const imageResponse = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: prompt + " highly detailed, cartoon style, vibrant colors",
+          n: 1,
+          size: "1024x1024",
+          response_format: "b64_json", 
+        });
+
+        const b64Data = imageResponse.data[0].b64_json;
+        if (!b64Data) continue;
+
+        const buffer = Buffer.from(b64Data, 'base64');
         
         // Save file
-        const fileName = `video-${uuidv4()}.mp4`;
-        const publicPath = path.join(process.cwd(), 'public', 'generated-videos');
+        const fileName = `scene-${uuidv4()}.png`;
+        const publicPath = path.join(process.cwd(), 'public', 'generated-scenes');
         const filePath = path.join(publicPath, fileName);
 
-        // Ensure directory exists (redundant safety)
+        // Ensure directory exists
         if (!fs.existsSync(publicPath)) {
             fs.mkdirSync(publicPath, { recursive: true });
         }
 
         fs.writeFileSync(filePath, buffer);
-        generatedVideoUrls.push(`/generated-videos/${fileName}`);
-        
-        // Small delay between successful requests to be polite
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        generatedContentUrls.push(`/generated-scenes/${fileName}`);
 
-      } catch (videoError) {
-        console.error("Video generation failed for prompt:", prompt, videoError);
+      } catch (genError: any) {
+        console.error("Image generation failed for prompt:", prompt, genError);
+        // Don't fail completely if one fails, just continue
       }
     }
 
-    if (generatedVideoUrls.length === 0) {
+    if (generatedContentUrls.length === 0) {
         return NextResponse.json(
-            { success: false, error: 'Failed to generate any videos. Service might be busy or overloaded.' },
+            { success: false, error: 'Failed to generate content. Please check OpenAI Quota.' },
             { status: 500 }
         );
     }
 
-    return NextResponse.json({ success: true, videos: generatedVideoUrls });
+    return NextResponse.json({ success: true, videos: generatedContentUrls, type: 'image' });
 
   } catch (error: any) {
     console.error('Video Generation Error:', error);
