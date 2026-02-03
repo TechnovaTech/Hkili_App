@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import dbConnect from '../../../lib/mongodb'
 import Story from '../../../models/Story'
+// Import referenced models to ensure they are registered with Mongoose
+import '../../../models/User'
+import '../../../models/Category'
+import '../../../models/StoryCharacter'
 
 export async function GET(request: Request) {
   try {

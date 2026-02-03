@@ -132,22 +132,36 @@ export default function StoriesManagement() {
     if (!file) return
 
     setUploading(true)
-    const uploadFormData = new FormData()
-    uploadFormData.append('file', file)
 
     try {
-      const res = await fetch('/api/upload', {
+      // 1. Get signature
+      const signRes = await fetch('/api/cloudinary-sign')
+      if (!signRes.ok) throw new Error('Failed to get upload signature')
+      const signData = await signRes.json()
+
+      // 2. Prepare Cloudinary Upload
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('api_key', signData.apiKey)
+      uploadFormData.append('timestamp', signData.timestamp.toString())
+      uploadFormData.append('signature', signData.signature)
+      uploadFormData.append('folder', signData.folder)
+
+      // 3. Upload to Cloudinary (auto resource type)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`
+      
+      const res = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: uploadFormData,
       })
 
       if (res.ok) {
         const data = await res.json()
-        if (data.success) {
-          setFormData(prev => ({ ...prev, [field]: data.url }))
-        }
+        setFormData(prev => ({ ...prev, [field]: data.secure_url }))
       } else {
-        alert('Failed to upload video')
+        const err = await res.json()
+        console.error('Cloudinary error:', err)
+        alert('Failed to upload video: ' + (err.error?.message || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error uploading video:', error)
