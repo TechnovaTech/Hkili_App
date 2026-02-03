@@ -32,6 +32,18 @@ const StorySchema = new mongoose.Schema({
     type: String,
     default: 'general',
   },
+  video1: {
+    type: String,
+    required: false,
+  },
+  video2: {
+    type: String,
+    required: false,
+  },
+  video3: {
+    type: String,
+    required: false,
+  },
   language: {
     type: String,
     enum: ['EN', 'FR', 'AR'],

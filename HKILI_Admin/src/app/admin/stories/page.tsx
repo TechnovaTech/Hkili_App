@@ -24,6 +24,9 @@ interface Story {
   storyCharacterId?: StoryCharacter | string
   createdAt: string
   language: string
+  video1?: string
+  video2?: string
+  video3?: string
 }
 
 export default function StoriesManagement() {
@@ -37,12 +40,16 @@ export default function StoriesManagement() {
   // Modal & Form State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [editingStory, setEditingStory] = useState<Story | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     language: 'EN',
     categoryId: '',
-    storyCharacterId: ''
+    storyCharacterId: '',
+    video1: '',
+    video2: '',
+    video3: ''
   })
 
   const router = useRouter()
@@ -120,6 +127,36 @@ export default function StoriesManagement() {
     }
   }
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'video1' | 'video2' | 'video3') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success) {
+          setFormData(prev => ({ ...prev, [field]: data.url }))
+        }
+      } else {
+        alert('Failed to upload video')
+      }
+    } catch (error) {
+      console.error('Error uploading video:', error)
+      alert('Error uploading video')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleOpenFormModal = (story?: Story) => {
     if (story) {
       setEditingStory(story)
@@ -128,7 +165,10 @@ export default function StoriesManagement() {
         content: story.content,
         language: story.language,
         categoryId: typeof story.categoryId === 'object' ? story.categoryId._id : (story.categoryId || ''),
-        storyCharacterId: typeof story.storyCharacterId === 'object' ? story.storyCharacterId._id : (story.storyCharacterId || '')
+        storyCharacterId: typeof story.storyCharacterId === 'object' ? story.storyCharacterId._id : (story.storyCharacterId || ''),
+        video1: story.video1 || '',
+        video2: story.video2 || '',
+        video3: story.video3 || ''
       })
     } else {
       setEditingStory(null)
@@ -137,7 +177,10 @@ export default function StoriesManagement() {
         content: '',
         language: 'EN',
         categoryId: '',
-        storyCharacterId: ''
+        storyCharacterId: '',
+        video1: '',
+        video2: '',
+        video3: ''
       })
     }
     setIsFormModalOpen(true)
@@ -400,17 +443,35 @@ export default function StoriesManagement() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                    <select
-                      value={formData.language}
-                      onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="EN">English</option>
-                      <option value="FR">French</option>
-                      <option value="AR">Arabic</option>
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {(['video1', 'video2', 'video3'] as const).map((field, index) => (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Video {index + 1}</label>
+                        <div className="flex flex-col space-y-2">
+                          {formData[field] && (
+                            <div className="w-full aspect-video relative rounded-lg overflow-hidden border border-gray-200 bg-black">
+                               <video 
+                                 src={formData[field]} 
+                                 className="w-full h-full object-contain" 
+                                 controls
+                               />
+                            </div>
+                          )}
+                          <label className={`cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-center ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <span className="text-sm text-gray-600">
+                              {uploading ? 'Uploading...' : (formData[field] ? 'Change Video' : 'Upload Video')}
+                            </span>
+                            <input
+                              type="file"
+                              accept="video/*"
+                              className="hidden"
+                              onChange={(e) => handleVideoUpload(e, field)}
+                              disabled={uploading}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <div>

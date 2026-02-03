@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
-    const { title, content, characters, genre, categoryId, storyCharacterId } = await request.json()
+    const { title, content, characters, genre, categoryId, storyCharacterId, video1, video2, video3 } = await request.json()
 
     if (!title || !content) {
       return NextResponse.json(
@@ -73,6 +73,9 @@ export async function POST(request: NextRequest) {
       genre: genre || 'general',
       categoryId,
       storyCharacterId,
+      video1,
+      video2,
+      video3,
     })
 
     return NextResponse.json({

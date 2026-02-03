@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
     // Upload to Cloudinary
     const result = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: 'hkili-categories' },
+        { 
+          folder: 'hkili-app',
+          resource_type: 'auto'
+        },
         (error, result) => {
           if (error) reject(error)
           else resolve(result)
