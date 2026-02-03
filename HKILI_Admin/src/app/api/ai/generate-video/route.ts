@@ -67,6 +67,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let lastError = '';
+
     for (const prompt of prompts.slice(0, 4)) { // Limit to 4
       try {
         console.log(`Generating image for prompt: ${prompt}`);
@@ -99,13 +101,14 @@ export async function POST(request: NextRequest) {
 
       } catch (genError: any) {
         console.error("Image generation failed for prompt:", prompt, genError);
+        lastError = genError.message || 'Unknown error';
         // Don't fail completely if one fails, just continue
       }
     }
 
     if (generatedContentUrls.length === 0) {
         return NextResponse.json(
-            { success: false, error: 'Failed to generate content. Please check OpenAI Quota.' },
+            { success: false, error: `Failed to generate content. OpenAI Error: ${lastError}` },
             { status: 500 }
         );
     }
