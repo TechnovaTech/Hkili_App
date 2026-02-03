@@ -93,27 +93,21 @@ export async function POST(request: NextRequest) {
       response_format: "url",
     });
 
-    const imageUrl = imageResponse.data[0].url;
+    const imageUrl = imageResponse.data?.[0]?.url;
     if (!imageUrl) throw new Error("Failed to generate base image from DALL-E 3");
     console.log("Base image generated:", imageUrl);
 
     // 5. Generate Video using RunwayML (Image to Video)
     console.log("Animating image with Runway Gen-3 Alpha Turbo...");
     
-    const task = await runwayClient.imageToVideo.create({
+    // Poll for completion (waitForTaskOutput throws on failure)
+    const finishedTask = await runwayClient.imageToVideo.create({
       model: 'gen3a_turbo',
       promptImage: imageUrl,
       promptText: promptText,
-    });
+    }).waitForTaskOutput();
     
-    console.log("Runway Task ID:", task.id);
-
-    // Poll for completion
-    const finishedTask = await task.waitForTaskOutput();
-    
-    if (finishedTask.status === 'FAILED') {
-        throw new Error(`Runway task failed: ${JSON.stringify(finishedTask)}`);
-    }
+    console.log("Runway Task ID:", finishedTask.id);
 
     // output is usually an array of strings (URLs)
     const runwayVideoUrl = finishedTask.output[0];
