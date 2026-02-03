@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(settings)
+    return NextResponse.json({ success: true, data: settings })
   } catch (error) {
     console.error('Error fetching settings:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest) {
       settings = await Setting.findOneAndUpdate({}, body, { new: true })
     }
     
-    return NextResponse.json(settings)
+    return NextResponse.json({ success: true, data: settings })
   } catch (error) {
     console.error('Error updating settings:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })

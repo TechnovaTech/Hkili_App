@@ -76,16 +76,28 @@ export default function StoryGenerationScreen() {
 
   const fetchMatchingStories = async () => {
     try {
-      console.log(`Fetching stories for category=${mode}, character=${character}`);
-      const response = await storyService.getStoriesByCriteria(mode, character);
+      console.log(`Generating story for category=${mode}, character=${character}, place=${place}, moral=${moral}`);
+      // Use generateStory to create a new story on the fly
+      const response = await storyService.generateStory({
+        categoryId: mode,
+        storyCharacterId: character,
+        place,
+        moral,
+        language: 'EN' // Default to EN or get from settings if available
+      });
+      
       if (response.success && response.data) {
-        console.log(`Found ${response.data.length} matching stories`);
-        setMatchingStories(response.data);
+        console.log(`Story generated successfully: ${response.data.title}`);
+        setMatchingStories([response.data]);
       } else {
-        console.log('No matching stories found or API failed');
+        console.log('Story generation failed:', response.error);
+        if (response.error === 'Insufficient coins to generate story') {
+           // Ideally show an alert here, but for now we log it
+           console.warn('User has insufficient coins');
+        }
       }
     } catch (error) {
-      console.error('Error fetching matching stories:', error);
+      console.error('Error generating story:', error);
     } finally {
       setHasFetched(true);
     }

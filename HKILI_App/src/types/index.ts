@@ -60,13 +60,18 @@ export type StoryGenre =
 export type StoryLength = 'short' | 'medium' | 'long';
 
 export interface StoryGenerationRequest {
-  childName: string;
-  childAge: number;
-  genre: StoryGenre;
+  childName?: string;
+  childAge?: number;
+  genre?: StoryGenre;
   characters?: string[];
   moralLesson?: string;
-  length: StoryLength;
+  length?: StoryLength;
   voiceId?: string;
+  categoryId?: string;
+  storyCharacterId?: string;
+  place?: string;
+  moral?: string;
+  language?: string;
 }
 
 export interface AudioState {

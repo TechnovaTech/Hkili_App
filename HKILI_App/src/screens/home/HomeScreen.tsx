@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { characterService } from '@/services/characterService';
 import { authService } from '@/services/authService';
+import { settingsService } from '@/services/settingsService';
 import { useCallback } from 'react';
 
 export default function HomeScreen() {
@@ -22,6 +23,7 @@ export default function HomeScreen() {
   const [characters, setCharacters] = useState<any[]>([]);
   const [loadingCharacters, setLoadingCharacters] = useState(false);
   const [coins, setCoins] = useState(0);
+  const [storyCost, setStoryCost] = useState(1);
 
   const fetchCharacters = useCallback(async () => {
     setLoadingCharacters(true);
@@ -47,11 +49,23 @@ export default function HomeScreen() {
     }
   }, []);
 
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await settingsService.getSettings();
+      if (res.success && res.data) {
+        setStoryCost(Number(res.data.storyCost) || 1);
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       fetchCharacters();
       fetchUserCoins();
-    }, [fetchCharacters, fetchUserCoins])
+      fetchSettings();
+    }, [fetchCharacters, fetchUserCoins, fetchSettings])
   );
 
   const handleAddMainCharacter = () => {
@@ -277,7 +291,7 @@ export default function HomeScreen() {
           disabled={!hasSelectedCharacter}
         >
           <Ionicons name="layers-outline" size={20} color={hasSelectedCharacter ? "#FFFFFF" : "#64B5F6"} />
-          <Text style={[styles.startButtonText, !hasSelectedCharacter && styles.startButtonTextDisabled]}>1 Start</Text>
+          <Text style={[styles.startButtonText, !hasSelectedCharacter && styles.startButtonTextDisabled]}>{storyCost} Start</Text>
         </TouchableOpacity>
       </View>
     </View>

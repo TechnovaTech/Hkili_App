@@ -63,7 +63,9 @@ export default function SettingsManagement() {
 
       if (response.ok) {
         const data = await response.json()
-        setSettings(data)
+        if (data.success) {
+          setSettings(data.data)
+        }
       } else {
         if (response.status === 401) {
           router.push('/admin/login')

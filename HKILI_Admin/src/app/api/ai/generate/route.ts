@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import Story from '@/models/Story';
+import User from '@/models/User';
+import Setting from '@/models/Setting';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
@@ -21,6 +23,22 @@ export async function POST(request: NextRequest) {
     const userId = decoded.userId;
 
     await dbConnect();
+
+    // Check User Coins and Story Cost
+    const setting = await Setting.findOne();
+    const storyCost = setting?.storyCost ?? 10;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    if (user.coins < storyCost) {
+      return NextResponse.json(
+        { success: false, error: 'Insufficient coins to generate story' },
+        { status: 403 }
+      );
+    }
     
     // 2. Parse Request
     const { prompt, language = 'EN' } = await request.json();
@@ -61,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     const parsedResult = JSON.parse(result);
 
-    // 4. Create Story (Saved directly to Stories Management)
+    // 5. Create Story (Saved directly to Stories Management)
     const newStory = await Story.create({
       title: parsedResult.title || 'Untitled AI Story',
       content: parsedResult.content,
@@ -71,7 +89,11 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     });
 
-    return NextResponse.json({ success: true, data: newStory });
+    // 6. Deduct Coins
+    user.coins -= storyCost;
+    await user.save();
+
+    return NextResponse.json({ success: true, data: newStory, remainingCoins: user.coins });
 
   } catch (error: any) {
     console.error('AI Generation Error:', error);
