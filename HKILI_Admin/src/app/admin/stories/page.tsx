@@ -40,7 +40,15 @@ export default function StoriesManagement() {
   // Modal & Form State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [editingStory, setEditingStory] = useState<Story | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploadingState, setUploadingState] = useState<{
+    video1: boolean;
+    video2: boolean;
+    video3: boolean;
+  }>({
+    video1: false,
+    video2: false,
+    video3: false
+  })
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -131,7 +139,7 @@ export default function StoriesManagement() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setUploading(true)
+    setUploadingState(prev => ({ ...prev, [field]: true }))
 
     try {
       // 1. Get signature
@@ -167,7 +175,7 @@ export default function StoriesManagement() {
       console.error('Error uploading video:', error)
       alert('Error uploading video')
     } finally {
-      setUploading(false)
+      setUploadingState(prev => ({ ...prev, [field]: false }))
     }
   }
 
@@ -471,16 +479,16 @@ export default function StoriesManagement() {
                                />
                             </div>
                           )}
-                          <label className={`cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-center ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <label className={`cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-center ${uploadingState[field] ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             <span className="text-sm text-gray-600">
-                              {uploading ? 'Uploading...' : (formData[field] ? 'Change Video' : 'Upload Video')}
+                              {uploadingState[field] ? 'Uploading...' : (formData[field] ? 'Change Video' : 'Upload Video')}
                             </span>
                             <input
                               type="file"
                               accept="video/*"
                               className="hidden"
                               onChange={(e) => handleVideoUpload(e, field)}
-                              disabled={uploading}
+                              disabled={uploadingState[field]}
                             />
                           </label>
                         </div>
