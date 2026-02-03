@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { v2 as cloudinary } from 'cloudinary';
+import RunwayML from '@runwayml/sdk';
+
+// Allow up to 60 seconds for video generation (if supported by platform)
+export const maxDuration = 60;
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -14,10 +18,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Initialize RunwayML
+// Note: RunwayML SDK automatically looks for RUNWAYML_API_SECRET env var.
+// We also allow RUNWAY_API_KEY for convenience if the user sets that.
+const runwayClient = new RunwayML({
+    apiKey: process.env.RUNWAYML_API_SECRET || process.env.RUNWAY_API_KEY
+});
+
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate (Simple check for Admin Token presence, assuming middleware or client handles validity for now, 
-    // or we can reuse the JWT logic if available/needed. For Admin panel, usually we check session/token)
+    // 1. Authenticate
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
       return NextResponse.json({ message: 'No token provided' }, { status: 401 });
@@ -39,8 +49,17 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+    
+    // Check Runway API Key
+    if (!process.env.RUNWAYML_API_SECRET && !process.env.RUNWAY_API_KEY) {
+         return NextResponse.json(
+        { success: false, error: 'RUNWAYML_API_SECRET is missing. Please add it to .env' },
+        { status: 500 }
+      );
+    }
 
-    // 3. Generate Visual Prompts using OpenAI
+    // 3. Generate Visual Prompts using OpenAI (GPT-3.5)
+    // Refine the story into a good visual description
     const completion = await openai.chat.completions.create({
       messages: [
         {
@@ -60,98 +79,64 @@ export async function POST(request: NextRequest) {
     if (!result) throw new Error('Failed to generate prompts');
     
     const { prompts } = JSON.parse(result);
+    const promptText = prompts[0];
     
-    // 4. Generate Videos using Hugging Face (Restored & Fixed with Cloudinary)
-    const generatedContentUrls: string[] = [];
-    // Updated to use the new Router URL and the active ali-vilab model
-    const HF_API_URL = "https://router.huggingface.co/models/ali-vilab/text-to-video-ms-1.7b";
-    const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
+    console.log(`Generated Prompt: ${promptText}`);
 
-    if (!HF_API_KEY) {
-       return NextResponse.json(
-        { success: false, error: 'HUGGINGFACE_API_KEY is missing.' },
-        { status: 500 }
-      );
+    // 4. Generate Image using DALL-E 3 (for high quality base)
+    console.log("Generating base image with DALL-E 3...");
+    const imageResponse = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: promptText + " Cartoon style, vivid colors, high quality, cinematic lighting.",
+      n: 1,
+      size: "1792x1024", // Landscape
+      response_format: "url",
+    });
+
+    const imageUrl = imageResponse.data[0].url;
+    if (!imageUrl) throw new Error("Failed to generate base image from DALL-E 3");
+    console.log("Base image generated:", imageUrl);
+
+    // 5. Generate Video using RunwayML (Image to Video)
+    console.log("Animating image with Runway Gen-3 Alpha Turbo...");
+    
+    const task = await runwayClient.imageToVideo.create({
+      model: 'gen3a_turbo',
+      promptImage: imageUrl,
+      promptText: promptText,
+    });
+    
+    console.log("Runway Task ID:", task.id);
+
+    // Poll for completion
+    const finishedTask = await task.waitForTaskOutput();
+    
+    if (finishedTask.status === 'FAILED') {
+        throw new Error(`Runway task failed: ${JSON.stringify(finishedTask)}`);
     }
 
-    // Helper for retry logic
-    const fetchWithRetry = async (url: string, body: any, retries = 3) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const res = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${HF_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            method: "POST",
-            body: JSON.stringify(body),
-          });
+    // output is usually an array of strings (URLs)
+    const runwayVideoUrl = finishedTask.output[0];
+    console.log("Runway Video URL:", runwayVideoUrl);
 
-          if (res.ok) {
-            return await res.arrayBuffer();
-          }
+    // 6. Upload to Cloudinary
+    console.log("Uploading to Cloudinary...");
+    const uploadResult = await cloudinary.uploader.upload(runwayVideoUrl, {
+        folder: 'hkili_videos',
+        resource_type: 'video',
+    });
 
-          const errorText = await res.text();
-          
-          if (res.status === 503) {
-            const errorJson = JSON.parse(errorText);
-            const waitTime = errorJson.estimated_time || 20;
-            console.log(`Model loading. Waiting ${waitTime}s...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-            continue;
-          }
+    const finalVideoUrl = uploadResult.secure_url;
+    console.log("Final Video URL:", finalVideoUrl);
 
-          throw new Error(`HF Error ${res.status}: ${errorText}`);
-        } catch (err) {
-           if (i === retries - 1) throw err;
-           await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-      }
-      throw new Error("Max retries exceeded");
-    };
-
-    let lastError = '';
-
-    for (const prompt of prompts.slice(0, 1)) { 
-      try {
-        console.log(`Generating video for prompt: ${prompt}`);
-        
-        const videoBuffer = await fetchWithRetry(HF_API_URL, { inputs: prompt });
-        const buffer = Buffer.from(videoBuffer as ArrayBuffer);
-        const base64Data = buffer.toString('base64');
-        const dataURI = `data:video/mp4;base64,${base64Data}`;
-
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(dataURI, {
-            folder: 'hkili_videos',
-            resource_type: 'video',
-        });
-        
-        generatedContentUrls.push(result.secure_url);
-        
-        // Delay to prevent rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-      } catch (genError: any) {
-        console.error(`Video generation failed for prompt "${prompt}":`, genError);
-        lastError = genError.message || 'Unknown error';
-      }
-    }
-
-    if (generatedContentUrls.length === 0) {
-        console.error("All video generation attempts failed. Last error:", lastError);
-        return NextResponse.json(
-            { success: false, error: `Failed to generate videos. Last Error: ${lastError}` },
-            { status: 500 }
-        );
-    }
-
-    return NextResponse.json({ success: true, videos: generatedContentUrls, type: 'video' });
+    return NextResponse.json({ success: true, videos: [finalVideoUrl], type: 'video' });
 
   } catch (error: any) {
     console.error('Video Generation Error:', error);
+    // Provide more detailed error message if possible
+    const errorMessage = error.message || 'Internal Server Error';
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
