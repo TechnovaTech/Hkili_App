@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,48 @@ import { Story } from '@/types';
 import { theme } from '@/theme';
 
 const { width } = Dimensions.get('window');
+
+// Video Component with Custom Overlay
+const StoryVideo = ({ source, onPlay }: { source: any, onPlay: () => void }) => {
+  const videoRef = useRef<Video>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const togglePlay = async () => {
+    if (!videoRef.current) return;
+    
+    if (isPlaying) {
+      await videoRef.current.pauseAsync();
+    } else {
+      onPlay();
+      await videoRef.current.playAsync();
+    }
+  };
+
+  return (
+    <View style={styles.videoContainer}>
+      <Video
+        ref={videoRef}
+        style={styles.video}
+        source={source}
+        useNativeControls={true} // Always enable native controls to ensure pause functionality works
+        resizeMode={ResizeMode.CONTAIN}
+        isLooping
+        onPlaybackStatusUpdate={status => {
+          if (status.isLoaded) {
+            setIsPlaying(status.isPlaying);
+          }
+        }}
+      />
+      {!isPlaying && (
+        <TouchableOpacity style={styles.playOverlay} onPress={togglePlay}>
+            <View style={styles.playCircleSmall}>
+              <Ionicons name="play" size={32} color={theme.colors.primary} style={{ marginLeft: 4 }} />
+            </View>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
 
 export default function StoryViewerScreen() {
   const router = useRouter();
@@ -182,25 +224,38 @@ export default function StoryViewerScreen() {
   const video2Source = story.video2 ? getImageUrl(story.video2) : null;
   const video3Source = story.video3 ? getImageUrl(story.video3) : null;
 
+  // Pre-process content to ensure we have multiple segments if possible
+  let contentSegments = story.content || [];
+  
+  // If single segment, try to split by paragraphs for better layout (video 2 placement)
+  if (contentSegments.length === 1 && contentSegments[0].text) {
+    const text = contentSegments[0].text;
+    // Split by double newline (paragraphs) or single if just long text? 
+    // Usually stories have double newlines.
+    const paragraphs = text.split(/\n\s*\n/); 
+    if (paragraphs.length > 1) {
+      contentSegments = paragraphs.map((p: string, i: number) => ({ 
+        id: `auto-${i}`, 
+        text: p.trim() 
+      })).filter((s: any) => s.text.length > 0);
+    }
+  }
+
   // Split content for middle video
-  const contentSegments = story.content || [];
+  // const contentSegments = story.content || []; // Removed duplicate declaration
   const middleIndex = Math.ceil(contentSegments.length / 2);
   const firstHalf = contentSegments.slice(0, middleIndex);
   const secondHalf = contentSegments.slice(middleIndex);
 
+  const handleVideoPlay = async () => {
+    if (isPlaying && sound) {
+      await sound.pauseAsync();
+    }
+  };
+
   const renderVideo = (source: { uri: string } | null, label: string) => {
     if (!source) return null;
-    return (
-      <View style={styles.videoContainer}>
-        <Video
-          style={styles.video}
-          source={source}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-        />
-      </View>
-    );
+    return <StoryVideo source={source} onPlay={handleVideoPlay} />;
   };
 
   return (
@@ -230,36 +285,12 @@ export default function StoryViewerScreen() {
         {/* Video 1 (After Title) */}
         {renderVideo(video1Source, 'Video 1')}
 
-        {/* Image with Play Overlay (Only show if Video 1 is NOT present, or keep as thumbnail?) 
-            User said "video 1 at after title". The original image was also after title.
-            I'll keep the image if it exists, as it might be a cover image. 
-            If Video 1 exists, maybe the image is redundant? 
-            Let's keep the image for now as it serves as the "cover" or visual anchor, 
-            unless Video 1 IS the cover. 
-            User prompt: "show that video 1 at after title" 
-        */}
-        <View style={styles.imageContainer}>
-          {imageSource ? (
-            <Image source={imageSource} style={styles.storyImage} resizeMode="cover" />
-          ) : (
-            <View style={[styles.storyImage, styles.placeholderImage]}>
-              <Ionicons name="image-outline" size={60} color="rgba(255,255,255,0.3)" />
-            </View>
-          )}
-          {/* Play Overlay */}
-          <TouchableOpacity style={styles.playOverlay} onPress={togglePlayback}>
-             <View style={styles.playCircleSmall}>
-               <Ionicons name={isPlaying ? "pause" : "play"} size={32} color={theme.colors.primary} style={{ marginLeft: isPlaying ? 0 : 4 }} />
-             </View>
-          </TouchableOpacity>
-        </View>
-
         {/* Subtitle / Section Header */}
         <Text style={styles.sectionTitle}>The Story</Text>
 
         {/* Story Text - First Half */}
         <View style={styles.textWrapper}>
-          {firstHalf.map((segment, index) => (
+          {firstHalf.map((segment: any, index: number) => (
             <Text key={`first-${index}`} style={styles.storyText}>
               {segment.text}
             </Text>
@@ -271,7 +302,7 @@ export default function StoryViewerScreen() {
 
         {/* Story Text - Second Half */}
         <View style={styles.textWrapper}>
-          {secondHalf.map((segment, index) => (
+          {secondHalf.map((segment: any, index: number) => (
             <Text key={`second-${index}`} style={styles.storyText}>
               {segment.text}
             </Text>
@@ -405,6 +436,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  pauseOverlay: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 10,
+  },
+  pauseCircleSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
     borderColor: theme.colors.primary,
   },
   sectionTitle: {
