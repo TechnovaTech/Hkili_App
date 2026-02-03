@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
     
     // 4. Generate Videos using Hugging Face (Restored & Fixed with Cloudinary)
     const generatedContentUrls: string[] = [];
-    const HF_API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b";
+    // Updated to use the new Router URL and the active ali-vilab model
+    const HF_API_URL = "https://router.huggingface.co/models/ali-vilab/text-to-video-ms-1.7b";
     const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
     if (!HF_API_KEY) {
