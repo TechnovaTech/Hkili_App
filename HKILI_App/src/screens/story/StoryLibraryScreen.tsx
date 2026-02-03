@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { storyService } from '@/services/storyService';
+import { authService } from '@/services/authService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
 
@@ -18,6 +19,18 @@ export default function StoryLibraryScreen() {
   const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState(0);
+
+  const fetchUserCoins = async () => {
+    try {
+      const res = await authService.getCurrentUser();
+      if (res.success && res.data) {
+        setCoins(res.data.coins || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user coins:', error);
+    }
+  };
 
   const fetchLibrary = async () => {
     try {
@@ -36,6 +49,7 @@ export default function StoryLibraryScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchLibrary();
+      fetchUserCoins();
     }, [])
   );
 
@@ -74,7 +88,7 @@ export default function StoryLibraryScreen() {
         <View style={styles.headerSpacer} />
         <Text style={styles.title}>My Stories</Text>
         <View style={styles.coinsContainer}>
-          <Text style={styles.coinsText}>2</Text>
+          <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>
       </View>

@@ -86,8 +86,10 @@ export default function HomeScreen() {
     setHasSelectedCharacter(true);
   };
 
+  const canStart = hasSelectedCharacter && coins >= storyCost;
+
   const handleStart = () => {
-    if (hasSelectedCharacter) {
+    if (canStart) {
       router.push('/story/mode-selection');
     }
   };
@@ -286,13 +288,17 @@ export default function HomeScreen() {
        
 
         <TouchableOpacity 
-          style={[styles.startButton, !hasSelectedCharacter && styles.startButtonDisabled]} 
+          style={[styles.startButton, !canStart && styles.startButtonDisabled]} 
           onPress={handleStart}
-          disabled={!hasSelectedCharacter}
+          disabled={!canStart}
         >
-          <Ionicons name="layers-outline" size={20} color={hasSelectedCharacter ? "#FFFFFF" : "#64B5F6"} />
-          <Text style={[styles.startButtonText, !hasSelectedCharacter && styles.startButtonTextDisabled]}>{storyCost} Start</Text>
+          <Ionicons name="layers-outline" size={20} color={canStart ? "#FFFFFF" : "#64B5F6"} />
+          <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>{storyCost} Start</Text>
         </TouchableOpacity>
+        
+        {hasSelectedCharacter && coins < storyCost && (
+          <Text style={styles.insufficientCoinsText}>Required: {storyCost} coins</Text>
+        )}
       </View>
     </View>
   );
@@ -302,6 +308,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0A1929',
+  },
+  insufficientCoinsText: {
+    marginTop: 8,
+    color: '#FF5252',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   fixedHeader: {
     flexDirection: 'row',
