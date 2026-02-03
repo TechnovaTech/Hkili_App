@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     
     // 4. Generate Videos using Hugging Face (Restored & Fixed with Cloudinary)
     const generatedContentUrls: string[] = [];
-    const HF_API_URL = "https://router.huggingface.co/hf-inference/models/damo-vilab/text-to-video-ms-1.7b";
+    const HF_API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b";
     const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
     if (!HF_API_KEY) {
@@ -132,14 +132,15 @@ export async function POST(request: NextRequest) {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (genError: any) {
-        console.error("Video generation failed:", genError);
+        console.error(`Video generation failed for prompt "${prompt}":`, genError);
         lastError = genError.message || 'Unknown error';
       }
     }
 
     if (generatedContentUrls.length === 0) {
+        console.error("All video generation attempts failed. Last error:", lastError);
         return NextResponse.json(
-            { success: false, error: `Failed to generate videos. Error: ${lastError}` },
+            { success: false, error: `Failed to generate videos. Last Error: ${lastError}` },
             { status: 500 }
         );
     }
