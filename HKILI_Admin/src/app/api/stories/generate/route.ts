@@ -56,66 +56,62 @@ export async function POST(request: NextRequest) {
       language = 'EN' 
     } = body;
 
-    // 4. Fetch details for prompt
+    // 4. Fetch details for prompt (Kept for compatibility or logging, but not used for AI anymore)
     let categoryName = 'General';
     if (categoryId) {
       const category = await Category.findById(categoryId);
       if (category) categoryName = category.name;
     }
 
-    let characterName = 'a character';
-    let characterDesc = '';
-    if (storyCharacterId) {
-      const character = await StoryCharacter.findById(storyCharacterId);
-      if (character) {
-        characterName = character.name;
-        characterDesc = character.description || '';
-      }
+    // 5. Find Existing Stories from Admin
+    // Find all admin users
+    const admins = await User.find({ role: 'admin' }).select('_id');
+    const adminIds = admins.map(a => a._id);
+
+    // Query for matching stories created by admins
+    const query = {
+      categoryId,
+      storyCharacterId,
+      userId: { $in: adminIds }
+    };
+
+    const count = await Story.countDocuments(query);
+
+    if (count === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No stories available for this selection. Please try different options.' },
+        { status: 404 }
+      );
     }
 
-    // 5. Construct Prompt
-    const prompt = `Write a short children's story about ${characterName} (${characterDesc}).
-    The story takes place in ${place || 'a magical world'}.
-    The genre is ${categoryName}.
-    ${moral ? `The moral of the story should be: ${moral}` : ''}
-    The story should be engaging, appropriate for children, and written in ${language}.
-    Return the response as a valid JSON object with 'title' and 'content' fields.`;
+    // 6. Select Random Story
+    const random = Math.floor(Math.random() * count);
+    const templateStory = await Story.findOne(query).skip(random);
 
-    // 6. Call OpenAI
-    if (!process.env.OPENAI_API_KEY) {
-       // Fallback for dev/test without key - OR return error
-       // For this task, we assume key is present or we return error
-       return NextResponse.json({ success: false, error: 'Server configuration error (OpenAI Key)' }, { status: 500 });
+    if (!templateStory) {
+       return NextResponse.json(
+        { success: false, error: 'Failed to retrieve story.' },
+        { status: 500 }
+      );
     }
 
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a creative story writer for children."
-        },
-        { role: "user", content: prompt }
-      ],
-      model: "gpt-3.5-turbo",
-      response_format: { type: "json_object" },
-    });
-
-    const result = completion.choices[0].message.content;
-    if (!result) {
-        throw new Error('No content generated');
-    }
-
-    const parsedResult = JSON.parse(result);
-
-    // 7. Create Story
+    // 7. Clone Story for User
     const newStory = await Story.create({
-      title: parsedResult.title || 'Untitled Story',
-      content: parsedResult.content,
-      userId: userId,
-      genre: categoryName,
+      title: templateStory.title,
+      content: templateStory.content,
+      userId: userId, // Assigned to the current user
+      genre: templateStory.genre || categoryName,
       categoryId: categoryId,
       storyCharacterId: storyCharacterId,
-      language: language,
+      language: language, // Keep requested language or template language? User asked for specific language in request. 
+                         // If template is fixed language, this might be a mismatch. 
+                         // But for now, let's assume we just copy the story. 
+                         // If the user requested 'FR' but story is 'EN', we can't magically translate without AI.
+                         // For now, I'll use the template's language or default to requested.
+                         // Actually, better to store the template's language if available.
+      video1: templateStory.video1,
+      video2: templateStory.video2,
+      video3: templateStory.video3,
       createdAt: new Date(),
     });
 

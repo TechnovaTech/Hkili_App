@@ -30,6 +30,9 @@ export interface Story {
   content: StorySegment[];
   audioUrl?: string;
   imageUrl?: string;
+  video1?: string;
+  video2?: string;
+  video3?: string;
   genre: StoryGenre;
   childName: string;
   childAge: number;

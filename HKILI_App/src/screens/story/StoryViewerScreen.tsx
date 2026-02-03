@@ -14,7 +14,7 @@ import {
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
+import { Audio, Video, ResizeMode } from 'expo-av';
 import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
@@ -176,6 +176,32 @@ export default function StoryViewerScreen() {
   }
 
   const imageSource = getImageUrl(story.imageUrl || (story.content && story.content[0]?.image));
+  
+  // Calculate video sources
+  const video1Source = story.video1 ? getImageUrl(story.video1) : null;
+  const video2Source = story.video2 ? getImageUrl(story.video2) : null;
+  const video3Source = story.video3 ? getImageUrl(story.video3) : null;
+
+  // Split content for middle video
+  const contentSegments = story.content || [];
+  const middleIndex = Math.ceil(contentSegments.length / 2);
+  const firstHalf = contentSegments.slice(0, middleIndex);
+  const secondHalf = contentSegments.slice(middleIndex);
+
+  const renderVideo = (source: { uri: string } | null, label: string) => {
+    if (!source) return null;
+    return (
+      <View style={styles.videoContainer}>
+        <Video
+          style={styles.video}
+          source={source}
+          useNativeControls
+          resizeMode={ResizeMode.CONTAIN}
+          isLooping
+        />
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -201,7 +227,17 @@ export default function StoryViewerScreen() {
         {/* Story Title */}
         <Text style={styles.storyTitle}>{story.title}</Text>
 
-        {/* Image with Play Overlay */}
+        {/* Video 1 (After Title) */}
+        {renderVideo(video1Source, 'Video 1')}
+
+        {/* Image with Play Overlay (Only show if Video 1 is NOT present, or keep as thumbnail?) 
+            User said "video 1 at after title". The original image was also after title.
+            I'll keep the image if it exists, as it might be a cover image. 
+            If Video 1 exists, maybe the image is redundant? 
+            Let's keep the image for now as it serves as the "cover" or visual anchor, 
+            unless Video 1 IS the cover. 
+            User prompt: "show that video 1 at after title" 
+        */}
         <View style={styles.imageContainer}>
           {imageSource ? (
             <Image source={imageSource} style={styles.storyImage} resizeMode="cover" />
@@ -210,7 +246,7 @@ export default function StoryViewerScreen() {
               <Ionicons name="image-outline" size={60} color="rgba(255,255,255,0.3)" />
             </View>
           )}
-          {/* Play Overlay (Visual only, controls are at bottom, or could trigger start) */}
+          {/* Play Overlay */}
           <TouchableOpacity style={styles.playOverlay} onPress={togglePlayback}>
              <View style={styles.playCircleSmall}>
                <Ionicons name={isPlaying ? "pause" : "play"} size={32} color={theme.colors.primary} style={{ marginLeft: isPlaying ? 0 : 4 }} />
@@ -221,14 +257,29 @@ export default function StoryViewerScreen() {
         {/* Subtitle / Section Header */}
         <Text style={styles.sectionTitle}>The Story</Text>
 
-        {/* Story Text */}
+        {/* Story Text - First Half */}
         <View style={styles.textWrapper}>
-          {story.content && story.content.map((segment, index) => (
-            <Text key={index} style={styles.storyText}>
+          {firstHalf.map((segment, index) => (
+            <Text key={`first-${index}`} style={styles.storyText}>
               {segment.text}
             </Text>
           ))}
         </View>
+
+        {/* Video 2 (Middle) */}
+        {renderVideo(video2Source, 'Video 2')}
+
+        {/* Story Text - Second Half */}
+        <View style={styles.textWrapper}>
+          {secondHalf.map((segment, index) => (
+            <Text key={`second-${index}`} style={styles.storyText}>
+              {segment.text}
+            </Text>
+          ))}
+        </View>
+
+        {/* Video 3 (Last) */}
+        {renderVideo(video3Source, 'Video 3')}
         
         {/* Spacer for bottom player */}
         <View style={{ height: 100 }} />
@@ -446,5 +497,18 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  videoContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
   },
 });
