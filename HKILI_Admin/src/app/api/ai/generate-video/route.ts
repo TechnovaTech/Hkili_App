@@ -65,33 +65,63 @@ export async function POST(request: NextRequest) {
     // Fallback if no HF key provided, to prevent crash and show instructions
     if (!HF_API_KEY) {
        console.warn("HUGGINGFACE_API_KEY missing. Returning mock response or error.");
-       // Ideally we should return error, but for user experience let's return a helpful error
        return NextResponse.json(
         { success: false, error: 'HUGGINGFACE_API_KEY is missing in .env' },
         { status: 500 }
       );
     }
 
+    // Helper for retry logic
+    const fetchWithRetry = async (url: string, body: any, retries = 3) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const res = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${HF_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+            body: JSON.stringify(body),
+          });
+
+          if (res.ok) {
+            return await res.arrayBuffer();
+          }
+
+          const errorText = await res.text();
+          
+          // Handle 503 Model Loading
+          if (res.status === 503) {
+            const errorJson = JSON.parse(errorText);
+            const waitTime = errorJson.estimated_time || 20;
+            console.log(`Model is loading. Waiting ${waitTime}s... (Attempt ${i + 1}/${retries})`);
+            await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+            continue;
+          }
+
+          // Handle other server errors with simple backoff
+          if (res.status >= 500) {
+             console.warn(`Server error ${res.status}: ${errorText}. Retrying...`);
+             await new Promise(resolve => setTimeout(resolve, 3000));
+             continue;
+          }
+
+          throw new Error(`HF Error ${res.status}: ${errorText}`);
+        } catch (err) {
+           if (i === retries - 1) throw err;
+           console.log(`Fetch error: ${err}. Retrying...`);
+           await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+      throw new Error("Max retries exceeded");
+    };
+
     for (const prompt of prompts.slice(0, 4)) { // Limit to 4
       try {
         console.log(`Generating video for prompt: ${prompt}`);
-        const response = await fetch(HF_API_URL, {
-          headers: {
-            Authorization: `Bearer ${HF_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({ inputs: prompt }),
-        });
-
-        if (!response.ok) {
-           const errText = await response.text();
-           console.error(`HF Error for prompt "${prompt}":`, errText);
-           continue; // Skip failed generation
-        }
-
-        const videoBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(videoBuffer);
+        
+        const videoBuffer = await fetchWithRetry(HF_API_URL, { inputs: prompt });
+        const buffer = Buffer.from(videoBuffer as ArrayBuffer);
         
         // Save file
         const fileName = `video-${uuidv4()}.mp4`;
@@ -105,9 +135,12 @@ export async function POST(request: NextRequest) {
 
         fs.writeFileSync(filePath, buffer);
         generatedVideoUrls.push(`/generated-videos/${fileName}`);
+        
+        // Small delay between successful requests to be polite
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
       } catch (videoError) {
-        console.error("Video generation failed:", videoError);
+        console.error("Video generation failed for prompt:", prompt, videoError);
       }
     }
 
