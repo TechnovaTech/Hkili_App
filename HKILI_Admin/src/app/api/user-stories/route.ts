@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '../../../lib/mongodb';
 import UserStory from '../../../models/UserStory';
 import Story from '../../../models/Story';
+// Ensure all referenced models are registered
+import '../../../models/User';
+import '../../../models/Category';
+import '../../../models/StoryCharacter';
 
 // GET: Fetch user's library stories
 export async function GET(request: NextRequest) {
