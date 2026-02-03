@@ -51,9 +51,9 @@ export default function AdminSidebar() {
           <Link href="/admin/ai-generator" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/ai-generator')}`}>
             AI Generator
           </Link>
-          <Link href="/admin/ai-videos" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/ai-videos')}`}>
+          {/* <Link href="/admin/ai-videos" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/ai-videos')}`}>
             AI Video Generator
-          </Link>
+          </Link> */}
           <Link href="/admin/characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/characters')}`}>
             User Characters
           </Link>
