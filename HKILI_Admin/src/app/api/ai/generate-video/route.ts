@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import fs from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Initialize Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export async function POST(request: NextRequest) {
@@ -84,20 +89,13 @@ export async function POST(request: NextRequest) {
         const b64Data = imageResponse.data?.[0]?.b64_json;
         if (!b64Data) continue;
 
-        const buffer = Buffer.from(b64Data, 'base64');
+        // Upload to Cloudinary directly from base64
+        const result = await cloudinary.uploader.upload(`data:image/png;base64,${b64Data}`, {
+            folder: 'hkili_scenes',
+            resource_type: 'image',
+        });
         
-        // Save file
-        const fileName = `scene-${uuidv4()}.png`;
-        const publicPath = path.join(process.cwd(), 'public', 'generated-scenes');
-        const filePath = path.join(publicPath, fileName);
-
-        // Ensure directory exists
-        if (!fs.existsSync(publicPath)) {
-            fs.mkdirSync(publicPath, { recursive: true });
-        }
-
-        fs.writeFileSync(filePath, buffer);
-        generatedContentUrls.push(`/generated-scenes/${fileName}`);
+        generatedContentUrls.push(result.secure_url);
 
       } catch (genError: any) {
         console.error("Image generation failed for prompt:", prompt, genError);
