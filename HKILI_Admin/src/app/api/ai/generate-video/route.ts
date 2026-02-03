@@ -61,57 +61,90 @@ export async function POST(request: NextRequest) {
     
     const { prompts } = JSON.parse(result);
     
-    // 4. Generate Images using OpenAI DALL-E 3 (More reliable than free video APIs)
+    // 4. Generate Videos using Hugging Face (Restored & Fixed with Cloudinary)
     const generatedContentUrls: string[] = [];
+    const HF_API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b";
+    const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
-    // Check for OpenAI Key again (redundant but safe)
-    if (!process.env.OPENAI_API_KEY) {
+    if (!HF_API_KEY) {
        return NextResponse.json(
-        { success: false, error: 'OPENAI_API_KEY is missing.' },
+        { success: false, error: 'HUGGINGFACE_API_KEY is missing.' },
         { status: 500 }
       );
     }
 
+    // Helper for retry logic
+    const fetchWithRetry = async (url: string, body: any, retries = 3) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const res = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${HF_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+            body: JSON.stringify(body),
+          });
+
+          if (res.ok) {
+            return await res.arrayBuffer();
+          }
+
+          const errorText = await res.text();
+          
+          if (res.status === 503) {
+            const errorJson = JSON.parse(errorText);
+            const waitTime = errorJson.estimated_time || 20;
+            console.log(`Model loading. Waiting ${waitTime}s...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+            continue;
+          }
+
+          throw new Error(`HF Error ${res.status}: ${errorText}`);
+        } catch (err) {
+           if (i === retries - 1) throw err;
+           await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+      }
+      throw new Error("Max retries exceeded");
+    };
+
     let lastError = '';
 
-    for (const prompt of prompts.slice(0, 4)) { // Limit to 4
+    for (const prompt of prompts.slice(0, 4)) { 
       try {
-        console.log(`Generating image for prompt: ${prompt}`);
+        console.log(`Generating video for prompt: ${prompt}`);
         
-        const imageResponse = await openai.images.generate({
-          model: "dall-e-3",
-          prompt: prompt + " highly detailed, cartoon style, vibrant colors",
-          n: 1,
-          size: "1024x1024",
-          response_format: "b64_json", 
-        });
+        const videoBuffer = await fetchWithRetry(HF_API_URL, { inputs: prompt });
+        const buffer = Buffer.from(videoBuffer as ArrayBuffer);
+        const base64Data = buffer.toString('base64');
+        const dataURI = `data:video/mp4;base64,${base64Data}`;
 
-        const b64Data = imageResponse.data?.[0]?.b64_json;
-        if (!b64Data) continue;
-
-        // Upload to Cloudinary directly from base64
-        const result = await cloudinary.uploader.upload(`data:image/png;base64,${b64Data}`, {
-            folder: 'hkili_scenes',
-            resource_type: 'image',
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(dataURI, {
+            folder: 'hkili_videos',
+            resource_type: 'video',
         });
         
         generatedContentUrls.push(result.secure_url);
+        
+        // Delay to prevent rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (genError: any) {
-        console.error("Image generation failed for prompt:", prompt, genError);
+        console.error("Video generation failed:", genError);
         lastError = genError.message || 'Unknown error';
-        // Don't fail completely if one fails, just continue
       }
     }
 
     if (generatedContentUrls.length === 0) {
         return NextResponse.json(
-            { success: false, error: `Failed to generate content. OpenAI Error: ${lastError}` },
+            { success: false, error: `Failed to generate videos. Error: ${lastError}` },
             { status: 500 }
         );
     }
 
-    return NextResponse.json({ success: true, videos: generatedContentUrls, type: 'image' });
+    return NextResponse.json({ success: true, videos: generatedContentUrls, type: 'video' });
 
   } catch (error: any) {
     console.error('Video Generation Error:', error);

@@ -54,8 +54,8 @@ export default function AIVideoGenerator() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">AI Scene Generator</h1>
-        <p className="mt-2 text-gray-600">Generate high-quality visual scenes from your stories using DALL-E 3</p>
+        <h1 className="text-2xl font-bold text-gray-900">AI Video Generator</h1>
+        <p className="mt-2 text-gray-600">Generate animated scenes from your stories using AI</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -97,39 +97,41 @@ export default function AIVideoGenerator() {
           </form>
         </div>
 
-        {/* Results Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 min-h-[400px]">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Generated Scenes</h2>
-          
-          {contentUrls.length === 0 && !loading && (
-            <div className="h-64 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
-              <span className="text-4xl mb-2">🎨</span>
-              <p>Generated scenes will appear here</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-6">
-            {contentUrls.map((url, index) => (
-              <div key={index} className="space-y-2">
-                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative group">
-                  <img 
-                    src={url} 
-                    alt={`Scene ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <a 
-                    href={url} 
-                    download={`scene-${index+1}.png`}
-                    className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    Download
-                  </a>
-                </div>
-                <p className="text-sm text-gray-500 text-center">Scene {index + 1}</p>
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 min-h-[500px]">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Generated Videos</h2>
+            
+            {contentUrls.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {contentUrls.map((url, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative group">
+                      <video 
+                        src={url} 
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                      <a 
+                        href={url} 
+                        download={`video-${index+1}.mp4`}
+                        className="absolute bottom-8 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Download
+                      </a>
+                    </div>
+                    <p className="text-sm text-gray-500 text-center">Scene {index + 1}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p>Generated videos will appear here</p>
+              </div>
+            )}
           </div>
-        </div>
+
       </div>
     </div>
   )
