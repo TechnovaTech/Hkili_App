@@ -9,9 +9,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const HF_API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b";
-const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
-
 export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate (Simple check for Admin Token presence, assuming middleware or client handles validity for now, 
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest) {
           response_format: "b64_json", 
         });
 
-        const b64Data = imageResponse.data[0].b64_json;
+        const b64Data = imageResponse.data?.[0]?.b64_json;
         if (!b64Data) continue;
 
         const buffer = Buffer.from(b64Data, 'base64');
