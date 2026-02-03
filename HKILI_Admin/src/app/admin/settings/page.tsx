@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 interface AppSettings {
   signupBonusCoins: number | string
+  storyCost: number | string
   languages: {
     EN: boolean
     FR: boolean
@@ -23,6 +24,7 @@ interface AppSettings {
 export default function SettingsManagement() {
   const [settings, setSettings] = useState<AppSettings>({
     signupBonusCoins: 0,
+    storyCost: 10,
     languages: {
       EN: true,
       FR: true,
@@ -88,7 +90,8 @@ export default function SettingsManagement() {
 
       const settingsToSave = {
         ...settings,
-        signupBonusCoins: Number(settings.signupBonusCoins)
+        signupBonusCoins: Number(settings.signupBonusCoins),
+        storyCost: Number(settings.storyCost)
       }
 
       const response = await fetch('/api/settings', {
@@ -118,6 +121,13 @@ export default function SettingsManagement() {
     setSettings(prev => ({
       ...prev,
       signupBonusCoins: value
+    }))
+  }
+
+  const handleStoryCostChange = (value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      storyCost: value
     }))
   }
 
@@ -193,6 +203,25 @@ export default function SettingsManagement() {
                   min="0"
                   value={settings.signupBonusCoins}
                   onChange={(e) => handleBonusCoinsChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Story Cost Settings */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Story Cost</h3>
+              <p className="text-sm text-gray-600 mb-6">Set the cost in coins for generating a new story</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cost per Story
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={settings.storyCost}
+                  onChange={(e) => handleStoryCostChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -354,6 +383,7 @@ export default function SettingsManagement() {
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">Story Settings</h4>
                   <p className="text-gray-600">Max Length: {settings.maxStoryLength} characters</p>
+                  <p className="text-gray-600">Story Cost: {settings.storyCost} coins</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">Active Modes</h4>

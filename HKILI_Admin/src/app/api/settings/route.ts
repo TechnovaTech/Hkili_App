@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     if (!settings) {
       settings = await Setting.create({
         signupBonusCoins: 0,
+        storyCost: 10,
         languages: { EN: true, FR: true, AR: true },
         maxStoryLength: 1000,
         storyModes: { adventure: true, educational: true, bedtime: true, interactive: false }

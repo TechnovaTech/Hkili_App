@@ -5,6 +5,10 @@ const SettingSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  storyCost: {
+    type: Number,
+    default: 10
+  },
   languages: {
     EN: { type: Boolean, default: true },
     FR: { type: Boolean, default: true },
