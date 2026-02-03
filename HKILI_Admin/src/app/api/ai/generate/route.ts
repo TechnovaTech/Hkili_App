@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    if (user.coins < storyCost) {
+    // Check coins only if user is NOT an admin
+    if (user.role !== 'admin' && user.coins < storyCost) {
       return NextResponse.json(
         { success: false, error: 'Insufficient coins to generate story' },
         { status: 403 }
@@ -89,9 +90,11 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     });
 
-    // 6. Deduct Coins
-    user.coins -= storyCost;
-    await user.save();
+    // 6. Deduct Coins (Only if not admin)
+    if (user.role !== 'admin') {
+      user.coins -= storyCost;
+      await user.save();
+    }
 
     return NextResponse.json({ success: true, data: newStory, remainingCoins: user.coins });
 
