@@ -18,7 +18,7 @@ export default function AIVideoGenerator() {
     setLoading(true)
     setError('')
     setContentUrls([])
-    setStatus('Analyzing story and generating visual scenes...')
+    setStatus('Analyzing story and generating a visual scene...')
 
     try {
       const token = localStorage.getItem('adminToken')
@@ -40,7 +40,7 @@ export default function AIVideoGenerator() {
 
       if (data.success) {
         setContentUrls(data.videos)
-        setStatus('Scenes generated successfully!')
+        setStatus('Scene generated successfully!')
       } else {
         setError(data.error || 'Failed to generate content')
       }
@@ -82,7 +82,7 @@ export default function AIVideoGenerator() {
               className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
                 ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'}`}
             >
-              {loading ? 'Generating Scenes...' : 'Generate 4 Story Scenes'}
+              {loading ? 'Generating Scene...' : 'Generate 1 Story Scene'}
             </button>
             
             {loading && (

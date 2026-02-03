@@ -45,10 +45,10 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are a storyboard artist. Create 4 distinct, highly descriptive visual prompts for an AI video generator based on the provided story. 
-          Each prompt should describe a single key scene in 1 sentence. 
+          content: `You are a storyboard artist. Create ONE highly descriptive visual prompt for an AI video generator based on the provided story. 
+          The prompt should describe a single key scene in 1 sentence. 
           Focus on visual details, cartoon style, and action. 
-          Return the response as a JSON object with a 'prompts' array of strings.`
+          Return the response as a JSON object with a 'prompts' array containing exactly one string.`
         },
         { role: "user", content: storyContent }
       ],
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     let lastError = '';
 
-    for (const prompt of prompts.slice(0, 4)) { 
+    for (const prompt of prompts.slice(0, 1)) { 
       try {
         console.log(`Generating video for prompt: ${prompt}`);
         
