@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import Story from '@/models/Story';
 import User from '@/models/User';
 import Setting from '@/models/Setting';
@@ -8,10 +7,6 @@ import StoryCharacter from '@/models/StoryCharacter';
 import UserStory from '@/models/UserStory';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: NextRequest) {
   try {

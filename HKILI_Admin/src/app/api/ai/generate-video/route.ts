@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { v2 as cloudinary } from 'cloudinary';
 import RunwayML from '@runwayml/sdk';
+import Setting from '@/models/Setting';
+import dbConnect from '@/lib/mongodb';
 
 // Allow up to 60 seconds for video generation (if supported by platform)
 export const maxDuration = 60;
 
 // Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
 // Initialize Cloudinary
 cloudinary.config({
@@ -32,6 +34,12 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json({ message: 'No token provided' }, { status: 401 });
     }
+    
+    await dbConnect();
+
+    // Fetch Settings
+    const setting = await Setting.findOne();
+    const apiKey = setting?.openaiApiKey || process.env.OPENAI_API_KEY;
 
     // 2. Parse Request
     const { storyContent } = await request.json();
@@ -43,12 +51,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: 'OpenAI API Key is missing.' },
+        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings or .env file.' },
         { status: 500 }
       );
     }
+
+    const openai = new OpenAI({ apiKey });
     
     // Check Runway API Key
     if (!process.env.RUNWAYML_API_SECRET && !process.env.RUNWAY_API_KEY) {

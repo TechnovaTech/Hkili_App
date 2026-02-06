@@ -9,6 +9,10 @@ const SettingSchema = new mongoose.Schema({
     type: Number,
     default: 10
   },
+  openaiApiKey: {
+    type: String,
+    default: ''
+  },
   languages: {
     EN: { type: Boolean, default: true },
     FR: { type: Boolean, default: true },

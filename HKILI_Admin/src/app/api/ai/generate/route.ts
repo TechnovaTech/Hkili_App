@@ -7,9 +7,9 @@ import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
 // Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'dummy-key-replace-me',
-});
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY || 'dummy-key-replace-me',
+// });
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     // Check User Coins and Story Cost
     const setting = await Setting.findOne();
     const storyCost = setting?.storyCost ?? 10;
+    const apiKey = setting?.openaiApiKey || process.env.OPENAI_API_KEY;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -51,12 +52,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: 'OpenAI API Key is missing. Please add OPENAI_API_KEY to your .env file.' },
+        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings or .env file.' },
         { status: 500 }
       );
     }
+
+    const openai = new OpenAI({ apiKey });
 
     // 3. Call OpenAI API
     const completion = await openai.chat.completions.create({

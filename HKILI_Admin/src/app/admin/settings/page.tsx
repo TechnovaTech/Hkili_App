@@ -7,6 +7,7 @@ import Link from 'next/link'
 interface AppSettings {
   signupBonusCoins: number | string
   storyCost: number | string
+  openaiApiKey: string
   languages: {
     EN: boolean
     FR: boolean
@@ -25,6 +26,7 @@ export default function SettingsManagement() {
   const [settings, setSettings] = useState<AppSettings>({
     signupBonusCoins: 0,
     storyCost: 10,
+    openaiApiKey: '',
     languages: {
       EN: true,
       FR: true,
@@ -133,6 +135,13 @@ export default function SettingsManagement() {
     }))
   }
 
+  const handleApiKeyChange = (value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      openaiApiKey: value
+    }))
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     router.push('/admin/login')
@@ -202,6 +211,25 @@ export default function SettingsManagement() {
               </div>
             </div>
 
+            {/* OpenAI API Key Settings */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">OpenAI API Key</h3>
+              <p className="text-sm text-gray-600 mb-6">Set the OpenAI API Key for story generation (Leave empty to use environment variable)</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  API Key
+                </label>
+                <input
+                  type="password"
+                  value={settings.openaiApiKey || ''}
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
+                  placeholder="sk-..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
 
 
 
@@ -241,6 +269,7 @@ export default function SettingsManagement() {
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">Story Settings</h4>
                   <p className="text-gray-600">Story Cost: {settings.storyCost} coins</p>
+                  <p className="text-gray-600">OpenAI Key: {settings.openaiApiKey ? '••••••••' : 'Not Set (Using Env)'}</p>
                 </div>
               </div>
             </div>
