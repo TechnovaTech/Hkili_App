@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
   const useRouterObj = useRouter()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -14,69 +16,78 @@ export default function AdminSidebar() {
       console.error('Logout error:', error)
     }
     
-    // Clear local storage
     localStorage.removeItem('adminToken')
     useRouterObj.push('/login')
-    useRouterObj.refresh() // Force refresh to update server components
+    useRouterObj.refresh()
   }
 
   const isActive = (path: string) => {
-    return pathname === path ? 'text-blue-600 bg-blue-50 border-r-4 border-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+    return pathname === path
   }
 
+  const menuItems = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/admin/users', label: 'Users', icon: '👥' },
+    { path: '/admin/stories', label: 'Stories', icon: '📚' },
+    { path: '/admin/ai-generator', label: 'AI Generator', icon: '🤖' },
+    { path: '/admin/characters', label: 'Characters', icon: '👤' },
+    { path: '/admin/story-characters', label: 'Story Characters', icon: '🎭' },
+    { path: '/admin/categories', label: 'Categories', icon: '📁' },
+    { path: '/admin/plans', label: 'Plans', icon: '💎' },
+    { path: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  ]
+
   return (
-    <div className="w-64 bg-white shadow-sm border-r border-gray-200 fixed h-full z-10">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">H</span>
-          </div>
-          <div className="ml-3">
-            <h1 className="text-xl font-bold text-gray-900">HKILI</h1>
-            <p className="text-sm text-gray-500">Admin Panel</p>
-          </div>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl border-r border-slate-700 fixed h-full z-10 transition-all duration-300`}>
+      <div className="p-6 border-b border-slate-700/50 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          {!isCollapsed && (
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-float">
+                <span className="text-white font-bold text-lg">H</span>
+              </div>
+              <div className="ml-3">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">HKILI</h1>
+                <p className="text-xs text-slate-400">Admin Panel</p>
+              </div>
+            </div>
+          )}
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-slate-400 hover:text-white transition-colors"
+          >
+            {isCollapsed ? '→' : '←'}
+          </button>
         </div>
       </div>
       <nav className="mt-6 flex flex-col justify-between h-[calc(100vh-140px)]">
-        <div>
-          <Link href="/admin/dashboard" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/dashboard')}`}>
-            Dashboard
-          </Link>
-          <Link href="/admin/users" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/users')}`}>
-            Users Management
-          </Link>
-          <Link href="/admin/stories" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/stories')}`}>
-            Stories Management
-          </Link>
-          <Link href="/admin/ai-generator" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/ai-generator')}`}>
-            AI Generator
-          </Link>
-          {/* <Link href="/admin/ai-videos" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/ai-videos')}`}>
-            AI Video Generator
-          </Link> */}
-          <Link href="/admin/characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/characters')}`}>
-            User Characters
-          </Link>
-          <Link href="/admin/story-characters" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/story-characters')}`}>
-            Story Characters
-          </Link>
-          <Link href="/admin/categories" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/categories')}`}>
-            Categories
-          </Link>
-          <Link href="/admin/plans" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/plans')}`}>
-            Plans
-          </Link>
-          <Link href="/admin/settings" className={`flex items-center px-6 py-3 font-medium transition-colors ${isActive('/admin/settings')}`}>
-            Settings
-          </Link>
+        <div className="space-y-1 px-3">
+          {menuItems.map((item) => (
+            <Link 
+              key={item.path}
+              href={item.path} 
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-3 rounded-xl font-medium transition-all duration-200 group relative overflow-hidden ${
+                isActive(item.path)
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                  : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+              }`}
+            >
+              {isActive(item.path) && (
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-20 blur-xl"></div>
+              )}
+              <span className="text-xl relative z-10">{item.icon}</span>
+              {!isCollapsed && <span className="ml-3 relative z-10">{item.label}</span>}
+            </Link>
+          ))}
         </div>
         
         <div className="px-6 pb-6">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-center px-4'} py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 shadow-lg hover:shadow-red-500/50`}
           >
-            Logout
+            <span className="text-lg">🚪</span>
+            {!isCollapsed && <span className="ml-2">Logout</span>}
           </button>
         </div>
       </nav>
