@@ -38,13 +38,13 @@ export default function AdminSidebar() {
   ]
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-dark-800 shadow-2xl border-r border-white/10 fixed h-full z-10 transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-app-bg shadow-2xl border-r border-app-border/30 fixed h-full z-10 transition-all duration-300`}>
       <div className="p-6 border-b border-white/10 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-white/20 animate-float">
-                <span className="text-black font-bold text-lg">H</span>
+              <div className="w-10 h-10 bg-app-primary rounded-xl flex items-center justify-center shadow-lg shadow-app-primary/30 animate-float">
+                <span className="text-white font-bold text-lg">H</span>
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-white">HKILI</h1>
@@ -68,12 +68,12 @@ export default function AdminSidebar() {
               href={item.path} 
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'px-4'} py-3 rounded-xl font-medium transition-all duration-200 group relative overflow-hidden shine-hover ${
                 isActive(item.path)
-                  ? 'bg-white text-black shadow-lg shadow-white/20'
-                  : 'text-gray-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/10'
+                  ? 'bg-app-primary text-white shadow-lg shadow-app-primary/30'
+                  : 'text-app-textMuted hover:bg-app-surface/30 hover:text-white border border-transparent hover:border-app-border/30'
               }`}
             >
               {isActive(item.path) && (
-                <div className="absolute inset-0 bg-white opacity-10 blur-xl"></div>
+                <div className="absolute inset-0 bg-app-primary opacity-10 blur-xl"></div>
               )}
               <span className="text-xl relative z-10">{item.icon}</span>
               {!isCollapsed && <span className="ml-3 relative z-10">{item.label}</span>}
@@ -84,7 +84,7 @@ export default function AdminSidebar() {
         <div className="px-6 pb-6">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-center px-4'} py-3 text-sm font-medium rounded-xl text-white bg-black hover:bg-white hover:text-black border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-lg shadow-white/10 shine-hover`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-center px-4'} py-3 text-sm font-medium rounded-xl text-white bg-app-surface/40 hover:bg-app-primary hover:text-white border border-app-border/30 focus:outline-none focus:ring-2 focus:ring-app-primary/50 transition-all duration-200 shadow-lg shadow-app-primary/10 shine-hover`}
           >
             <span className="text-lg">🚪</span>
             {!isCollapsed && <span className="ml-2">Logout</span>}
