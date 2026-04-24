@@ -6,6 +6,14 @@ export interface StoryCharacter {
   name: string;
   description?: string;
   image?: string;
+  age?: number;
+  gender?: string;
+  hairColor?: string;
+  hairStyle?: string;
+  skinColor?: string;
+  eyeColor?: string;
+  interests?: string[];
+  customInterests?: string[];
   categoryId: string | { _id: string; name: string };
   createdAt?: string;
 }

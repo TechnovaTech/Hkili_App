@@ -21,7 +21,7 @@ import { characterService } from '@/services/characterService';
 type TabType = 'basic' | 'appearance' | 'interests';
 
 export default function AddCharacterScreen() {
-  const { mode, id } = useLocalSearchParams<{ mode: string; id: string }>();
+  const { mode, id, isMain } = useLocalSearchParams<{ mode: string; id: string; isMain: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CharacterFormData>({
@@ -34,6 +34,7 @@ export default function AddCharacterScreen() {
     hairStyle: 'Short',
     interests: [],
     customInterests: [],
+    isMainCharacter: isMain === 'true',
   });
 
   useEffect(() => {
@@ -48,12 +49,13 @@ export default function AddCharacterScreen() {
         hairStyle: 'Short',
         interests: [],
         customInterests: [],
+        isMainCharacter: isMain === 'true',
       });
       setActiveTab('basic');
     } else if (mode === 'edit' && id) {
       loadCharacter(id);
     }
-  }, [mode, id]);
+  }, [mode, id, isMain]);
 
   const loadCharacter = async (characterId: string) => {
     setLoading(true);
@@ -75,6 +77,7 @@ export default function AddCharacterScreen() {
           hairStyle: c.hairStyle || appearance.hairStyle || 'Short',
           interests: c.interests || [],
           customInterests: [],
+          isMainCharacter: c.isMainCharacter ?? true,
         });
       }
     } catch (error) {

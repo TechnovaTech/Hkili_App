@@ -84,6 +84,50 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
           </View>
         </View>
 
+        {/* Character Type Selection */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>
+            Character Type<Text style={styles.required}>*</Text>
+          </Text>
+          <Text style={styles.description}>
+            Is this a main character or a side character?
+          </Text>
+          <View style={styles.genderContainer}>
+            <TouchableOpacity
+              style={[
+                styles.genderButton,
+                formData.isMainCharacter && styles.selectedGenderButton,
+              ]}
+              onPress={() => updateFormData({ isMainCharacter: true })}
+            >
+              <Text
+                style={[
+                  styles.genderText,
+                  formData.isMainCharacter && styles.selectedGenderText,
+                ]}
+              >
+                Main Character
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.genderButton,
+                !formData.isMainCharacter && styles.selectedGenderButton,
+              ]}
+              onPress={() => updateFormData({ isMainCharacter: false })}
+            >
+              <Text
+                style={[
+                  styles.genderText,
+                  !formData.isMainCharacter && styles.selectedGenderText,
+                ]}
+              >
+                Side Character
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Next Button */}
         <TouchableOpacity style={styles.nextButton} onPress={onNext}>
           <Text style={styles.nextButtonText}>Next</Text>

@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
 import { categoryService, Category } from '@/services/categoryService';
 import { playClickSound } from '@/utils/soundUtils';
@@ -20,6 +20,7 @@ import { playClickSound } from '@/utils/soundUtils';
 const { width } = Dimensions.get('window');
 
 export default function ModeSelectionScreen() {
+  const params = useLocalSearchParams();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +45,10 @@ export default function ModeSelectionScreen() {
     await playClickSound();
     router.push({
       pathname: '/story/mode-character-selection',
-      params: { mode: modeId }
+      params: { 
+        ...params,
+        mode: modeId 
+      }
     });
   };
 

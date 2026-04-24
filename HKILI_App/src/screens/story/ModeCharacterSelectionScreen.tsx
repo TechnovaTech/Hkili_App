@@ -20,7 +20,8 @@ import { playClickSound } from '@/utils/soundUtils';
 const { width } = Dimensions.get('window');
 
 export default function ModeCharacterSelectionScreen() {
-  const { mode } = useLocalSearchParams<{ mode: string }>();
+  const params = useLocalSearchParams();
+  const { mode } = params as { mode: string };
   const [characters, setCharacters] = useState<StoryCharacter[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +49,10 @@ export default function ModeCharacterSelectionScreen() {
     await playClickSound();
     router.push({
       pathname: '/story/story-place-selection',
-      params: { mode, character: characterId }
+      params: { 
+        ...params,
+        character: characterId 
+      }
     });
   };
 

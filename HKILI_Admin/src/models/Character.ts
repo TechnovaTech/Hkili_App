@@ -50,6 +50,10 @@ const CharacterSchema = new mongoose.Schema({
     type: String,
     required: false,
   }],
+  isMainCharacter: {
+    type: Boolean,
+    default: true,
+  },
   description: {
     type: String,
     required: false,

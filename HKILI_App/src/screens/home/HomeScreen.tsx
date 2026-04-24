@@ -12,15 +12,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { characterService } from '@/services/characterService';
+import { storyCharacterService } from '@/services/storyCharacterService';
 import { authService } from '@/services/authService';
 import { settingsService } from '@/services/settingsService';
 import { useCallback } from 'react';
 
 export default function HomeScreen() {
-  const [selectedMainCharacters, setSelectedMainCharacters] = useState([]);
-  const [selectedSideCharacters, setSelectedSideCharacters] = useState([]);
-  const [hasSelectedCharacter, setHasSelectedCharacter] = useState(false);
+  const [selectedMainCharacters, setSelectedMainCharacters] = useState<string[]>([]);
+  const [selectedSideCharacters, setSelectedSideCharacters] = useState<string[]>([]);
   const [characters, setCharacters] = useState<any[]>([]);
+  const [storyCharacters, setStoryCharacters] = useState<any[]>([]);
   const [loadingCharacters, setLoadingCharacters] = useState(false);
   const [coins, setCoins] = useState(0);
   const [storyCost, setStoryCost] = useState(1);
@@ -28,15 +29,25 @@ export default function HomeScreen() {
   const fetchCharacters = useCallback(async () => {
     setLoadingCharacters(true);
     try {
-      const res = await characterService.getAll();
-      if (res.success && res.data) {
-        setCharacters(res.data as any[]);
-        setHasSelectedCharacter((res.data as any[]).length > 0);
+      const [charRes, storyCharRes] = await Promise.all([
+        characterService.getAll(),
+        storyCharacterService.getAll()
+      ]);
+
+      if (charRes.success && charRes.data) {
+        setCharacters(charRes.data as any[]);
+      }
+      if (storyCharRes.success && storyCharRes.data) {
+        setStoryCharacters(storyCharRes.data as any[]);
       }
     } finally {
       setLoadingCharacters(false);
     }
   }, []);
+
+  const mainCharacters = characters.filter(c => c.isMainCharacter !== false);
+  const userSideCharacters = characters.filter(c => c.isMainCharacter === false);
+  const sideCharacters = [...userSideCharacters, ...storyCharacters];
 
   const fetchUserCoins = useCallback(async () => {
     try {
@@ -71,7 +82,14 @@ export default function HomeScreen() {
   const handleAddMainCharacter = () => {
     router.push({
       pathname: '/character/add',
-      params: { mode: 'create' }
+      params: { mode: 'create', isMain: 'true' }
+    });
+  };
+
+  const handleAddSideCharacter = () => {
+    router.push({
+      pathname: '/character/add',
+      params: { mode: 'create', isMain: 'false' }
     });
   };
 
@@ -82,15 +100,29 @@ export default function HomeScreen() {
     });
   };
 
-  const handleSelectCharacter = () => {
-    setHasSelectedCharacter(true);
+  const toggleMainCharacterSelection = (id: string) => {
+    setSelectedMainCharacters(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
-  const canStart = hasSelectedCharacter && coins >= storyCost;
+  const toggleSideCharacterSelection = (id: string) => {
+    setSelectedSideCharacters(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const canStart = selectedMainCharacters.length > 0 && coins >= storyCost;
 
   const handleStart = () => {
     if (canStart) {
-      router.push('/story/mode-selection');
+      router.push({
+        pathname: '/story/mode-selection',
+        params: {
+          mainCharacters: JSON.stringify(selectedMainCharacters),
+          sideCharacters: JSON.stringify(selectedSideCharacters)
+        }
+      });
     }
   };
 
@@ -229,36 +261,44 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.charactersContainer}>
-              {characters.map((c: any) => (
-                <TouchableOpacity
-                  key={c.id || c._id}
-                  style={styles.characterCard}
-                  onPress={handleSelectCharacter}
-                >
-                  <View style={styles.avatarContainer}>
-                    <View style={styles.characterAvatar}>
-                      <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
-                        {renderCharacterHair(c)}
-                        <View style={styles.characterEyesRow}>
-                          <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                          <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+              {mainCharacters.map((c: any) => {
+                const isSelected = selectedMainCharacters.includes(c.id || c._id);
+                return (
+                  <TouchableOpacity
+                    key={c.id || c._id}
+                    style={[styles.characterCard, isSelected && styles.selectedCharacterCard]}
+                    onPress={() => toggleMainCharacterSelection(c.id || c._id)}
+                  >
+                    <View style={styles.avatarContainer}>
+                      <View style={styles.characterAvatar}>
+                        <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
+                          {renderCharacterHair(c)}
+                          <View style={styles.characterEyesRow}>
+                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                          </View>
+                          <View style={styles.characterMouth} />
                         </View>
-                        <View style={styles.characterMouth} />
                       </View>
+                      <TouchableOpacity 
+                        style={styles.cardEditButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleEditCharacter(c);
+                        }}
+                      >
+                        <Ionicons name="pencil" size={14} color="#FFFFFF" />
+                      </TouchableOpacity>
+                      {isSelected && (
+                        <View style={styles.selectedBadge}>
+                          <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                        </View>
+                      )}
                     </View>
-                    <TouchableOpacity 
-                      style={styles.cardEditButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleEditCharacter(c);
-                      }}
-                    >
-                      <Ionicons name="pencil" size={14} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.characterName}>{c.name}</Text>
-                </TouchableOpacity>
-              ))}
+                    <Text style={[styles.characterName, isSelected && styles.selectedCharacterName]}>{c.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
               
               <TouchableOpacity
                 style={styles.addCharacterButton}
@@ -272,12 +312,57 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Select side characters:</Text>
             
-            <TouchableOpacity
-              style={styles.addSideCharacterButton}
-              onPress={handleAddMainCharacter}
-            >
-              <Ionicons name="add" size={24} color="#81C784" />
-            </TouchableOpacity>
+            <View style={styles.charactersContainer}>
+              {sideCharacters.map((c: any) => {
+                const isSelected = selectedSideCharacters.includes(c.id || c._id);
+                const isStoryCharacter = storyCharacters.some(sc => (sc.id || sc._id) === (c.id || c._id));
+                
+                return (
+                  <TouchableOpacity
+                    key={c.id || c._id}
+                    style={[styles.characterCard, isSelected && styles.selectedCharacterCard]}
+                    onPress={() => toggleSideCharacterSelection(c.id || c._id)}
+                  >
+                    <View style={styles.avatarContainer}>
+                      <View style={styles.characterAvatar}>
+                        <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
+                          {renderCharacterHair(c)}
+                          <View style={styles.characterEyesRow}>
+                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                          </View>
+                          <View style={styles.characterMouth} />
+                        </View>
+                      </View>
+                      {!isStoryCharacter && (
+                        <TouchableOpacity 
+                          style={styles.cardEditButton}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleEditCharacter(c);
+                          }}
+                        >
+                          <Ionicons name="pencil" size={14} color="#FFFFFF" />
+                        </TouchableOpacity>
+                      )}
+                      {isSelected && (
+                        <View style={styles.selectedBadge}>
+                          <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.characterName, isSelected && styles.selectedCharacterName]}>{c.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+              
+              <TouchableOpacity
+                style={styles.addSideCharacterButton}
+                onPress={handleAddSideCharacter}
+              >
+                <Ionicons name="add" size={24} color="#81C784" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.bottomSpacing} />
@@ -296,7 +381,7 @@ export default function HomeScreen() {
           <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>{storyCost} Start</Text>
         </TouchableOpacity>
         
-        {hasSelectedCharacter && coins < storyCost && (
+        {selectedMainCharacters.length > 0 && coins < storyCost && (
           <Text style={styles.insufficientCoinsText}>Required: {storyCost} coins</Text>
         )}
       </View>
@@ -566,6 +651,14 @@ const styles = StyleSheet.create({
   characterCard: {
     alignItems: 'center',
     gap: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 20,
+    padding: 4,
+  },
+  selectedCharacterCard: {
+    borderColor: '#81C784',
+    backgroundColor: 'rgba(129, 199, 132, 0.1)',
   },
   avatarContainer: {
     width: 120,
@@ -574,6 +667,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#81C784',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center', 
+    borderWidth: 2,
+    borderColor: '#0A1929', 
+    zIndex: 11,
   },
   cardEditButton: {
     position: 'absolute',
@@ -589,7 +697,7 @@ const styles = StyleSheet.create({
   },
   characterAvatar: {
     width: 80,
-    height: 80,
+    height: 80, 
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -599,6 +707,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 5, // Scaled down from 10
     elevation: 3, // Scaled down
+    overflow: 'hidden',
   },
   characterFace: {
     width: 60,
@@ -616,7 +725,11 @@ const styles = StyleSheet.create({
   characterName: {
     fontSize: 16,
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '600', 
+  },
+  selectedCharacterName: {
+    color: '#81C784', 
+    fontWeight: 'bold',
   },
   addCharacterButton: {
     width: 120,
