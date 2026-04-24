@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
+import { authService } from '../src/services/authService';
+import * as SecureStore from 'expo-secure-store';
 
-const { width, height } = Dimensions.get('window');
+const ONBOARDING_KEY = 'onboarding_completed';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -10,7 +12,6 @@ export default function IndexPage() {
   const scaleAnim = new Animated.Value(0.8);
 
   useEffect(() => {
-    // Animation for logo
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -24,23 +25,33 @@ export default function IndexPage() {
       }),
     ]).start();
 
-    // Navigate to onboarding after 2 seconds
-    const timer = setTimeout(() => {
-      router.replace('/onboarding');
-    }, 2000);
+    const bootstrap = async () => {
+      const isAuthenticated = await authService.isAuthenticated();
+      if (isAuthenticated) {
+        router.replace('/(tabs)/home');
+        return;
+      }
+      const onboardingDone = await SecureStore.getItemAsync(ONBOARDING_KEY);
+      if (onboardingDone) {
+        router.replace('/auth/login');
+      } else {
+        router.replace('/onboarding');
+      }
+    };
 
+    const timer = setTimeout(bootstrap, 2000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <View style={styles.container}>
-      <Animated.View 
+      <Animated.View
         style={[
           styles.logoContainer,
           {
             opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }]
-          }
+            transform: [{ scale: scaleAnim }],
+          },
         ]}
       >
         <View style={styles.logo}>
@@ -54,7 +65,7 @@ export default function IndexPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2D1B3D',
+    backgroundColor: '#0A1929',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -65,11 +76,11 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FF6B35',
+    borderColor: '#4CAF50',
   },
   logoText: {
     fontSize: 60,

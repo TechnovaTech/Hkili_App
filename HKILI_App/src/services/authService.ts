@@ -90,9 +90,12 @@ class AuthService {
   async isAuthenticated(): Promise<boolean> {
     try {
       const tokens = await tokenStorage.get();
-      if (!tokens) return false;
-      return tokens.expiresAt > Date.now();
-    } catch (error) {
+      if (!tokens?.accessToken) return false;
+      // Consider authenticated if access token is valid OR refresh token exists
+      // (apiClient interceptor will auto-refresh on 401)
+      if (tokens.expiresAt > Date.now()) return true;
+      return !!tokens.refreshToken;
+    } catch {
       return false;
     }
   }

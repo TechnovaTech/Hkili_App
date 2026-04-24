@@ -8,6 +8,9 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+
+const ONBOARDING_KEY = 'onboarding_completed';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,7 +50,7 @@ export default function OnboardingScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const router = useRouter();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < onboardingData.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
@@ -56,11 +59,13 @@ export default function OnboardingScreen() {
         animated: true,
       });
     } else {
+      await SecureStore.setItemAsync(ONBOARDING_KEY, 'true');
       router.replace('/auth/login');
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    await SecureStore.setItemAsync(ONBOARDING_KEY, 'true');
     router.replace('/auth/login');
   };
 
