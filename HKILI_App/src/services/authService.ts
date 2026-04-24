@@ -43,7 +43,7 @@ class AuthService {
     const response = await apiClient.post<AuthResponse>('/auth/google', { idToken });
     
     if (response.success && response.data) {
-      await this.storeTokens(response.data.tokens);
+      await tokenStorage.set(response.data.tokens);
     }
     
     return response;
@@ -53,7 +53,7 @@ class AuthService {
     const response = await apiClient.post<AuthResponse>('/auth/apple', { identityToken });
     
     if (response.success && response.data) {
-      await this.storeTokens(response.data.tokens);
+      await tokenStorage.set(response.data.tokens);
     }
     
     return response;

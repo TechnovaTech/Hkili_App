@@ -34,7 +34,7 @@ export default function LoginScreen() {
       
       if (response.success) {
         // Navigate to home page after successful login
-        router.replace('/home');
+        router.replace('/(tabs)/home');
       } else {
         setError(response.error || 'Invalid credentials');
       }

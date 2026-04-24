@@ -106,12 +106,12 @@ export default function AddCharacterScreen() {
       
       // Always redirect regardless of API response for now
       console.log('Redirecting to home...');
-      router.push('/home');
+      router.push('/(tabs)/home');
       
     } catch (error: any) {
       console.error('Character save error:', error);
       // Still redirect even on error
-      router.push('/home');
+      router.push('/(tabs)/home');
     } finally {
       setLoading(false);
     }
