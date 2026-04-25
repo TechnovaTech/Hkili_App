@@ -25,10 +25,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
     
-    let query = {}
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type') // 'main' | 'side' | null = all
+
+    let query: any = {}
     if (decoded.role !== 'admin') {
-      query = { userId: decoded.userId }
+      query.userId = decoded.userId
     }
+    if (type === 'main') query.isMainCharacter = true
+    if (type === 'side') query.isMainCharacter = false
 
     const characters = await Character.find(query)
       .sort({ createdAt: -1 })
