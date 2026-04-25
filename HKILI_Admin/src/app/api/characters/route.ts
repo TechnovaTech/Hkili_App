@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     if (decoded.role !== 'admin') {
       query.userId = decoded.userId
     }
-    if (type === 'main') query.isMainCharacter = true
+    if (type === 'main') query.isMainCharacter = { $ne: false }
     if (type === 'side') query.isMainCharacter = false
 
     const characters = await Character.find(query)

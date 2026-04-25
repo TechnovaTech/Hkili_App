@@ -285,11 +285,11 @@ export default function CharactersManagement() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        character.isMainCharacter
+                        character.isMainCharacter !== false
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'bg-purple-50 text-purple-700 border border-purple-200'
                       }`}>
-                        {character.isMainCharacter ? '⭐ Main' : '🎭 Side'}
+                        {character.isMainCharacter !== false ? '⭐ Main' : '🎭 Side'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
