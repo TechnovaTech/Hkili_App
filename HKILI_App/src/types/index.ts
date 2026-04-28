@@ -34,7 +34,6 @@ export interface Story {
   image1?: string;
   image2?: string;
   image3?: string;
-  image4?: string;
   video1?: string;
   video2?: string;
   video3?: string;

@@ -224,14 +224,12 @@ export default function StoryViewerScreen() {
   const video2Source = story.video2 ? getImageUrl(story.video2) : null;
   const video3Source = story.video3 ? getImageUrl(story.video3) : null;
 
-  // AI generated images
+  // AI generated images (3: start, middle, end)
   const storyImages = [
     story.image1 ? { uri: story.image1 } : null,
     story.image2 ? { uri: story.image2 } : null,
     story.image3 ? { uri: story.image3 } : null,
-    story.image4 ? { uri: story.image4 } : null,
   ];
-  const hasImages = storyImages.some(img => img !== null);
 
   // Pre-process content to ensure we have multiple segments if possible
   let contentSegments = story.content || [];
@@ -250,11 +248,11 @@ export default function StoryViewerScreen() {
     }
   }
 
-  // Split content into 3 parts for 4 image placements: start / after-1st-third / after-2nd-third / end
-  const third = Math.ceil(contentSegments.length / 3);
-  const part1 = contentSegments.slice(0, third);
-  const part2 = contentSegments.slice(third, third * 2);
-  const part3 = contentSegments.slice(third * 2);
+  // Split content into 2 halves for 3 image placements: start / middle / end
+  const half = Math.ceil(contentSegments.length / 2);
+  const part1 = contentSegments.slice(0, half);
+  const part2 = contentSegments.slice(half);
+  const part3: any[] = [];
 
   const handleVideoPlay = async () => {
     if (isPlaying && sound) {
@@ -316,7 +314,7 @@ export default function StoryViewerScreen() {
           ))}
         </View>
 
-        {/* Image 2 — After first third */}
+        {/* Image 2 — Middle */}
         {renderStoryImage(storyImages[1])}
 
         {/* Video 2 (Middle) */}
@@ -329,21 +327,11 @@ export default function StoryViewerScreen() {
           ))}
         </View>
 
-        {/* Image 3 — After second third */}
-        {renderStoryImage(storyImages[2])}
-
         {/* Video 3 (Last) */}
         {renderVideo(video3Source, 'Video 3')}
 
-        {/* Story Text — Part 3 */}
-        <View style={styles.textWrapper}>
-          {part3.map((segment: any, index: number) => (
-            <Text key={`p3-${index}`} style={styles.storyText}>{segment.text}</Text>
-          ))}
-        </View>
-
-        {/* Image 4 — End */}
-        {renderStoryImage(storyImages[3])}
+        {/* Image 3 — End */}
+        {renderStoryImage(storyImages[2])}
 
         {/* Spacer for bottom player */}
         <View style={{ height: 100 }} />

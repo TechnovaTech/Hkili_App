@@ -16,6 +16,9 @@ interface Story {
   categoryId?: Category | string
   createdAt: string
   language: string
+  image1?: string
+  image2?: string
+  image3?: string
   video1?: string
   video2?: string
   video3?: string
@@ -36,23 +39,18 @@ export default function StoriesManagement() {
   // Modal & Form State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [editingStory, setEditingStory] = useState<Story | null>(null)
-  const [uploadingState, setUploadingState] = useState<{
-    video1: boolean;
-    video2: boolean;
-    video3: boolean;
-  }>({
-    video1: false,
-    video2: false,
-    video3: false
-  })
+  const [uploadingState, setUploadingState] = useState<Record<string, boolean>>({})
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     language: 'EN',
     categoryId: '',
+    image1: '',
+    image2: '',
+    image3: '',
     video1: '',
     video2: '',
-    video3: ''
+    video3: '',
   })
 
   const router = useRouter()
@@ -117,45 +115,31 @@ export default function StoriesManagement() {
     }
   }
 
-  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'video1' | 'video2' | 'video3') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string, type: 'image' | 'video') => {
     const file = e.target.files?.[0]
     if (!file) return
-
     setUploadingState(prev => ({ ...prev, [field]: true }))
-
     try {
-      // 1. Get signature
       const signRes = await fetch('/api/cloudinary-sign')
       if (!signRes.ok) throw new Error('Failed to get upload signature')
       const signData = await signRes.json()
-
-      // 2. Prepare Cloudinary Upload
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
       uploadFormData.append('api_key', signData.apiKey)
       uploadFormData.append('timestamp', signData.timestamp.toString())
       uploadFormData.append('signature', signData.signature)
       uploadFormData.append('folder', signData.folder)
-
-      // 3. Upload to Cloudinary (auto resource type)
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`
-      
-      const res = await fetch(cloudinaryUrl, {
-        method: 'POST',
-        body: uploadFormData,
-      })
-
+      const res = await fetch(cloudinaryUrl, { method: 'POST', body: uploadFormData })
       if (res.ok) {
         const data = await res.json()
         setFormData(prev => ({ ...prev, [field]: data.secure_url }))
       } else {
         const err = await res.json()
-        console.error('Cloudinary error:', err)
-        alert('Failed to upload video: ' + (err.error?.message || 'Unknown error'))
+        alert('Upload failed: ' + (err.error?.message || 'Unknown error'))
       }
     } catch (error) {
-      console.error('Error uploading video:', error)
-      alert('Error uploading video')
+      alert('Error uploading file')
     } finally {
       setUploadingState(prev => ({ ...prev, [field]: false }))
     }
@@ -169,9 +153,12 @@ export default function StoriesManagement() {
         content: story.content,
         language: story.language,
         categoryId: typeof story.categoryId === 'object' ? story.categoryId._id : (story.categoryId || ''),
+        image1: story.image1 || '',
+        image2: story.image2 || '',
+        image3: story.image3 || '',
         video1: story.video1 || '',
         video2: story.video2 || '',
-        video3: story.video3 || ''
+        video3: story.video3 || '',
       })
     } else {
       setEditingStory(null)
@@ -180,9 +167,12 @@ export default function StoriesManagement() {
         content: '',
         language: 'EN',
         categoryId: '',
+        image1: '',
+        image2: '',
+        image3: '',
         video1: '',
         video2: '',
-        video3: ''
+        video3: '',
       })
     }
     setIsFormModalOpen(true)
@@ -428,35 +418,63 @@ export default function StoriesManagement() {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {(['video1', 'video2', 'video3'] as const).map((field, index) => (
-                      <div key={field}>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Video {index + 1}</label>
-                        <div className="flex flex-col space-y-2">
-                          {formData[field] && (
-                            <div className="w-full aspect-video relative rounded-lg overflow-hidden border border-gray-200 bg-black">
-                               <video 
-                                 src={formData[field]} 
-                                 className="w-full h-full object-contain" 
-                                 controls
-                               />
+                  {/* Story Images */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Story Images</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['image1', 'image2', 'image3'] as const).map((field, index) => (
+                        <div key={field} className="flex flex-col gap-2">
+                          <span className="text-xs text-gray-500 font-medium">
+                            {index === 0 ? 'Start' : index === 1 ? 'Middle' : 'End'}
+                          </span>
+                          {formData[field] ? (
+                            <div className="relative group">
+                              <img
+                                src={formData[field]}
+                                alt={`Story image ${index + 1}`}
+                                className="w-full aspect-square object-cover rounded-lg border border-gray-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, [field]: '' }))}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >×</button>
+                            </div>
+                          ) : (
+                            <div className="w-full aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                              <span className="text-gray-400 text-xs">No image</span>
                             </div>
                           )}
-                          <label className={`cursor-pointer bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors text-center ${uploadingState[field] ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            <span className="text-sm text-gray-600">
-                              {uploadingState[field] ? 'Uploading...' : (formData[field] ? 'Change Video' : 'Upload Video')}
-                            </span>
-                            <input
-                              type="file"
-                              accept="video/*"
-                              className="hidden"
-                              onChange={(e) => handleVideoUpload(e, field)}
-                              disabled={uploadingState[field]}
-                            />
+                          <label className={`cursor-pointer text-center text-xs px-2 py-1.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors ${uploadingState[field] ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {uploadingState[field] ? 'Uploading...' : formData[field] ? 'Change' : 'Upload'}
+                            <input type="file" accept="image/*" className="hidden"
+                              onChange={(e) => handleFileUpload(e, field, 'image')}
+                              disabled={!!uploadingState[field]} />
                           </label>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Videos */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Videos (optional)</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['video1', 'video2', 'video3'] as const).map((field, index) => (
+                        <div key={field} className="flex flex-col gap-2">
+                          <span className="text-xs text-gray-500 font-medium">Video {index + 1}</span>
+                          {formData[field] && (
+                            <video src={formData[field]} className="w-full aspect-video rounded-lg border border-gray-200 bg-black" controls />
+                          )}
+                          <label className={`cursor-pointer text-center text-xs px-2 py-1.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors ${uploadingState[field] ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {uploadingState[field] ? 'Uploading...' : formData[field] ? 'Change' : 'Upload'}
+                            <input type="file" accept="video/*" className="hidden"
+                              onChange={(e) => handleFileUpload(e, field, 'video')}
+                              disabled={!!uploadingState[field]} />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div>

@@ -125,12 +125,11 @@ export async function POST(request: NextRequest) {
     const storyTitle = parsedResult.title || 'Untitled AI Story';
     const storyContent = parsedResult.content || '';
 
-    // Generate 4 story-relevant images in parallel using DALL-E
+    // Generate 3 story-relevant images in parallel using DALL-E
     const imagePrompts = [
-      `Children's storybook illustration, beginning scene: ${storyTitle}. Characters: ${mainCharacterNames.join(', ')}. Setting: ${place || 'magical land'}. Colorful, warm, friendly art style.`,
-      `Children's storybook illustration, early adventure scene from "${storyTitle}". Characters exploring ${place || 'magical land'}. Vibrant, detailed, whimsical art style.`,
-      `Children's storybook illustration, exciting middle scene from "${storyTitle}". Characters facing a challenge. Colorful, expressive, storybook art style.`,
-      `Children's storybook illustration, heartwarming ending scene from "${storyTitle}". Characters happy, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style.`,
+      `Children's storybook illustration, opening scene: ${storyTitle}. Characters: ${mainCharacterNames.join(', ')}. Setting: ${place || 'magical land'}. Colorful, warm, friendly art style.`,
+      `Children's storybook illustration, middle scene from "${storyTitle}". Characters facing a challenge in ${place || 'magical land'}. Vibrant, expressive, whimsical art style.`,
+      `Children's storybook illustration, heartwarming ending from "${storyTitle}". Characters happy, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style.`,
     ];
 
     const imageResults = await Promise.allSettled(
@@ -145,7 +144,7 @@ export async function POST(request: NextRequest) {
       )
     );
 
-    const [img1, img2, img3, img4] = imageResults.map(r =>
+    const [img1, img2, img3] = imageResults.map(r =>
       r.status === 'fulfilled' ? (r.value.data?.[0]?.url ?? null) : null
     );
 
@@ -164,7 +163,6 @@ export async function POST(request: NextRequest) {
       image1: img1,
       image2: img2,
       image3: img3,
-      image4: img4,
       createdAt: new Date(),
     });
 
