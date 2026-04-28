@@ -29,7 +29,7 @@ export default function AdminSidebar() {
     { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/admin/users', label: 'Users', icon: '👥' },
     { path: '/admin/stories', label: 'Stories', icon: '📚' },
-    { path: '/admin/ai-generator', label: 'AI Generator', icon: '🤖' },
+    //{ path: '/admin/ai-generator', label: 'AI Generator', icon: '🤖' },
     { path: '/admin/characters', label: 'Characters', icon: '👤' },
     //{ path: '/admin/story-characters', label: 'Story Characters', icon: '🎭' },
     { path: '/admin/categories', label: 'Categories', icon: '📁' },
