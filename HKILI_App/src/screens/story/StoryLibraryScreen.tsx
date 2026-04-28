@@ -42,9 +42,12 @@ export default function StoryLibraryScreen() {
       const response = await storyService.getLibraryStories();
       if (response.success && response.data) {
         setStories(response.data);
+      } else {
+        setStories([]);
       }
     } catch (error) {
       console.error('Error fetching library:', error);
+      setStories([]);
     } finally {
       setLoading(false);
     }
@@ -105,7 +108,7 @@ export default function StoryLibraryScreen() {
         <FlatList
           data={stories}
           renderItem={renderStoryItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id || (item as any)._id || Math.random().toString()}
           contentContainerStyle={[styles.storiesList, { paddingBottom: listBottomPadding }]}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

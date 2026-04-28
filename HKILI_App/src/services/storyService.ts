@@ -113,19 +113,38 @@ class StoryService {
   }
 
   async getLibraryStories(): Promise<ApiResponse<Story[]>> {
-    const response = await apiClient.get<any>('/user-stories');
-    
-    if (response && (response as any).success && Array.isArray((response as any).data)) {
+    try {
+      const response = await apiClient.get<any>('/user-stories');
+
+      // Handle wrapped response { success, data }
+      if (response && (response as any).success && Array.isArray((response as any).data)) {
         const stories = (response as any).data.map((story: any) => ({
-            ...story,
-            id: story._id || story.id,
-            content: typeof story.content === 'string' 
-              ? this.parseContent(story.content) 
-              : (story.content || [])
+          ...story,
+          id: story._id || story.id,
+          content: typeof story.content === 'string'
+            ? this.parseContent(story.content)
+            : (story.content || [])
         }));
         return { success: true, data: stories };
+      }
+
+      // Handle raw array response
+      if (Array.isArray(response)) {
+        const stories = response.map((story: any) => ({
+          ...story,
+          id: story._id || story.id,
+          content: typeof story.content === 'string'
+            ? this.parseContent(story.content)
+            : (story.content || [])
+        }));
+        return { success: true, data: stories };
+      }
+
+      return { success: true, data: [] };
+    } catch (error) {
+      console.error('Error fetching library:', error);
+      return { success: false, error: 'Failed to fetch library' };
     }
-    return response as any;
   }
 }
 

@@ -37,14 +37,22 @@ export async function GET(request: NextRequest) {
     // Or just return the populated list.
     // The app likely expects a list of Stories.
     const stories = userStories
-      .filter(us => us.storyId) // Filter out any null stories (deleted ones)
-      .map(us => ({
-        ...us.storyId.toObject(),
-        libraryId: us._id, // Reference to the library entry
-        savedAt: us.savedAt,
-        isFavorite: us.isFavorite,
-        lastReadAt: us.lastReadAt
-      }));
+      .filter(us => us.storyId != null)
+      .map(us => {
+        try {
+          return {
+            ...us.storyId.toObject(),
+            id: us.storyId._id?.toString() || us.storyId.toString(),
+            libraryId: us._id,
+            savedAt: us.savedAt,
+            isFavorite: us.isFavorite,
+            lastReadAt: us.lastReadAt,
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
     return NextResponse.json({ success: true, data: stories });
   } catch (error) {

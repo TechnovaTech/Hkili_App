@@ -40,8 +40,13 @@ export default function StoryGenerationScreen() {
 
   useEffect(() => {
     if (status === 'done' && generatedStoryId.current) {
-      storyService.addToLibrary(generatedStoryId.current).catch(() => {});
-      router.replace({ pathname: '/story/viewer', params: { storyId: generatedStoryId.current } });
+      const storyId = generatedStoryId.current;
+      // Await addToLibrary before navigating so the story is guaranteed in the library
+      storyService.addToLibrary(storyId)
+        .catch(() => {})
+        .finally(() => {
+          router.replace({ pathname: '/story/viewer', params: { storyId } });
+        });
     }
   }, [status]);
 
