@@ -19,9 +19,6 @@ interface Story {
   image1?: string
   image2?: string
   image3?: string
-  video1?: string
-  video2?: string
-  video3?: string
   prompt?: string
   place?: string
   moral?: string
@@ -48,9 +45,6 @@ export default function StoriesManagement() {
     image1: '',
     image2: '',
     image3: '',
-    video1: '',
-    video2: '',
-    video3: '',
   })
 
   const router = useRouter()
@@ -156,9 +150,6 @@ export default function StoriesManagement() {
         image1: story.image1 || '',
         image2: story.image2 || '',
         image3: story.image3 || '',
-        video1: story.video1 || '',
-        video2: story.video2 || '',
-        video3: story.video3 || '',
       })
     } else {
       setEditingStory(null)
@@ -170,9 +161,6 @@ export default function StoriesManagement() {
         image1: '',
         image2: '',
         image3: '',
-        video1: '',
-        video2: '',
-        video3: '',
       })
     }
     setIsFormModalOpen(true)
@@ -456,26 +444,6 @@ export default function StoriesManagement() {
                     </div>
                   </div>
 
-                  {/* Videos */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Videos (optional)</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {(['video1', 'video2', 'video3'] as const).map((field, index) => (
-                        <div key={field} className="flex flex-col gap-2">
-                          <span className="text-xs text-gray-500 font-medium">Video {index + 1}</span>
-                          {formData[field] && (
-                            <video src={formData[field]} className="w-full aspect-video rounded-lg border border-gray-200 bg-black" controls />
-                          )}
-                          <label className={`cursor-pointer text-center text-xs px-2 py-1.5 rounded border border-gray-300 hover:bg-gray-50 transition-colors ${uploadingState[field] ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            {uploadingState[field] ? 'Uploading...' : formData[field] ? 'Change' : 'Upload'}
-                            <input type="file" accept="video/*" className="hidden"
-                              onChange={(e) => handleFileUpload(e, field, 'video')}
-                              disabled={!!uploadingState[field]} />
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
