@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { storyService } from '@/services/storyService';
 import { authService } from '@/services/authService';
 import { Story } from '@/types';
@@ -17,9 +18,12 @@ import { theme } from '@/theme';
 
 export default function StoryLibraryScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [coins, setCoins] = useState(0);
+  // navbar: paddingVertical(24) + icon(24) + gap(4) + text(16) = 68px + safe area bottom
+  const listBottomPadding = 68 + insets.bottom + 16;
 
   const fetchUserCoins = async () => {
     try {
@@ -102,7 +106,7 @@ export default function StoryLibraryScreen() {
           data={stories}
           renderItem={renderStoryItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.storiesList}
+          contentContainerStyle={[styles.storiesList, { paddingBottom: listBottomPadding }]}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
@@ -161,7 +165,11 @@ const styles = StyleSheet.create({
   storiesList: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 100,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   storyCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

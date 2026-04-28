@@ -50,11 +50,11 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   bottomNavbar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#0A1929',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
     position: 'absolute',
     bottom: 0,
     left: 0,
