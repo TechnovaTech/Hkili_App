@@ -44,10 +44,10 @@ export default function ModeSelectionScreen() {
   const handleModeSelect = async (modeId: string) => {
     await playClickSound();
     router.push({
-      pathname: '/story/mode-character-selection',
+      pathname: '/story/story-place-selection',
       params: { 
         ...params,
-        mode: modeId 
+        categoryId: modeId 
       }
     });
   };

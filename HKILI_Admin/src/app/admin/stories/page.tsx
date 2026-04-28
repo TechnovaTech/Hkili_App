@@ -27,6 +27,11 @@ interface Story {
   video1?: string
   video2?: string
   video3?: string
+  prompt?: string
+  place?: string
+  moral?: string
+  mainCharacters?: string[]
+  sideCharacters?: string[]
 }
 
 export default function StoriesManagement() {
@@ -373,6 +378,20 @@ export default function StoriesManagement() {
                         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-3">
                           {story.content}
                         </p>
+                        {story.prompt && (
+                          <details className="mb-3">
+                            <summary className="text-xs font-semibold text-blue-600 cursor-pointer select-none">View AI Prompt</summary>
+                            <pre className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded text-xs text-gray-700 whitespace-pre-wrap break-words">{story.prompt}</pre>
+                          </details>
+                        )}
+                        {(story.place || story.moral || (story.mainCharacters && story.mainCharacters.length > 0)) && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {story.place && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">📍 {story.place}</span>}
+                            {story.moral && <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded">💡 {story.moral}</span>}
+                            {story.mainCharacters && story.mainCharacters.length > 0 && <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">👤 {story.mainCharacters.join(', ')}</span>}
+                            {story.sideCharacters && story.sideCharacters.length > 0 && <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">👥 {story.sideCharacters.join(', ')}</span>}
+                          </div>
+                        )}
                         <div className="flex items-center text-xs text-gray-500">
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

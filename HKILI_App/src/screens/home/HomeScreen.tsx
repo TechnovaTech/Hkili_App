@@ -119,8 +119,8 @@ export default function HomeScreen() {
       router.push({
         pathname: '/story/mode-selection',
         params: {
-          mainCharacters: JSON.stringify(selectedMainCharacters),
-          sideCharacters: JSON.stringify(selectedSideCharacters)
+          mainCharacterIds: JSON.stringify(selectedMainCharacters),
+          sideCharacterIds: JSON.stringify(selectedSideCharacters),
         }
       });
     }
