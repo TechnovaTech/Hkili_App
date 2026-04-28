@@ -17,6 +17,7 @@ import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
 
+
 export default function StoryViewerScreen() {
   const router = useRouter();
   const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
@@ -27,10 +28,12 @@ export default function StoryViewerScreen() {
 
   // TTS player state
   const [isPlaying, setIsPlaying] = useState(false);
-  const [elapsed, setElapsed] = useState(0);       // seconds elapsed
-  const [totalDuration, setTotalDuration] = useState(0); // estimated total seconds
+  const [elapsed, setElapsed] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fullTextRef = useRef('');
+  const pausedAtRef = useRef(0); // tracks word index where we paused
+
 
   useEffect(() => {
     if (storyData) {
@@ -81,16 +84,16 @@ export default function StoryViewerScreen() {
     }
   }, [story]);
 
-  const startTimer = () => {
+  const startTimer = (fromSeconds = 0) => {
     if (timerRef.current) clearInterval(timerRef.current);
+    let current = fromSeconds;
     timerRef.current = setInterval(() => {
-      setElapsed(prev => {
-        if (prev >= totalDuration) {
-          clearInterval(timerRef.current!);
-          return totalDuration;
-        }
-        return prev + 1;
-      });
+      current += 1;
+      setElapsed(current);
+      if (current >= totalDuration) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+      }
     }, 1000);
   };
 
@@ -101,41 +104,38 @@ export default function StoryViewerScreen() {
     }
   };
 
+  // Speak from a given elapsed-seconds offset by skipping already-read words
+  const speakFrom = (fromSeconds: number) => {
+    const fullText = fullTextRef.current;
+    if (!fullText) return;
+    const words = fullText.split(/\s+/);
+    const wps = (0.9 * 130) / 60;
+    const skipWords = Math.floor(fromSeconds * wps);
+    const remainingText = words.slice(Math.min(skipWords, words.length - 1)).join(' ');
+    Speech.speak(remainingText, {
+      language: 'en-US',
+      rate: 0.9,
+      pitch: 1.0,
+      onDone: () => { setIsPlaying(false); setElapsed(totalDuration); pausedAtRef.current = 0; stopTimer(); },
+      onStopped: () => { setIsPlaying(false); stopTimer(); },
+      onError: () => { setIsPlaying(false); stopTimer(); },
+    });
+  };
+
   const handlePlay = async () => {
     if (isPlaying) {
-      // Pause
+      pausedAtRef.current = elapsed;
       await Speech.stop();
       stopTimer();
       setIsPlaying(false);
     } else {
-      // Play from beginning or resume (expo-speech doesn't support resume, restart from beginning)
-      const text = fullTextRef.current;
-      if (!text) return;
-
-      setElapsed(0);
+      const from = pausedAtRef.current;
       setIsPlaying(true);
-      startTimer();
-
-      Speech.speak(text, {
-        language: 'en-US',
-        rate: 0.9,
-        pitch: 1.0,
-        onDone: () => {
-          setIsPlaying(false);
-          setElapsed(totalDuration);
-          stopTimer();
-        },
-        onStopped: () => {
-          setIsPlaying(false);
-          stopTimer();
-        },
-        onError: () => {
-          setIsPlaying(false);
-          stopTimer();
-        },
-      });
+      startTimer(from);
+      speakFrom(from);
     }
   };
+
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -237,37 +237,32 @@ export default function StoryViewerScreen() {
 
       {/* Bottom Player — always visible */}
       <View style={styles.player}>
-        {/* Progress bar */}
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-        </View>
-
-        {/* Time labels */}
-        <View style={styles.timeRow}>
+        {/* Progress bar with times on each side */}
+        <View style={styles.progressRow}>
           <Text style={styles.timeText}>{formatTime(elapsed)}</Text>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+          </View>
           <Text style={styles.timeText}>{formatTime(totalDuration)}</Text>
         </View>
 
-        {/* Controls */}
+        {/* Controls row: play button centered, voice button at right corner */}
         <View style={styles.controls}>
-          <TouchableOpacity
-            onPress={handlePlay}
-            style={styles.playBtn}
-            activeOpacity={0.8}
-          >
+          <View style={{ width: 52 }} />
+
+          <TouchableOpacity onPress={handlePlay} style={styles.playBtn} activeOpacity={0.8}>
             <Ionicons
               name={isPlaying ? 'pause' : 'play'}
-              size={32}
+              size={28}
               color="#FFFFFF"
               style={{ marginLeft: isPlaying ? 0 : 3 }}
             />
           </TouchableOpacity>
-        </View>
 
-        {isPlaying && (
-          <Text style={styles.speakingLabel}>🔊 Reading story aloud...</Text>
-        )}
+          <View style={{ width: 52 }} />
+        </View>
       </View>
+
     </View>
   );
 }
@@ -323,59 +318,53 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: Platform.OS === 'ios' ? 32 : 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 12,
+    backgroundColor: '#0A1929',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: Platform.OS === 'ios' ? 32 : 18,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 14,
   },
   progressTrack: {
+    flex: 1,
     height: 4,
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 2,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#4CAF50',
     borderRadius: 2,
   },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  timeText: { fontSize: 12, color: theme.colors.textMuted },
+  timeText: { fontSize: 12, color: '#888888', width: 36, textAlign: 'center' },
   controls: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 24,
   },
+
   playBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: theme.colors.primary,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  speakingLabel: {
-    textAlign: 'center',
-    color: theme.colors.primary,
-    fontSize: 12,
-    marginTop: 10,
-  },
+
   errorText: { color: theme.colors.text, fontSize: 18, marginBottom: 20 },
   backBtn: {
     backgroundColor: theme.colors.primary,
