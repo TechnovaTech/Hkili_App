@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     );
 
     const [img1, img2, img3, img4] = imageResults.map(r =>
-      r.status === 'fulfilled' ? r.value.data[0]?.url || null : null
+      r.status === 'fulfilled' ? (r.value.data?.[0]?.url ?? null) : null
     );
 
     const newStory = await Story.create({
