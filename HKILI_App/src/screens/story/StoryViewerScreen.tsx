@@ -224,6 +224,15 @@ export default function StoryViewerScreen() {
   const video2Source = story.video2 ? getImageUrl(story.video2) : null;
   const video3Source = story.video3 ? getImageUrl(story.video3) : null;
 
+  // AI generated images
+  const storyImages = [
+    story.image1 ? { uri: story.image1 } : null,
+    story.image2 ? { uri: story.image2 } : null,
+    story.image3 ? { uri: story.image3 } : null,
+    story.image4 ? { uri: story.image4 } : null,
+  ];
+  const hasImages = storyImages.some(img => img !== null);
+
   // Pre-process content to ensure we have multiple segments if possible
   let contentSegments = story.content || [];
   
@@ -241,11 +250,11 @@ export default function StoryViewerScreen() {
     }
   }
 
-  // Split content for middle video
-  // const contentSegments = story.content || []; // Removed duplicate declaration
-  const middleIndex = Math.ceil(contentSegments.length / 2);
-  const firstHalf = contentSegments.slice(0, middleIndex);
-  const secondHalf = contentSegments.slice(middleIndex);
+  // Split content into 3 parts for 4 image placements: start / after-1st-third / after-2nd-third / end
+  const third = Math.ceil(contentSegments.length / 3);
+  const part1 = contentSegments.slice(0, third);
+  const part2 = contentSegments.slice(third, third * 2);
+  const part3 = contentSegments.slice(third * 2);
 
   const handleVideoPlay = async () => {
     if (isPlaying && sound) {
@@ -256,6 +265,15 @@ export default function StoryViewerScreen() {
   const renderVideo = (source: { uri: string } | null, label: string) => {
     if (!source) return null;
     return <StoryVideo source={source} onPlay={handleVideoPlay} />;
+  };
+
+  const renderStoryImage = (source: { uri: string } | null) => {
+    if (!source) return null;
+    return (
+      <View style={styles.storyImageContainer}>
+        <Image source={source} style={styles.storyImageFull} resizeMode="cover" />
+      </View>
+    );
   };
 
   return (
@@ -282,36 +300,51 @@ export default function StoryViewerScreen() {
         {/* Story Title */}
         <Text style={styles.storyTitle}>{story.title}</Text>
 
+        {/* Image 1 — Start */}
+        {renderStoryImage(storyImages[0])}
+
         {/* Video 1 (After Title) */}
         {renderVideo(video1Source, 'Video 1')}
 
         {/* Subtitle / Section Header */}
         <Text style={styles.sectionTitle}>The Story</Text>
 
-        {/* Story Text - First Half */}
+        {/* Story Text — Part 1 */}
         <View style={styles.textWrapper}>
-          {firstHalf.map((segment: any, index: number) => (
-            <Text key={`first-${index}`} style={styles.storyText}>
-              {segment.text}
-            </Text>
+          {part1.map((segment: any, index: number) => (
+            <Text key={`p1-${index}`} style={styles.storyText}>{segment.text}</Text>
           ))}
         </View>
+
+        {/* Image 2 — After first third */}
+        {renderStoryImage(storyImages[1])}
 
         {/* Video 2 (Middle) */}
         {renderVideo(video2Source, 'Video 2')}
 
-        {/* Story Text - Second Half */}
+        {/* Story Text — Part 2 */}
         <View style={styles.textWrapper}>
-          {secondHalf.map((segment: any, index: number) => (
-            <Text key={`second-${index}`} style={styles.storyText}>
-              {segment.text}
-            </Text>
+          {part2.map((segment: any, index: number) => (
+            <Text key={`p2-${index}`} style={styles.storyText}>{segment.text}</Text>
           ))}
         </View>
 
+        {/* Image 3 — After second third */}
+        {renderStoryImage(storyImages[2])}
+
         {/* Video 3 (Last) */}
         {renderVideo(video3Source, 'Video 3')}
-        
+
+        {/* Story Text — Part 3 */}
+        <View style={styles.textWrapper}>
+          {part3.map((segment: any, index: number) => (
+            <Text key={`p3-${index}`} style={styles.storyText}>{segment.text}</Text>
+          ))}
+        </View>
+
+        {/* Image 4 — End */}
+        {renderStoryImage(storyImages[3])}
+
         {/* Spacer for bottom player */}
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -555,6 +588,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   video: {
+    width: '100%',
+    height: '100%',
+  },
+  storyImageContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+    marginTop: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  storyImageFull: {
     width: '100%',
     height: '100%',
   },

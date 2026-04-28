@@ -37,6 +37,10 @@ const StorySchema = new mongoose.Schema({
   mainCharacters: [{ type: String }],
   sideCharacters: [{ type: String }],
   prompt: { type: String, required: false },
+  image1: { type: String, required: false },
+  image2: { type: String, required: false },
+  image3: { type: String, required: false },
+  image4: { type: String, required: false },
   video1: {
     type: String,
     required: false,

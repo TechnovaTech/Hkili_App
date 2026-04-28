@@ -26,10 +26,15 @@ export interface Character {
 
 export interface Story {
   id: string;
+  _id?: string;
   title: string;
   content: StorySegment[];
   audioUrl?: string;
   imageUrl?: string;
+  image1?: string;
+  image2?: string;
+  image3?: string;
+  image4?: string;
   video1?: string;
   video2?: string;
   video3?: string;

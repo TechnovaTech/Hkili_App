@@ -122,10 +122,36 @@ export async function POST(request: NextRequest) {
     if (!result) throw new Error('No content generated');
 
     const parsedResult = JSON.parse(result);
+    const storyTitle = parsedResult.title || 'Untitled AI Story';
+    const storyContent = parsedResult.content || '';
+
+    // Generate 4 story-relevant images in parallel using DALL-E
+    const imagePrompts = [
+      `Children's storybook illustration, beginning scene: ${storyTitle}. Characters: ${mainCharacterNames.join(', ')}. Setting: ${place || 'magical land'}. Colorful, warm, friendly art style.`,
+      `Children's storybook illustration, early adventure scene from "${storyTitle}". Characters exploring ${place || 'magical land'}. Vibrant, detailed, whimsical art style.`,
+      `Children's storybook illustration, exciting middle scene from "${storyTitle}". Characters facing a challenge. Colorful, expressive, storybook art style.`,
+      `Children's storybook illustration, heartwarming ending scene from "${storyTitle}". Characters happy, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style.`,
+    ];
+
+    const imageResults = await Promise.allSettled(
+      imagePrompts.map(prompt =>
+        openai.images.generate({
+          model: 'dall-e-3',
+          prompt,
+          n: 1,
+          size: '1024x1024',
+          quality: 'standard',
+        })
+      )
+    );
+
+    const [img1, img2, img3, img4] = imageResults.map(r =>
+      r.status === 'fulfilled' ? r.value.data[0]?.url || null : null
+    );
 
     const newStory = await Story.create({
-      title: parsedResult.title || 'Untitled AI Story',
-      content: parsedResult.content,
+      title: storyTitle,
+      content: storyContent,
       userId,
       genre: 'AI Generated',
       language,
@@ -135,6 +161,10 @@ export async function POST(request: NextRequest) {
       mainCharacters: mainCharacterNames,
       sideCharacters: sideCharacterNames,
       prompt: finalPrompt,
+      image1: img1,
+      image2: img2,
+      image3: img3,
+      image4: img4,
       createdAt: new Date(),
     });
 
