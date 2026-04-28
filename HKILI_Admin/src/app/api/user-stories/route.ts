@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import dbConnect from '../../../lib/mongodb';
 import UserStory from '../../../models/UserStory';
-import Story from '../../../models/Story';
-// Ensure all referenced models are registered
+import '../../../models/Story';
 import '../../../models/User';
 import '../../../models/Category';
 import '../../../models/StoryCharacter';
@@ -12,7 +11,6 @@ import '../../../models/StoryCharacter';
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    
     if (!token) {
       return NextResponse.json({ message: 'No token provided' }, { status: 401 });
     }
@@ -22,42 +20,29 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
-    // Find all UserStory entries for this user and populate the story details
     const userStories = await UserStory.find({ userId })
-      .populate({
-        path: 'storyId',
-        populate: [
-          { path: 'categoryId', select: 'name' },
-          { path: 'storyCharacterId', select: 'name image' }
-        ]
-      })
-      .sort({ savedAt: -1 });
+      .populate({ path: 'storyId', populate: { path: 'categoryId', select: 'name' } })
+      .sort({ savedAt: -1 })
+      .lean();
 
-    // Transform to return the Story objects enriched with library metadata if needed
-    // Or just return the populated list.
-    // The app likely expects a list of Stories.
     const stories = userStories
-      .filter(us => us.storyId != null)
-      .map(us => {
-        try {
-          return {
-            ...us.storyId.toObject(),
-            id: us.storyId._id?.toString() || us.storyId.toString(),
-            libraryId: us._id,
-            savedAt: us.savedAt,
-            isFavorite: us.isFavorite,
-            lastReadAt: us.lastReadAt,
-          };
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean);
+      .filter((us: any) => us.storyId != null)
+      .map((us: any) => {
+        const story = us.storyId;
+        return {
+          ...story,
+          id: story._id?.toString(),
+          _id: story._id?.toString(),
+          savedAt: us.savedAt,
+          isFavorite: us.isFavorite ?? false,
+          lastReadAt: us.lastReadAt,
+        };
+      });
 
     return NextResponse.json({ success: true, data: stories });
-  } catch (error) {
-    console.error('Library fetch error:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Library fetch error:', error?.message || error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -65,36 +50,32 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    
     if (!token) {
       return NextResponse.json({ message: 'No token provided' }, { status: 401 });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const userId = decoded.userId;
-    
-    const { storyId } = await request.json();
 
+    const { storyId } = await request.json();
     if (!storyId) {
       return NextResponse.json({ message: 'Story ID is required' }, { status: 400 });
     }
 
     await dbConnect();
 
-    // Check if already exists to avoid duplicates (or upsert)
-    // We use findOneAndUpdate with upsert to handle "add to library" idempotently
     const userStory = await UserStory.findOneAndUpdate(
       { userId, storyId },
-      { 
+      {
         $set: { lastReadAt: new Date() },
-        $setOnInsert: { savedAt: new Date(), isFavorite: false }
+        $setOnInsert: { savedAt: new Date(), isFavorite: false },
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
     return NextResponse.json({ success: true, data: userStory });
-  } catch (error) {
-    console.error('Add to library error:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Add to library error:', error?.message || error);
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
