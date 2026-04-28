@@ -33,6 +33,7 @@ export default function AdminSidebar() {
     { path: '/admin/characters', label: 'Characters', icon: '👤' },
     //{ path: '/admin/story-characters', label: 'Story Characters', icon: '🎭' },
     { path: '/admin/categories', label: 'Categories', icon: '📁' },
+    { path: '/admin/prompts', label: 'Prompts', icon: '📝' },
     { path: '/admin/plans', label: 'Plans', icon: '💎' },
     { path: '/admin/settings', label: 'Settings', icon: '⚙️' },
   ]
