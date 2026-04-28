@@ -29,7 +29,7 @@ interface Story {
 export default function StoriesManagement() {
   const [stories, setStories] = useState<Story[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true
+  const [loading, setLoading] = useState(true)
   const [languageFilter, setLanguageFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   
