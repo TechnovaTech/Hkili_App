@@ -21,7 +21,7 @@ const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an eng
 
 function buildPrompt(template: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
-    (t, [key, val]) => t.replaceAll(key, val),
+    (t, [key, val]) => t.replace(new RegExp(key.replace(/[\[\]]/g, '\\$&'), 'g'), val),
     template
   );
 }
