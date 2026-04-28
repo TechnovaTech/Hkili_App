@@ -8,20 +8,12 @@ interface Category {
   name: string
 }
 
-interface StoryCharacter {
-  _id: string
-  name: string
-  categoryId: string | { _id: string }
-  image?: string
-}
-
 interface Story {
   _id: string
   title: string
   content: string
   userId: { _id: string, email: string } | string
   categoryId?: Category | string
-  storyCharacterId?: StoryCharacter | string
   createdAt: string
   language: string
   video1?: string
@@ -37,8 +29,7 @@ interface Story {
 export default function StoriesManagement() {
   const [stories, setStories] = useState<Story[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [allStoryCharacters, setAllStoryCharacters] = useState<StoryCharacter[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true
   const [languageFilter, setLanguageFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   
@@ -59,7 +50,6 @@ export default function StoriesManagement() {
     content: '',
     language: 'EN',
     categoryId: '',
-    storyCharacterId: '',
     video1: '',
     video2: '',
     video3: ''
@@ -70,7 +60,6 @@ export default function StoriesManagement() {
   useEffect(() => {
     fetchStories()
     fetchCategories()
-    fetchStoryCharacters()
   }, [])
 
   const getAuthHeader = (): Record<string, string> => {
@@ -106,18 +95,6 @@ export default function StoriesManagement() {
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
-    }
-  }
-
-  const fetchStoryCharacters = async () => {
-    try {
-      const res = await fetch('/api/story-characters', { headers: getAuthHeader() })
-      if (res.ok) {
-        const data = await res.json()
-        if (data.success) setAllStoryCharacters(data.data)
-      }
-    } catch (error) {
-      console.error('Error fetching story characters:', error)
     }
   }
 
@@ -192,7 +169,6 @@ export default function StoriesManagement() {
         content: story.content,
         language: story.language,
         categoryId: typeof story.categoryId === 'object' ? story.categoryId._id : (story.categoryId || ''),
-        storyCharacterId: typeof story.storyCharacterId === 'object' ? story.storyCharacterId._id : (story.storyCharacterId || ''),
         video1: story.video1 || '',
         video2: story.video2 || '',
         video3: story.video3 || ''
@@ -204,7 +180,6 @@ export default function StoriesManagement() {
         content: '',
         language: 'EN',
         categoryId: '',
-        storyCharacterId: '',
         video1: '',
         video2: '',
         video3: ''
@@ -242,13 +217,6 @@ export default function StoriesManagement() {
       console.error('Error saving story:', error)
     }
   }
-
-  // Filter characters based on selected category
-  const filteredCharacters = allStoryCharacters.filter(char => {
-    if (!formData.categoryId) return false
-    const charCatId = typeof char.categoryId === 'object' ? char.categoryId._id : char.categoryId
-    return charCatId === formData.categoryId
-  })
 
   const filteredStories = stories.filter(story => {
     const matchesLanguage = !languageFilter || story.language === languageFilter
@@ -367,12 +335,6 @@ export default function StoriesManagement() {
                               {typeof story.categoryId === 'object' ? story.categoryId.name : 'Unknown'}
                             </span>
                           )}
-                          {story.storyCharacterId && (
-                            <span className="flex items-center">
-                              <span className="font-medium mr-1">Character:</span>
-                              {typeof story.storyCharacterId === 'object' ? story.storyCharacterId.name : 'Unknown'}
-                            </span>
-                          )}
                         </div>
 
                         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-3">
@@ -452,36 +414,18 @@ export default function StoriesManagement() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                      <select
-                        value={formData.categoryId}
-                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, storyCharacterId: '' })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        required
-                      >
-                        <option value="">Select Category</option>
-                        {categories.map(c => (
-                          <option key={c._id} value={c._id}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Character</label>
-                      <select
-                        value={formData.storyCharacterId}
-                        onChange={(e) => setFormData({ ...formData, storyCharacterId: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!formData.categoryId}
-                        required
-                      >
-                        <option value="">Select Character</option>
-                        {filteredCharacters.map(c => (
-                          <option key={c._id} value={c._id}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      value={formData.categoryId}
+                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="">Select Category (optional)</option>
+                      {categories.map(c => (
+                        <option key={c._id} value={c._id}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
