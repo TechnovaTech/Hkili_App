@@ -9,9 +9,6 @@ import Prompt from '@/models/Prompt';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
-export const maxDuration = 60; // Set max duration to 60 seconds for Vercel
-export const dynamic = 'force-dynamic';
-
 const DEFAULT_TEMPLATE = `Write a [CATEGORY] story set in [PLACE] in [LANGUAGE] language.
 
 Main character(s): [MAIN_CHARACTER_NAMES]
@@ -20,11 +17,7 @@ Moral of the story: [MORAL]
 
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`;
 
-const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. 
-Return a JSON object with the following fields:
-- title: The title of the story
-- content: The story text
-- imagePrompts: An array of 3 highly descriptive English prompts for DALL-E to illustrate the beginning, middle, and end of this story. Each prompt should be 1-2 sentences.`;
+const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`;
 
 function buildPrompt(template: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
@@ -38,28 +31,10 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) return NextResponse.json({ message: 'No token provided' }, { status: 401 });
 
-    const secret = process.env.JWT_SECRET || 'your-secret-key';
-    if (!process.env.JWT_SECRET) {
-      console.warn('Warning: JWT_SECRET is not defined in environment variables. Using fallback.');
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, secret) as any;
-    } catch (jwtError: any) {
-      console.error('JWT Verification Error:', jwtError.message);
-      return NextResponse.json({ message: 'Invalid or expired token', error: jwtError.message }, { status: 401 });
-    }
-    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const userId = decoded.userId;
 
-    console.log('Connecting to database...');
-    try {
-      await dbConnect();
-    } catch (dbError: any) {
-      console.error('Database Connection Error:', dbError.message);
-      return NextResponse.json({ success: false, error: 'Database connection failed', details: dbError.message }, { status: 500 });
-    }
+    await dbConnect();
 
     const setting = await Setting.findOne();
     const storyCost = setting?.storyCost ?? 10;
@@ -73,9 +48,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (!apiKey) {
-      console.error('Missing OpenAI API Key');
       return NextResponse.json(
-        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings or as OPENAI_API_KEY environment variable.' },
+        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings.' },
         { status: 500 }
       );
     }
@@ -134,7 +108,7 @@ export async function POST(request: NextRequest) {
 
       finalPrompt = buildPrompt(template, vars);
       // Force language in system message regardless of template to ensure output language is correct
-      finalSystemMessage = `${buildPrompt(systemTpl, vars)}\n\nCRITICAL: THE "title" AND "content" FIELDS MUST BE IN ${targetLanguage.toUpperCase()}. THE "imagePrompts" MUST ALWAYS BE IN ENGLISH.`;
+      finalSystemMessage = `${buildPrompt(systemTpl, vars)}\n\nCRITICAL: THE ENTIRE OUTPUT MUST BE IN ${targetLanguage.toUpperCase()}. THIS INCLUDES BOTH THE "title" AND THE "content" FIELDS. DO NOT USE ANY ENGLISH IN THE OUTPUT EXCEPT FOR THE JSON KEYS.`;
     }
 
     if (!finalPrompt) {
@@ -152,7 +126,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: finalSystemMessage },
         { role: 'user', content: finalPrompt },
       ],
-      model: 'gpt-4o-mini', // Much more reliable for JSON mode than 3.5-turbo
+      model: 'gpt-3.5-turbo-0125', // Use a more modern version of 3.5 that handles JSON better
       response_format: { type: 'json_object' },
     });
 
@@ -162,59 +136,41 @@ export async function POST(request: NextRequest) {
     const parsedResult = JSON.parse(result);
     const storyTitle = parsedResult.title || 'Untitled AI Story';
     const storyContent = parsedResult.content || '';
-    const generatedImagePrompts = parsedResult.imagePrompts || [];
 
     console.log(`Story generated: ${storyTitle} in ${targetLanguage}`);
 
-    // Generate 3 story-relevant images in parallel
-    const finalImagePrompts = generatedImagePrompts.length >= 3 
-      ? generatedImagePrompts.slice(0, 3).map((p: string) => `Children's storybook illustration: ${p}. Colorful, whimsical art style.`)
-      : [
-          `Children's storybook illustration, opening scene for a ${categoryName} story titled "${storyTitle}". Colorful, warm, friendly art style.`,
-          `Children's storybook illustration, middle action scene from the story "${storyTitle}". Vibrant, expressive, whimsical art style.`,
-          `Children's storybook illustration, heartwarming ending for "${storyTitle}". Warm, uplifting, colorful art style.`,
-        ];
+    // Generate 3 story-relevant images in parallel using DALL-E
+    // Use English for image prompts as DALL-E performs better with English
+    // We include the category and characters to provide context even if the title is in another language
+    const imageContext = `Category: ${categoryName}, Setting: ${place || 'magical land'}, Characters: ${mainCharacterNames.join(', ')}`;
+    const imagePrompts = [
+      `Children's storybook illustration, opening scene for a ${categoryName} story titled "${storyTitle}". ${imageContext}. Colorful, warm, friendly art style, high quality.`,
+      `Children's storybook illustration, middle action scene from the story "${storyTitle}". ${imageContext}. Vibrant, expressive, whimsical art style, high quality.`,
+      `Children's storybook illustration, heartwarming ending for "${storyTitle}". ${imageContext}, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style, high quality.`,
+    ];
 
-    console.log('Generating images with prompts:', finalImagePrompts);
-    
-    // Function to generate image with fallback
-    const generateImageWithFallback = async (prompt: string, idx: number) => {
-      try {
-        console.log(`Attempting DALL-E 3 for image ${idx + 1}...`);
-        const response = await openai.images.generate({
+    console.log('Generating images...');
+    const imageResults = await Promise.allSettled(
+      imagePrompts.map(prompt =>
+        openai.images.generate({
           model: 'dall-e-3',
           prompt,
           n: 1,
           size: '1024x1024',
           quality: 'standard',
-        });
-        console.log(`DALL-E 3 success for image ${idx + 1}`);
-        return response.data?.[0]?.url || null;
-      } catch (de3Error: any) {
-        console.error(`DALL-E 3 failed for image ${idx + 1}:`, de3Error.message);
-        
-        try {
-          console.log(`Attempting DALL-E 2 fallback for image ${idx + 1}...`);
-          const response = await openai.images.generate({
-            model: 'dall-e-2',
-            prompt: prompt.substring(0, 400), // DALL-E 2 has shorter prompt limit
-            n: 1,
-            size: '1024x1024',
-          });
-          console.log(`DALL-E 2 fallback success for image ${idx + 1}`);
-          return response.data?.[0]?.url || null;
-        } catch (de2Error: any) {
-          console.error(`DALL-E 2 fallback also failed for image ${idx + 1}:`, de2Error.message);
-          return null;
-        }
-      }
-    };
-
-    const imageResults = await Promise.all(
-      finalImagePrompts.map((prompt: string, idx: number) => generateImageWithFallback(prompt, idx))
+        })
+      )
     );
 
-    const [img1, img2, img3] = imageResults;
+    const [img1, img2, img3] = imageResults.map((r, idx) => {
+      if (r.status === 'fulfilled') {
+        console.log(`Image ${idx + 1} generated successfully`);
+        return r.value.data?.[0]?.url ?? null;
+      } else {
+        console.error(`Image ${idx + 1} failed:`, r.reason);
+        return null;
+      }
+    });
 
     const newStory = await Story.create({
       title: storyTitle,
@@ -242,16 +198,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: newStory, remainingCoins: user.coins });
   } catch (error: any) {
     console.error('AI Generation Error:', error);
-    const errorMessage = error.message || 'Failed to generate story';
-    const errorStack = process.env.NODE_ENV === 'development' ? error.stack : undefined;
-    
     return NextResponse.json(
-      { 
-        success: false, 
-        error: errorMessage,
-        details: error.response?.data || error.cause || null,
-        stack: errorStack
-      },
+      { success: false, error: error.message || 'Failed to generate story' },
       { status: 500 }
     );
   }
