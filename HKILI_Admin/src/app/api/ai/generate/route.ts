@@ -156,13 +156,13 @@ export async function POST(request: NextRequest) {
 
     console.log('Generating images with prompts:', finalImagePrompts);
     const imageResults = await Promise.allSettled(
-      finalImagePrompts.map(prompt =>
+      finalImagePrompts.map((prompt: string) =>
         openai.images.generate({
           model: 'dall-e-2', // Fallback to dall-e-2 as it's more widely available and faster
           prompt,
           n: 1,
           size: '1024x1024',
-        }).catch(err => {
+        }).catch((err: any) => {
            console.error('DALL-E 2 Error, trying DALL-E 3 fallback if possible:', err.message);
            // If DALL-E 2 fails, we don't try DALL-E 3 because usually it's a billing or key issue
            throw err;
