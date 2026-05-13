@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     };
 
     const imageResults = await Promise.all(
-      finalImagePrompts.map((prompt, idx) => generateImageWithFallback(prompt, idx))
+      finalImagePrompts.map((prompt: string, idx: number) => generateImageWithFallback(prompt, idx))
     );
 
     const [img1, img2, img3] = imageResults;

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     let userId: string;
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
       userId = decoded.userId;
     } catch (e) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 });
