@@ -17,7 +17,7 @@ Moral of the story: [MORAL]
 
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`;
 
-const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Write in [LANGUAGE]. Return JSON with 'title' and 'content' fields.`;
+const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`;
 
 function buildPrompt(template: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(

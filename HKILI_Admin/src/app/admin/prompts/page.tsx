@@ -21,7 +21,7 @@ Moral of the story: [MORAL]
 
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`
 
-const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Write in [LANGUAGE]. Return JSON with 'title' and 'content' fields.`
+const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`
 
 const PLACEHOLDERS = [
   { key: '[CATEGORY]', desc: 'Story category (e.g. Adventure, Fantasy)' },
@@ -29,7 +29,7 @@ const PLACEHOLDERS = [
   { key: '[MAIN_CHARACTER_NAMES]', desc: 'Comma-separated main character names' },
   { key: '[SIDE_CHARACTER_NAMES]', desc: 'Comma-separated side character names (or "None")' },
   { key: '[MORAL]', desc: 'The moral of the story' },
-  { key: '[LANGUAGE]', desc: 'Language code (EN, FR, AR) — for both system message and template' },
+  { key: '[LANGUAGE]', desc: 'Language code (EN, FR, AR) — use in Prompt Template' },
 ]
 
 export default function PromptManagement() {
