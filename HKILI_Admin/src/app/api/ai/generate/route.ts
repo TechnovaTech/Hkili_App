@@ -9,6 +9,9 @@ import Prompt from '@/models/Prompt';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
+export const maxDuration = 60; // Set max duration to 60 seconds for Vercel
+export const dynamic = 'force-dynamic';
+
 const DEFAULT_TEMPLATE = `Write a [CATEGORY] story set in [PLACE] in [LANGUAGE] language.
 
 Main character(s): [MAIN_CHARACTER_NAMES]
@@ -35,10 +38,28 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) return NextResponse.json({ message: 'No token provided' }, { status: 401 });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    const secret = process.env.JWT_SECRET || 'your-secret-key';
+    if (!process.env.JWT_SECRET) {
+      console.warn('Warning: JWT_SECRET is not defined in environment variables. Using fallback.');
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret) as any;
+    } catch (jwtError: any) {
+      console.error('JWT Verification Error:', jwtError.message);
+      return NextResponse.json({ message: 'Invalid or expired token', error: jwtError.message }, { status: 401 });
+    }
+    
     const userId = decoded.userId;
 
-    await dbConnect();
+    console.log('Connecting to database...');
+    try {
+      await dbConnect();
+    } catch (dbError: any) {
+      console.error('Database Connection Error:', dbError.message);
+      return NextResponse.json({ success: false, error: 'Database connection failed', details: dbError.message }, { status: 500 });
+    }
 
     const setting = await Setting.findOne();
     const storyCost = setting?.storyCost ?? 10;
@@ -52,8 +73,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (!apiKey) {
+      console.error('Missing OpenAI API Key');
       return NextResponse.json(
-        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings.' },
+        { success: false, error: 'OpenAI API Key is missing. Please add it in Admin Settings or as OPENAI_API_KEY environment variable.' },
         { status: 500 }
       );
     }
