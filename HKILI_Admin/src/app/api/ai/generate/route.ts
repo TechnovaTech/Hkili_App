@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) return NextResponse.json({ message: 'No token provided' }, { status: 401 });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
     const userId = decoded.userId;
 
     await dbConnect();
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: finalSystemMessage },
         { role: 'user', content: finalPrompt },
       ],
-      model: 'gpt-4o-mini', // Use 4o-mini for better instruction following and speed
+      model: 'gpt-3.5-turbo', // Revert to 3.5-turbo as it was working before
       response_format: { type: 'json_object' },
     });
 
@@ -158,13 +158,13 @@ export async function POST(request: NextRequest) {
     const imageResults = await Promise.allSettled(
       finalImagePrompts.map((prompt: string) =>
         openai.images.generate({
-          model: 'dall-e-2', // Fallback to dall-e-2 as it's more widely available and faster
+          model: 'dall-e-3', // Switch back to dall-e-3 as it was used before
           prompt,
           n: 1,
           size: '1024x1024',
+          quality: 'standard',
         }).catch((err: any) => {
-           console.error('DALL-E 2 Error, trying DALL-E 3 fallback if possible:', err.message);
-           // If DALL-E 2 fails, we don't try DALL-E 3 because usually it's a billing or key issue
+           console.error('DALL-E 3 Error:', err.message);
            throw err;
         })
       )
@@ -206,8 +206,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: newStory, remainingCoins: user.coins });
   } catch (error: any) {
     console.error('AI Generation Error:', error);
+    const errorMessage = error.message || 'Failed to generate story';
+    const errorStack = process.env.NODE_ENV === 'development' ? error.stack : undefined;
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to generate story' },
+      { 
+        success: false, 
+        error: errorMessage,
+        details: error.response?.data || error.cause || null,
+        stack: errorStack
+      },
       { status: 500 }
     );
   }
