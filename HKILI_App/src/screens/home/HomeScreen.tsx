@@ -117,7 +117,7 @@ export default function HomeScreen() {
   const handleStart = () => {
     if (canStart) {
       router.push({
-        pathname: '/story/mode-selection',
+        pathname: '/story/language-selection',
         params: {
           mainCharacterIds: JSON.stringify(selectedMainCharacters),
           sideCharacterIds: JSON.stringify(selectedSideCharacters),

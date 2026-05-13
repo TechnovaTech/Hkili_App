@@ -14,12 +14,13 @@ import { apiClient } from '@/services/apiClient';
 import { storyService } from '@/services/storyService';
 
 export default function StoryGenerationScreen() {
-  const { categoryId, mainCharacterIds, sideCharacterIds, place, moral } = useLocalSearchParams<{
+  const { categoryId, mainCharacterIds, sideCharacterIds, place, moral, language } = useLocalSearchParams<{
     categoryId: string;
     mainCharacterIds: string;
     sideCharacterIds: string;
     place: string;
     moral: string;
+    language: string;
   }>();
 
   const [scaleAnim] = useState(new Animated.Value(1));
@@ -61,7 +62,7 @@ export default function StoryGenerationScreen() {
         sideCharacterIds: sideIds,
         place,
         moral,
-        language: 'EN',
+        language: language || 'EN',
       });
 
       if (response.success && response.data) {

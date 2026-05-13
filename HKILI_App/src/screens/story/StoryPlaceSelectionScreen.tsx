@@ -52,9 +52,7 @@ export default function StoryPlaceSelectionScreen() {
     router.push({
       pathname: '/story/story-generation',
       params: {
-        categoryId,
-        mainCharacterIds,
-        sideCharacterIds,
+        ...params,
         place: storyPlace.trim(),
         moral: moralText,
       },

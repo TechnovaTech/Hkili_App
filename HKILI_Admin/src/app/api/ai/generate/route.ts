@@ -9,7 +9,7 @@ import Prompt from '@/models/Prompt';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
 
-const DEFAULT_TEMPLATE = `Write a [CATEGORY] story set in [PLACE].
+const DEFAULT_TEMPLATE = `Write a [CATEGORY] story set in [PLACE] in [LANGUAGE] language.
 
 Main character(s): [MAIN_CHARACTER_NAMES]
 Side character(s): [SIDE_CHARACTER_NAMES]
