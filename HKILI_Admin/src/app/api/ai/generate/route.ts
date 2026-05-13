@@ -65,8 +65,15 @@ export async function POST(request: NextRequest) {
       prompt: directPrompt,
     } = body;
 
+    const languageNames: Record<string, string> = {
+      'EN': 'English',
+      'AR': 'Arabic',
+      'FR': 'French'
+    };
+    const targetLanguage = languageNames[language] || 'English';
+
     let finalPrompt = directPrompt;
-    let finalSystemMessage = DEFAULT_SYSTEM.replace('[LANGUAGE]', language);
+    let finalSystemMessage = DEFAULT_SYSTEM;
     let categoryName = '';
     let mainCharacterNames: string[] = [];
     let sideCharacterNames: string[] = [];
@@ -96,11 +103,12 @@ export async function POST(request: NextRequest) {
         '[MAIN_CHARACTER_NAMES]': mainCharacterNames.join(', '),
         '[SIDE_CHARACTER_NAMES]': sideCharacterNames.length > 0 ? sideCharacterNames.join(', ') : 'None',
         '[MORAL]': moral || 'No specific moral',
-        '[LANGUAGE]': language,
+        '[LANGUAGE]': targetLanguage,
       };
 
       finalPrompt = buildPrompt(template, vars);
-      finalSystemMessage = buildPrompt(systemTpl, vars);
+      // Force language in system message regardless of template to ensure output language is correct
+      finalSystemMessage = `${buildPrompt(systemTpl, vars)}\n\nCRITICAL: THE ENTIRE OUTPUT MUST BE IN ${targetLanguage.toUpperCase()}. THIS INCLUDES BOTH THE "title" AND THE "content" FIELDS. DO NOT USE ANY ENGLISH IN THE OUTPUT EXCEPT FOR THE JSON KEYS.`;
     }
 
     if (!finalPrompt) {
@@ -109,12 +117,16 @@ export async function POST(request: NextRequest) {
 
     const openai = new OpenAI({ apiKey });
 
+    // Log the prompts being sent to OpenAI for debugging
+    console.log('Final System Message:', finalSystemMessage);
+    console.log('Final Prompt:', finalPrompt);
+
     const completion = await openai.chat.completions.create({
       messages: [
         { role: 'system', content: finalSystemMessage },
         { role: 'user', content: finalPrompt },
       ],
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo-0125', // Use a more modern version of 3.5 that handles JSON better
       response_format: { type: 'json_object' },
     });
 
@@ -125,13 +137,19 @@ export async function POST(request: NextRequest) {
     const storyTitle = parsedResult.title || 'Untitled AI Story';
     const storyContent = parsedResult.content || '';
 
+    console.log(`Story generated: ${storyTitle} in ${targetLanguage}`);
+
     // Generate 3 story-relevant images in parallel using DALL-E
+    // Use English for image prompts as DALL-E performs better with English
+    // We include the category and characters to provide context even if the title is in another language
+    const imageContext = `Category: ${categoryName}, Setting: ${place || 'magical land'}, Characters: ${mainCharacterNames.join(', ')}`;
     const imagePrompts = [
-      `Children's storybook illustration, opening scene: ${storyTitle}. Characters: ${mainCharacterNames.join(', ')}. Setting: ${place || 'magical land'}. Colorful, warm, friendly art style.`,
-      `Children's storybook illustration, middle scene from "${storyTitle}". Characters facing a challenge in ${place || 'magical land'}. Vibrant, expressive, whimsical art style.`,
-      `Children's storybook illustration, heartwarming ending from "${storyTitle}". Characters happy, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style.`,
+      `Children's storybook illustration, opening scene for a ${categoryName} story titled "${storyTitle}". ${imageContext}. Colorful, warm, friendly art style, high quality.`,
+      `Children's storybook illustration, middle action scene from the story "${storyTitle}". ${imageContext}. Vibrant, expressive, whimsical art style, high quality.`,
+      `Children's storybook illustration, heartwarming ending for "${storyTitle}". ${imageContext}, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style, high quality.`,
     ];
 
+    console.log('Generating images...');
     const imageResults = await Promise.allSettled(
       imagePrompts.map(prompt =>
         openai.images.generate({
@@ -144,9 +162,15 @@ export async function POST(request: NextRequest) {
       )
     );
 
-    const [img1, img2, img3] = imageResults.map(r =>
-      r.status === 'fulfilled' ? (r.value.data?.[0]?.url ?? null) : null
-    );
+    const [img1, img2, img3] = imageResults.map((r, idx) => {
+      if (r.status === 'fulfilled') {
+        console.log(`Image ${idx + 1} generated successfully`);
+        return r.value.data?.[0]?.url ?? null;
+      } else {
+        console.error(`Image ${idx + 1} failed:`, r.reason);
+        return null;
+      }
+    });
 
     const newStory = await Story.create({
       title: storyTitle,
