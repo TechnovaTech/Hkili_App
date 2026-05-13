@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
           quality: 'standard',
         });
         console.log(`DALL-E 3 success for image ${idx + 1}`);
-        return response.data[0].url;
+        return response.data?.[0]?.url || null;
       } catch (de3Error: any) {
         console.error(`DALL-E 3 failed for image ${idx + 1}:`, de3Error.message);
         
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
             size: '1024x1024',
           });
           console.log(`DALL-E 2 fallback success for image ${idx + 1}`);
-          return response.data[0].url;
+          return response.data?.[0]?.url || null;
         } catch (de2Error: any) {
           console.error(`DALL-E 2 fallback also failed for image ${idx + 1}:`, de2Error.message);
           return null;
