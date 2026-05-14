@@ -2,8 +2,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'HKILI Admin Panel',
-  description: 'Admin panel for HKILI App',
+  title: 'Unaï Admin Panel',
+  description: 'Admin panel for Unaï App',
 }
 
 export default function RootLayout({

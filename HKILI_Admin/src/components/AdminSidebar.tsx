@@ -48,7 +48,7 @@ export default function AdminSidebar() {
                 <span className="text-white font-bold text-lg">H</span>
               </div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-white">HKILI</h1>
+                <h1 className="text-xl font-bold text-white">Unaï</h1>
                 <p className="text-xs text-gray-400">Admin Panel</p>
               </div>
             </div>
