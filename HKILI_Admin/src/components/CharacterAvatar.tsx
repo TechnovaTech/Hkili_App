@@ -5,14 +5,17 @@ interface CharacterAvatarProps {
   hairColor: string;
   hairStyle: string;
   eyeColor: string;
+  size?: number;
 }
 
 export default function CharacterAvatar({ 
   skinColor = '#FDBCB4', 
   hairColor = '#8B4513', 
   hairStyle = 'Short', 
-  eyeColor = '#8B4513' 
+  eyeColor = '#8B4513',
+  size = 80
 }: CharacterAvatarProps) {
+  const scale = size / 80;
   
   const renderHair = () => {
     if (hairStyle === 'Bald') return null;
@@ -346,11 +349,33 @@ export default function CharacterAvatar({
   };
 
   return (
-    <div className="relative w-[80px] h-[80px] rounded-full flex justify-center items-center shadow-md bg-[rgba(255,255,255,0.12)]"
-         style={{ boxShadow: '0 3px 5px rgba(0,0,0,0.25)' }}>
-      <div 
-        className="relative w-[60px] h-[60px] rounded-full flex flex-col justify-center items-center"
-        style={{ backgroundColor: skinColor }}
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        boxShadow: '0 3px 5px rgba(0,0,0,0.25)',
+        background: 'rgba(255,255,255,0.12)',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative',
+          backgroundColor: skinColor,
+        }}
       >
         {renderHair()}
         <div className="flex gap-2 z-20 mt-1">

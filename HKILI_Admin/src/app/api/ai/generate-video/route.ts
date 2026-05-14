@@ -20,12 +20,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Initialize RunwayML
-// Note: RunwayML SDK automatically looks for RUNWAYML_API_SECRET env var.
-// We also allow RUNWAY_API_KEY for convenience if the user sets that.
-const runwayClient = new RunwayML({
-    apiKey: process.env.RUNWAYML_API_SECRET || process.env.RUNWAY_API_KEY
-});
+// RunwayML client is initialized lazily inside the handler to avoid build-time errors
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,12 +56,14 @@ export async function POST(request: NextRequest) {
     const openai = new OpenAI({ apiKey });
     
     // Check Runway API Key
-    if (!process.env.RUNWAYML_API_SECRET && !process.env.RUNWAY_API_KEY) {
-         return NextResponse.json(
+    const runwayApiKey = process.env.RUNWAYML_API_SECRET || process.env.RUNWAY_API_KEY;
+    if (!runwayApiKey) {
+      return NextResponse.json(
         { success: false, error: 'RUNWAYML_API_SECRET is missing. Please add it to .env' },
         { status: 500 }
       );
     }
+    const runwayClient = new RunwayML({ apiKey: runwayApiKey });
 
     // 3. Generate Visual Prompts using OpenAI (GPT-3.5)
     // Refine the story into a good visual description
