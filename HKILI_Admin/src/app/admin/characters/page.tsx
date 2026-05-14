@@ -26,7 +26,6 @@ interface Character {
   hairStyle: string
   skinColor: string
   eyeColor: string
-  avatarUrl?: string
   interests: string[]
   customInterests: string[]
   description?: string
@@ -54,7 +53,6 @@ export default function CharactersManagement() {
     hairStyle: 'Short',
     skinColor: '#FDBCB4',
     eyeColor: '#8B4513',
-    avatarUrl: '',
     interests: '',
     isMainCharacter: true,
   })
@@ -120,7 +118,6 @@ export default function CharactersManagement() {
         hairStyle: character.hairStyle,
         skinColor: character.skinColor,
         eyeColor: character.eyeColor,
-        avatarUrl: character.avatarUrl || '',
         interests: character.interests.join(', '),
         isMainCharacter: character.isMainCharacter,
       })
@@ -136,7 +133,6 @@ export default function CharactersManagement() {
         hairStyle: 'Short',
         skinColor: '#FDBCB4',
         eyeColor: '#8B4513',
-        avatarUrl: '',
         interests: '',
         isMainCharacter: activeTab === 'side' ? false : true,
       })
@@ -271,13 +267,15 @@ export default function CharactersManagement() {
                   <tr key={character._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="mr-3">
-                          <CharacterAvatar
-                            avatarUrl={character.avatarUrl}
-                            gender={character.gender}
-                            name={character.name}
-                            size="sm"
-                          />
+                        <div className="mr-3 w-10 h-10 flex items-center justify-center overflow-hidden">
+                          <div className="transform scale-50 origin-center">
+                            <CharacterAvatar
+                              skinColor={character.skinColor}
+                              hairColor={character.hairColor}
+                              hairStyle={character.hairStyle}
+                              eyeColor={character.eyeColor}
+                            />
+                          </div>
                         </div>
                         <div>
                           <div className="font-medium text-gray-900">{character.name}</div>
@@ -448,53 +446,6 @@ export default function CharactersManagement() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   placeholder="e.g. Reading, Running, Gaming"
                 />
-              </div>
-
-              <div className="border-t pt-4">
-                <h3 className="text-md font-medium mb-3">Select Avatar</h3>
-                <div className="grid grid-cols-5 gap-3 mb-4">
-                  {[
-                    ...(formData.gender === 'female' ? [] : [
-                      'male/3d-boy-avatar-cartoon-boy-character-with-smiling-face-Tb7CAEg3_t.jpg',
-                      'male/3d-boy-avatar-cute-cartoon-boy-with-glasses-design-PmX0ik1h_t.jpg',
-                      'male/hand-drawn-profile-icon-avatar-character_884500-33561.avif',
-                      'male/hand-drawn-profile-icon-avatar-character_884500-34499.avif',
-                      'male/hand-drawn-profile-icon-avatar-character_884500-34686.jpg',
-                      'male/hand-drawn-profile-icon-avatar-character_884500-34726.avif',
-                      'male/images.jpg'
-                    ]),
-                    ...(formData.gender === 'male' ? [] : [
-                      'female/360_F_643686558_Efl6HB1ITw98bx1PdAd1wy56QpUTMh47.jpg',
-                      'female/3d-girl-avatar-3d-animated-girl-in-orange-sweater-TFsMwdNz_t.jpg',
-                      'female/3d-girl-avatar-animated-girl-character-with-glasses-B1jLa3Xa_t.jpg',
-                      'female/3d-woman-avatar-3d-cartoon-girl-with-brown-hair-M7DPxRTU_t.jpg',
-                      'female/cute-cartoon-girl-avatar-long-brown-hair-friendly-expression-various-uses-showcasing-young-female-character-371428712.webp',
-                      'female/cute-girl-avatar-featuring-long-black-hair-styled-flat-design-smiling-wearing-shirt-embodying-youthful-371432328.webp',
-                      'female/generated-image-372601986.webp',
-                      'female/young-man-avatar-character-due-avatar-man-vector-icon-cartoon-illustration_1186924-4438.avif'
-                    ])
-                  ].map((path) => (
-                    <button
-                      key={path}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, avatarUrl: path })}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        formData.avatarUrl === path ? 'border-blue-600 shadow-md' : 'border-transparent hover:border-gray-200'
-                      }`}
-                    >
-                      <img src={`/${path}`} alt="Avatar" className="w-full h-full object-cover" />
-                      {formData.avatarUrl === path && (
-                        <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center">
-                          <div className="bg-blue-600 text-white rounded-full p-0.5">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="border-t pt-4">
