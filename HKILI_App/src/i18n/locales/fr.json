@@ -70,7 +70,29 @@
     "offlineStorage": "Stockage hors ligne",
     "storageUsed": "Stockage utilisé",
     "clearCache": "Vider le cache",
-    "about": "À propos"
+    "about": "À propos",
+    "faq": "FAQ",
+    "faqSubtitle": "Questions et réponses fréquentes"
+  },
+  "faq": {
+    "title": "FAQ",
+    "description": "Trouvez des réponses aux questions courantes sur HKILI AI Storytelling.",
+    "q1": "Qu'est-ce que HKILI AI Storytelling ?",
+    "a1": "HKILI AI Storytelling est une application innovante qui utilise l'intelligence artificielle pour créer des histoires magiques personnalisées pour les enfants.",
+    "q2": "Comment générer une histoire ?",
+    "a2": "Allez dans l'onglet 'Générer', entrez les détails de votre enfant, puis appuyez sur 'Générer'.",
+    "q3": "Puis-je écouter les histoires ?",
+    "a3": "Oui ! Chaque histoire générée inclut une narration par IA de haute qualité.",
+    "q4": "Est-ce que ça fonctionne hors ligne ?",
+    "a4": "Absolument. Vous pouvez télécharger vos histoires préférées pour les lire et les écouter sans connexion.",
+    "q5": "Quelles langues sont supportées ?",
+    "a5": "Nous supportons actuellement l'anglais, l'arabe et le français.",
+    "q6": "Est-ce sûr pour les enfants ?",
+    "a6": "Oui, la sécurité est notre priorité. Notre IA est formée pour générer un contenu positif et éducatif.",
+    "q7": "Comment enregistrer une histoire ?",
+    "a7": "Toutes les histoires générées sont automatiquement enregistrées dans votre bibliothèque.",
+    "footer": "Vous avez encore des questions ?",
+    "contactSupport": "Contacter le support"
   },
   "genres": {
     "adventure": "Aventure",

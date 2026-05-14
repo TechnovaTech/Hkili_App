@@ -70,7 +70,29 @@
     "offlineStorage": "Offline Storage",
     "storageUsed": "Storage Used",
     "clearCache": "Clear Cache",
-    "about": "About"
+    "about": "About",
+    "faq": "FAQ",
+    "faqSubtitle": "Common questions & answers"
+  },
+  "faq": {
+    "title": "FAQ",
+    "description": "Find answers to common questions about HKILI AI Storytelling.",
+    "q1": "What is HKILI AI Storytelling?",
+    "a1": "HKILI AI Storytelling is an innovative app that uses artificial intelligence to create personalized, magical stories for children. You can customize characters, settings, and themes to create unique reading experiences.",
+    "q2": "How do I generate a story?",
+    "a2": "Navigate to the 'Generate' tab, enter your child's name and age, choose a genre, and add any special characters or moral lessons you'd like to include. Tap 'Generate' and watch the magic happen!",
+    "q3": "Can I listen to the stories?",
+    "a3": "Yes! Every story generated includes high-quality AI narration. You can play, pause, and control the playback speed in the story viewer.",
+    "q4": "Does it work offline?",
+    "a4": "Absolutely. You can download your favorite stories to your device. Once downloaded, they will be available in your 'Offline Stories' section even without an internet connection.",
+    "q5": "What languages are supported?",
+    "a5": "We currently support English, Arabic, and French. The app also features full RTL (Right-to-Left) support for Arabic users.",
+    "q6": "Is it safe for children?",
+    "a6": "Yes, safety is our priority. Our AI is specifically trained to generate age-appropriate, positive, and educational content for children.",
+    "q7": "How do I save a story?",
+    "a7": "All generated stories are automatically saved to your library. You can also mark stories as 'Favorites' for quick access.",
+    "footer": "Still have questions?",
+    "contactSupport": "Contact Support"
   },
   "genres": {
     "adventure": "Adventure",

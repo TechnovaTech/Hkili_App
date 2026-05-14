@@ -8,10 +8,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -25,18 +27,26 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t('settings.title')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
-       
-
-     
+        <TouchableOpacity 
+          style={styles.settingItem} 
+          onPress={() => router.push('/faq')}
+        >
+          <Ionicons name="help-circle-outline" size={24} color="#4CAF50" />
+          <View style={styles.settingContent}>
+            <Text style={styles.settingTitle}>{t('settings.faq')}</Text>
+            <Text style={styles.settingSubtitle}>{t('settings.faqSubtitle')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#81C784" />
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.settingItem}>
           <Ionicons name="information-circle-outline" size={24} color="#4CAF50" />
           <View style={styles.settingContent}>
-            <Text style={styles.settingTitle}>About</Text>
+            <Text style={styles.settingTitle}>{t('settings.about')}</Text>
             <Text style={styles.settingSubtitle}>Version 1.0.0</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#81C784" />
@@ -44,7 +54,7 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#F44336" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t('auth.logout')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
