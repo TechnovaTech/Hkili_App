@@ -270,23 +270,13 @@ export default function StoryCharactersManagement() {
                 <tr key={character._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="mr-3 w-10 h-10 flex items-center justify-center overflow-hidden rounded-full bg-gray-100">
-                        {character.image ? (
-                          <img 
-                            src={character.image} 
-                            alt={character.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="transform scale-50 origin-center">
-                            <CharacterAvatar 
-                              skinColor={character.skinColor}
-                              hairColor={character.hairColor}
-                              hairStyle={character.hairStyle}
-                              eyeColor={character.eyeColor}
-                            />
-                          </div>
-                        )}
+                      <div className="mr-3">
+                        <CharacterAvatar 
+                          avatarUrl={character.image}
+                          gender={character.gender}
+                          name={character.name}
+                          size="sm"
+                        />
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">{character.name}</div>
