@@ -54,6 +54,10 @@ const CharacterSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  avatarUrl: {
+    type: String,
+    required: false,
+  },
   description: {
     type: String,
     required: false,

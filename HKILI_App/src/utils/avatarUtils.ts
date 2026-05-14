@@ -33,11 +33,17 @@ export const FEMALE_AVATARS = [
 
 export const ALL_AVATARS = [...MALE_AVATARS, ...FEMALE_AVATARS];
 
-export const getAvatarSource = (avatarUrl: string | number | undefined | null, gender?: string) => {
+export const getAvatarSource = (avatarUrl: string | number | undefined | null, gender?: string, characterName?: string) => {
   if (!avatarUrl) {
-    if (gender === 'male') return { uri: `${BASE_URL}/${MALE_AVATARS[0].path}` };
-    if (gender === 'female') return { uri: `${BASE_URL}/${FEMALE_AVATARS[0].path}` };
-    return { uri: `${BASE_URL}/${MALE_AVATARS[0].path}` }; // Default to male if unknown
+    const avatars = gender === 'female' ? FEMALE_AVATARS : MALE_AVATARS;
+    
+    // If we have a name, use it to pick a consistent avatar for this character
+    if (characterName) {
+      const index = characterName.length % avatars.length;
+      return { uri: `${BASE_URL}/${avatars[index].path}` };
+    }
+    
+    return { uri: `${BASE_URL}/${avatars[0].path}` };
   }
   
   // If it's already a full URL or a numeric ID

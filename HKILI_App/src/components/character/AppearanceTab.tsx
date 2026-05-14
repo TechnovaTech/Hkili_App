@@ -62,7 +62,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
           <View style={styles.avatarStage}>
             <View style={styles.avatarFrame}>
               <Image 
-                source={getAvatarSource(formData.avatarUrl, formData.gender)} 
+                source={getAvatarSource(formData.avatarUrl, formData.gender, formData.name)} 
                 style={styles.mainAvatarImage}
                 resizeMode="cover"
               />

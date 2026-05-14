@@ -172,7 +172,7 @@ export default function HomeScreen() {
                     <View style={styles.avatarContainer}>
                       <View style={styles.characterAvatar}>
                         <Image 
-                          source={getAvatarSource(c.avatarUrl, c.gender)} 
+                          source={getAvatarSource(c.avatarUrl, c.gender, c.name)} 
                           style={styles.avatarImage} 
                           resizeMode="cover"
                         />
@@ -223,7 +223,7 @@ export default function HomeScreen() {
                     <View style={styles.sideAvatarContainer}>
                       <View style={styles.characterAvatar}>
                         <Image 
-                          source={getAvatarSource(c.avatarUrl, c.gender)} 
+                          source={getAvatarSource(c.avatarUrl, c.gender, c.name)} 
                           style={styles.avatarImage} 
                           resizeMode="cover"
                         />
