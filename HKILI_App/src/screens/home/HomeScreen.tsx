@@ -128,108 +128,6 @@ export default function HomeScreen() {
     }
   };
 
-  const renderCharacterHair = (c: any) => {
-    const style = c.hairStyle || 'Short';
-    const color = c.hairColor || '#8B4513';
-    const colorStyle = { backgroundColor: color };
-
-    if (style === 'Bald') return null;
-
-    if (style === 'Buzz Cut') {
-      return <View style={[styles.avatarHairBuzz, colorStyle]} />;
-    }
-
-    if (style === 'Pixie') {
-      return <View style={[styles.avatarHairPixie, colorStyle]} />;
-    }
-
-    if (style === 'Spiky') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairSpike, styles.hairSpikeOne, colorStyle]} />
-          <View style={[styles.hairSpike, styles.hairSpikeTwo, colorStyle]} />
-          <View style={[styles.hairSpike, styles.hairSpikeThree, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Wavy') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairWave, styles.hairWaveOne, colorStyle]} />
-          <View style={[styles.hairWave, styles.hairWaveTwo, colorStyle]} />
-          <View style={[styles.hairWave, styles.hairWaveThree, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Curly') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairCurl, styles.hairCurlOne, colorStyle]} />
-          <View style={[styles.hairCurl, styles.hairCurlTwo, colorStyle]} />
-          <View style={[styles.hairCurl, styles.hairCurlThree, colorStyle]} />
-          <View style={[styles.hairCurl, styles.hairCurlFour, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Long') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairBack, colorStyle]} />
-          <View style={[styles.hairSideLeft, colorStyle]} />
-          <View style={[styles.hairSideRight, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Bob') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairBobBack, colorStyle]} />
-          <View style={[styles.hairBobSideLeft, colorStyle]} />
-          <View style={[styles.hairBobSideRight, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Straight') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairStraightBack, colorStyle]} />
-          <View style={[styles.hairSideLeft, colorStyle]} />
-          <View style={[styles.hairSideRight, colorStyle]} />
-        </>
-      );
-    }
-
-    if (style === 'Braided') {
-      return (
-        <>
-          <View style={[styles.avatarHairBase, colorStyle]} />
-          <View style={[styles.hairBraid, colorStyle]} />
-          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentOne, colorStyle]} />
-          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentTwo, colorStyle]} />
-          <View style={[styles.hairBraidSegment, styles.hairBraidSegmentThree, colorStyle]} />
-        </>
-      );
-    }
-
-    return (
-      <>
-        <View style={[styles.avatarHairBase, colorStyle]} />
-        <View style={[styles.hairFringe, colorStyle]} />
-      </>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
@@ -273,22 +171,11 @@ export default function HomeScreen() {
                   >
                     <View style={styles.avatarContainer}>
                       <View style={styles.characterAvatar}>
-                        {c.avatarUrl ? (
-                          <Image 
-                            source={getAvatarSource(c.avatarUrl)} 
-                            style={styles.avatarImage} 
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
-                            {renderCharacterHair(c)}
-                            <View style={styles.characterEyesRow}>
-                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                            </View>
-                            <View style={styles.characterMouth} />
-                          </View>
-                        )}
+                        <Image 
+                          source={getAvatarSource(c.avatarUrl, c.gender)} 
+                          style={styles.avatarImage} 
+                          resizeMode="cover"
+                        />
                       </View>
                       <TouchableOpacity 
                         style={styles.cardEditButton}
@@ -322,7 +209,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Select side characters:</Text>
             
-            <View style={styles.charactersContainer}>
+            <View style={styles.sideCharactersContainer}>
               {sideCharacters.map((c: any) => {
                 const isSelected = selectedSideCharacters.includes(c.id || c._id);
                 const isStoryCharacter = storyCharacters.some(sc => (sc.id || sc._id) === (c.id || c._id));
@@ -330,27 +217,16 @@ export default function HomeScreen() {
                 return (
                   <TouchableOpacity
                     key={c.id || c._id}
-                    style={[styles.characterCard, isSelected && styles.selectedCharacterCard]}
+                    style={[styles.sideCharacterCard, isSelected && styles.selectedCharacterCard]}
                     onPress={() => toggleSideCharacterSelection(c.id || c._id)}
                   >
-                    <View style={styles.avatarContainer}>
+                    <View style={styles.sideAvatarContainer}>
                       <View style={styles.characterAvatar}>
-                        {c.avatarUrl ? (
-                          <Image 
-                            source={getAvatarSource(c.avatarUrl)} 
-                            style={styles.avatarImage} 
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
-                            {renderCharacterHair(c)}
-                            <View style={styles.characterEyesRow}>
-                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                            </View>
-                            <View style={styles.characterMouth} />
-                          </View>
-                        )}
+                        <Image 
+                          source={getAvatarSource(c.avatarUrl, c.gender)} 
+                          style={styles.avatarImage} 
+                          resizeMode="cover"
+                        />
                       </View>
                       {!isStoryCharacter && (
                         <TouchableOpacity 
@@ -435,183 +311,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
-   // Character Appearance Styles
-  characterEyesRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
-    zIndex: 2,
-  },
-  characterMouth: {
-    width: 14,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    marginTop: 5,
-    zIndex: 2,
-  },
-  avatarHairBase: {
-    position: 'absolute',
-    top: -3,
-    left: 5,
-    right: 5,
-    height: 27.5,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    zIndex: 1,
-  },
-  avatarHairBuzz: {
-    position: 'absolute',
-    top: 5,
-    left: 8,
-    right: 8,
-    height: 18,
-    borderRadius: 9,
-    zIndex: 1,
-  },
-  avatarHairPixie: {
-    position: 'absolute',
-    top: -1,
-    left: 7,
-    right: 7,
-    height: 21,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    zIndex: 1,
-  },
-  hairFringe: {
-    position: 'absolute',
-    top: 16,
-    left: 12,
-    width: 18,
-    height: 7,
-    borderRadius: 4,
-    zIndex: 1,
-  },
-  hairWave: {
-    position: 'absolute',
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
-    top: 8,
-    zIndex: 1,
-  },
-  hairWaveOne: { left: 9 },
-  hairWaveTwo: { left: 24 },
-  hairWaveThree: { right: 9 },
-  hairCurl: {
-    position: 'absolute',
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    top: 10,
-    zIndex: 1,
-  },
-  hairCurlOne: { left: 7 },
-  hairCurlTwo: { left: 18 },
-  hairCurlThree: { right: 18 },
-  hairCurlFour: { right: 7 },
-  hairSpike: {
-    position: 'absolute',
-    width: 5,
-    height: 11,
-    borderRadius: 3,
-    top: -4,
-    zIndex: 1,
-  },
-  hairSpikeOne: { left: 12, transform: [{ rotate: '-18deg' }] },
-  hairSpikeTwo: { left: 25, transform: [{ rotate: '8deg' }] },
-  hairSpikeThree: { right: 12, transform: [{ rotate: '18deg' }] },
-  hairBack: {
-    position: 'absolute',
-    top: 22,
-    left: 4,
-    right: 4,
-    height: 26,
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
-    zIndex: 0,
-  },
-  hairSideLeft: {
-    position: 'absolute',
-    left: 2,
-    top: 19,
-    width: 9,
-    height: 23,
-    borderTopLeftRadius: 6,
-    borderBottomLeftRadius: 6,
-    zIndex: 2,
-  },
-  hairSideRight: {
-    position: 'absolute',
-    right: 2,
-    top: 19,
-    width: 9,
-    height: 23,
-    borderTopRightRadius: 6,
-    borderBottomRightRadius: 6,
-    zIndex: 2,
-  },
-  hairBobBack: {
-    position: 'absolute',
-    top: 22,
-    left: 6,
-    right: 6,
-    height: 18,
-    borderBottomLeftRadius: 9,
-    borderBottomRightRadius: 9,
-    zIndex: 0,
-  },
-  hairBobSideLeft: {
-    position: 'absolute',
-    left: 4,
-    top: 20,
-    width: 8,
-    height: 15,
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
-    zIndex: 2,
-  },
-  hairBobSideRight: {
-    position: 'absolute',
-    right: 4,
-    top: 20,
-    width: 8,
-    height: 15,
-    borderTopRightRadius: 5,
-    borderBottomRightRadius: 5,
-    zIndex: 2,
-  },
-  hairStraightBack: {
-    position: 'absolute',
-    top: 21,
-    left: 5,
-    right: 5,
-    height: 28,
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
-    zIndex: 0,
-  },
-  hairBraid: {
-    position: 'absolute',
-    right: 9,
-    top: 23,
-    width: 7,
-    height: 23,
-    borderRadius: 3.5,
-    zIndex: 2,
-  },
-  hairBraidSegment: {
-    position: 'absolute',
-    right: 9,
-    width: 7,
-    height: 5,
-    borderRadius: 2.5,
-    zIndex: 2,
-  },
-  hairBraidSegmentOne: { top: 25 },
-  hairBraidSegmentTwo: { top: 31 },
-  hairBraidSegmentThree: { top: 37 },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -663,25 +362,53 @@ const styles = StyleSheet.create({
   },
   charactersContainer: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
     flexWrap: 'wrap',
+    justifyContent: 'flex-start',
   },
   characterCard: {
+    width: '30%', // Three in one row for main characters
     alignItems: 'center',
     gap: 8,
     borderWidth: 2,
     borderColor: 'transparent',
     borderRadius: 20,
     padding: 4,
+    marginBottom: 8,
+  },
+  sideCharactersContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  sideCharacterCard: {
+    width: '22%', // Four in one row for side characters
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 16,
+    padding: 2,
+    marginBottom: 8,
   },
   selectedCharacterCard: {
     borderColor: '#81C784',
     backgroundColor: 'rgba(129, 199, 132, 0.1)',
   },
   avatarContainer: {
-    width: 120,
-    height: 120,
+    width: '100%',
+    aspectRatio: 1,
     borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  sideAvatarContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -692,9 +419,9 @@ const styles = StyleSheet.create({
     top: -4,
     right: -4,
     backgroundColor: '#81C784',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center', 
     borderWidth: 2,
@@ -703,19 +430,19 @@ const styles = StyleSheet.create({
   },
   cardEditButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    top: 4,
+    right: 4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   characterAvatar: {
-    width: 80,
-    height: 80, 
+    width: '80%',
+    height: '80%', 
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -732,30 +459,30 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   characterFace: {
-    width: 60,
-    height: 60,
+    width: '100%',
+    height: '100%',
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    // Removed flexDirection: 'row' to stack eyes and mouth vertically
   },
   characterEyes: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   characterName: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#FFFFFF',
-    fontWeight: '600', 
+    fontWeight: '600',
+    textAlign: 'center',
   },
   selectedCharacterName: {
     color: '#81C784', 
     fontWeight: 'bold',
   },
   addCharacterButton: {
-    width: 120,
-    height: 120,
+    width: '30%',
+    aspectRatio: 1,
     borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
@@ -763,10 +490,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     borderStyle: 'dashed',
+    marginBottom: 8,
   },
   addSideCharacterButton: {
-    width: 80,
-    height: 80,
+    width: '22%',
+    aspectRatio: 1,
     borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
@@ -774,6 +502,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     borderStyle: 'dashed',
+    marginBottom: 8,
   },
   bottomSpacing: {
     height: 100,

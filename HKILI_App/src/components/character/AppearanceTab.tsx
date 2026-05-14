@@ -61,18 +61,11 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
           </View>
           <View style={styles.avatarStage}>
             <View style={styles.avatarFrame}>
-              {formData.avatarUrl ? (
-                <Image 
-                  source={getAvatarSource(formData.avatarUrl)} 
-                  style={styles.mainAvatarImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.emptyAvatar}>
-                  <Ionicons name="person" size={60} color="rgba(255,255,255,0.3)" />
-                  <Text style={styles.emptyAvatarText}>Select an avatar below</Text>
-                </View>
-              )}
+              <Image 
+                source={getAvatarSource(formData.avatarUrl, formData.gender)} 
+                style={styles.mainAvatarImage}
+                resizeMode="cover"
+              />
             </View>
           </View>
         </View>
