@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  Image,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { characterService } from '@/services/characterService';
+import { getAvatarSource } from '../../utils/avatarUtils';
 import { storyCharacterService } from '@/services/storyCharacterService';
 import { authService } from '@/services/authService';
 import { settingsService } from '@/services/settingsService';
@@ -271,14 +273,22 @@ export default function HomeScreen() {
                   >
                     <View style={styles.avatarContainer}>
                       <View style={styles.characterAvatar}>
-                        <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
-                          {renderCharacterHair(c)}
-                          <View style={styles.characterEyesRow}>
-                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                        {c.avatarUrl ? (
+                          <Image 
+                            source={getAvatarSource(c.avatarUrl)} 
+                            style={styles.avatarImage} 
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
+                            {renderCharacterHair(c)}
+                            <View style={styles.characterEyesRow}>
+                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                            </View>
+                            <View style={styles.characterMouth} />
                           </View>
-                          <View style={styles.characterMouth} />
-                        </View>
+                        )}
                       </View>
                       <TouchableOpacity 
                         style={styles.cardEditButton}
@@ -325,14 +335,22 @@ export default function HomeScreen() {
                   >
                     <View style={styles.avatarContainer}>
                       <View style={styles.characterAvatar}>
-                        <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
-                          {renderCharacterHair(c)}
-                          <View style={styles.characterEyesRow}>
-                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
-                            <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                        {c.avatarUrl ? (
+                          <Image 
+                            source={getAvatarSource(c.avatarUrl)} 
+                            style={styles.avatarImage} 
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <View style={[styles.characterFace, { backgroundColor: c.skinColor || '#FDBCB4' }]}>
+                            {renderCharacterHair(c)}
+                            <View style={styles.characterEyesRow}>
+                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                              <View style={[styles.characterEyes, { backgroundColor: c.eyeColor || '#8B4513' }]} />
+                            </View>
+                            <View style={styles.characterMouth} />
                           </View>
-                          <View style={styles.characterMouth} />
-                        </View>
+                        )}
                       </View>
                       {!isStoryCharacter && (
                         <TouchableOpacity 
@@ -701,13 +719,17 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)', // Match AppearanceTab frame
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 }, // Scaled down from 6
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
-    shadowRadius: 5, // Scaled down from 10
-    elevation: 3, // Scaled down
+    shadowRadius: 5,
+    elevation: 3,
     overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   characterFace: {
     width: 60,

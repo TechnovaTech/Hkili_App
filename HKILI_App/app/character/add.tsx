@@ -34,6 +34,7 @@ export default function AddCharacterScreen() {
     hairStyle: 'Short',
     interests: [],
     customInterests: [],
+    avatarUrl: '',
     isMainCharacter: isMain === 'true',
   });
 
@@ -49,6 +50,7 @@ export default function AddCharacterScreen() {
         hairStyle: 'Short',
         interests: [],
         customInterests: [],
+        avatarUrl: '',
         isMainCharacter: isMain === 'true',
       });
       setActiveTab('basic');
@@ -77,6 +79,7 @@ export default function AddCharacterScreen() {
           hairStyle: c.hairStyle || appearance.hairStyle || 'Short',
           interests: c.interests || [],
           customInterests: [],
+          avatarUrl: c.avatarUrl || '',
           isMainCharacter: c.isMainCharacter ?? true,
         });
       }
