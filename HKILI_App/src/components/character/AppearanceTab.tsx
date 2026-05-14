@@ -39,7 +39,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
         })}
       >
         <Image 
-          source={av.image} 
+          source={getAvatarSource(av.id)} 
           style={styles.miniAvatarImage}
           resizeMode="cover"
         />
