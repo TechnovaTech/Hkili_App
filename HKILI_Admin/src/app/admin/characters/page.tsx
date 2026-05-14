@@ -26,6 +26,7 @@ interface Character {
   hairStyle: string
   skinColor: string
   eyeColor: string
+  avatarUrl?: string
   interests: string[]
   customInterests: string[]
   description?: string
@@ -49,6 +50,7 @@ export default function CharactersManagement() {
     gender: 'n/a',
     categoryId: '',
     description: '',
+    avatarUrl: '',
     hairColor: '#8B4513',
     hairStyle: 'Short',
     skinColor: '#FDBCB4',
@@ -114,6 +116,7 @@ export default function CharactersManagement() {
         gender: character.gender,
         categoryId: typeof character.categoryId === 'string' ? character.categoryId : character.categoryId?._id || '',
         description: character.description || '',
+        avatarUrl: character.avatarUrl || '',
         hairColor: character.hairColor,
         hairStyle: character.hairStyle,
         skinColor: character.skinColor,
@@ -129,6 +132,7 @@ export default function CharactersManagement() {
         gender: 'n/a',
         categoryId: '',
         description: '',
+        avatarUrl: '',
         hairColor: '#8B4513',
         hairStyle: 'Short',
         skinColor: '#FDBCB4',
@@ -273,6 +277,9 @@ export default function CharactersManagement() {
                             hairColor={character.hairColor}
                             hairStyle={character.hairStyle}
                             eyeColor={character.eyeColor}
+                            avatarUrl={character.avatarUrl}
+                            gender={character.gender}
+                            name={character.name}
                             size={40}
                           />
                         </div>
@@ -423,6 +430,16 @@ export default function CharactersManagement() {
                       <option key={c._id} value={c._id}>{c.name}</option>
                     ))}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Avatar Path (e.g. male/image.jpg)</label>
+                  <input
+                    type="text"
+                    value={formData.avatarUrl}
+                    onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    placeholder="Leave empty for default"
+                  />
                 </div>
               </div>
 

@@ -284,6 +284,8 @@ export default function StoryCharactersManagement() {
                               hairColor={character.hairColor}
                               hairStyle={character.hairStyle}
                               eyeColor={character.eyeColor}
+                              gender={character.gender}
+                              name={character.name}
                             />
                           </div>
                         )}

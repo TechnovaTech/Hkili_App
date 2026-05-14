@@ -1,10 +1,13 @@
 import React from 'react';
 
 interface CharacterAvatarProps {
-  skinColor: string;
-  hairColor: string;
-  hairStyle: string;
-  eyeColor: string;
+  skinColor?: string;
+  hairColor?: string;
+  hairStyle?: string;
+  eyeColor?: string;
+  avatarUrl?: string;
+  gender?: string;
+  name?: string;
   size?: number;
 }
 
@@ -13,8 +16,38 @@ export default function CharacterAvatar({
   hairColor = '#8B4513', 
   hairStyle = 'Short', 
   eyeColor = '#8B4513',
+  avatarUrl,
+  gender = 'n/a',
+  name = '',
   size = 80
 }: CharacterAvatarProps) {
+  // If we have an avatar URL, show the image
+  if (avatarUrl) {
+    const imageUrl = avatarUrl.startsWith('http') ? avatarUrl : `/${avatarUrl}`;
+    return (
+      <div 
+        className="rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200"
+        style={{ width: `${size}px`, height: `${size}px` }}
+      >
+        <img 
+          src={imageUrl} 
+          alt={name} 
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  // Fallback to name-based default if no avatarUrl but we want a real look
+  // For admin, we might still want the old drawing as a fallback or use the same logic as app
+  // Let's implement a simple fallback to a default image based on gender if avatarUrl is missing
+  if (name) {
+    const isFemale = gender === 'female';
+    const folder = isFemale ? 'female' : 'male';
+    // We can't easily use the full path without the exact filename here 
+    // but we can at least try to show something if we have it in public
+  }
+
   const scale = size / 80;
   
   const renderHair = () => {
