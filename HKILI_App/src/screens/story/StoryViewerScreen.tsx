@@ -55,10 +55,23 @@ export default function StoryViewerScreen() {
 
   const fetchStory = async (sid: string) => {
     try {
+      console.log(`[StoryViewer] Fetching story with ID: ${sid}`);
       const response = await storyService.getStory(sid);
-      if (response.success && response.data) setStory(response.data);
+      if (response.success && response.data) {
+        const s = response.data;
+        console.log('[StoryViewer] Story data received:', {
+          title: s.title,
+          image1: s.image1 ? 'URL present' : 'MISSING',
+          image2: s.image2 ? 'URL present' : 'MISSING',
+          image3: s.image3 ? 'URL present' : 'MISSING',
+          fullData: s // Log full object for inspection
+        });
+        setStory(s);
+      } else {
+        console.error('[StoryViewer] Failed to fetch story:', response.error);
+      }
     } catch (error) {
-      console.error('Error fetching story:', error);
+      console.error('[StoryViewer] Error fetching story:', error);
     } finally {
       setLoading(false);
     }

@@ -56,6 +56,8 @@ export default function StoryGenerationScreen() {
       const mainIds = mainCharacterIds ? JSON.parse(mainCharacterIds) : [];
       const sideIds = sideCharacterIds ? JSON.parse(sideCharacterIds) : [];
 
+      console.log('[StoryGeneration] Requesting story generation...', { categoryId, mainIds, sideIds, place, moral, language });
+
       const response = await apiClient.post<any>('/ai/generate', {
         categoryId,
         mainCharacterIds: mainIds,
@@ -65,14 +67,25 @@ export default function StoryGenerationScreen() {
         language: language || 'EN',
       });
 
+      console.log('[StoryGeneration] API Response received:', response);
+
       if (response.success && response.data) {
+        const story = response.data;
+        console.log('[StoryGeneration] Story generated successfully:', {
+          id: story._id || story.id,
+          image1: story.image1 ? 'URL present' : 'MISSING',
+          image2: story.image2 ? 'URL present' : 'MISSING',
+          image3: story.image3 ? 'URL present' : 'MISSING'
+        });
         generatedStoryId.current = response.data._id || response.data.id;
         setStatus('done');
       } else {
+        console.error('[StoryGeneration] Generation failed:', response.error);
         setErrorMsg(response.error || 'Failed to generate story');
         setStatus('error');
       }
     } catch (err: any) {
+      console.error('[StoryGeneration] Exception during generation:', err);
       setErrorMsg(err.message || 'An error occurred');
       setStatus('error');
     }

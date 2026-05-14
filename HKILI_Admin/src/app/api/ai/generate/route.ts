@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       `Children's storybook illustration, heartwarming ending for "${storyTitle}". ${imageContext}, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style, high quality.`,
     ];
 
-    console.log('Generating images...');
+    console.log('Generating images with prompts:', imagePrompts);
     const imageResults = await Promise.allSettled(
       imagePrompts.map(prompt =>
         openai.images.generate({
@@ -164,13 +164,16 @@ export async function POST(request: NextRequest) {
 
     const [img1, img2, img3] = imageResults.map((r, idx) => {
       if (r.status === 'fulfilled') {
-        console.log(`Image ${idx + 1} generated successfully`);
-        return r.value.data?.[0]?.url ?? null;
+        const url = r.value.data?.[0]?.url ?? null;
+        console.log(`Image ${idx + 1} generated successfully:`, url);
+        return url;
       } else {
-        console.error(`Image ${idx + 1} failed:`, r.reason);
+        console.error(`Image ${idx + 1} failed with reason:`, r.reason);
         return null;
       }
     });
+
+    console.log('Final image URLs to be saved:', { img1, img2, img3 });
 
     const newStory = await Story.create({
       title: storyTitle,
