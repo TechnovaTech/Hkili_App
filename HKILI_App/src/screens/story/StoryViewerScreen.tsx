@@ -13,7 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
-import { useTranslation } from 'react-i18next';
 import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
@@ -21,7 +20,6 @@ import { theme } from '@/theme';
 
 export default function StoryViewerScreen() {
   const router = useRouter();
-  const { i18n } = useTranslation();
   const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
   const id = Array.isArray(storyId) ? storyId[0] : storyId;
 
@@ -82,8 +80,7 @@ export default function StoryViewerScreen() {
   // Build full story text from segments
   const getFullText = useCallback((s: Story) => {
     if (!s.content || s.content.length === 0) return s.title || '';
-    if (typeof s.content === 'string') return s.content;
-    return s.content.map((seg: any) => seg.text || seg || '').filter(Boolean).join('\n\n');
+    return s.content.map((seg: any) => seg.text || '').filter(Boolean).join('\n\n');
   }, []);
 
   // Estimate reading duration: ~130 words per minute for TTS
@@ -129,7 +126,7 @@ export default function StoryViewerScreen() {
     const skipWords = Math.floor(fromSeconds * wps);
     const remainingText = words.slice(Math.min(skipWords, words.length - 1)).join(' ');
     Speech.speak(remainingText, {
-      language: i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'fr' ? 'fr-FR' : 'en-US',
+      language: 'en-US',
       rate: 0.9,
       pitch: 1.0,
       onDone: () => { setIsPlaying(false); setElapsed(totalDuration); pausedAtRef.current = 0; stopTimer(); },
@@ -193,7 +190,7 @@ export default function StoryViewerScreen() {
   }
 
   // Split content into 2 halves
-  let segments = Array.isArray(story.content) ? story.content : [{ id: '1', text: String(story.content) }];
+  let segments = story.content || [];
   if (segments.length === 1 && segments[0].text) {
     const paras = segments[0].text.split(/\n\s*\n/);
     if (paras.length > 1) {

@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
 
     const newStory = await Story.create({
       title: storyTitle,
-      content: JSON.stringify(Array.isArray(storyContent) ? storyContent : [{ id: '1', text: storyContent }]),
+      content: storyContent,
       userId,
       genre: 'AI Generated',
       language,
