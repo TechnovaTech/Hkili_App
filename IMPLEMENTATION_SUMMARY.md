@@ -80,7 +80,7 @@ The app now uses a streamlined flow where users select main/side characters, the
 5. **Story Viewer**: Generated story is displayed and saved to library
 
 ## Backend Prompt Structure
-
+ 
 The prompt sent to OpenAI is structured as:
 ```
 Write a [CATEGORY] story set in [PLACE].

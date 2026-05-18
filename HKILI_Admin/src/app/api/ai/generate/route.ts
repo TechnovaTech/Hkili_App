@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: finalSystemMessage },
         { role: 'user', content: finalPrompt },
       ],
-      model: 'gpt-3.5-turbo-0125', // Use a more modern version of 3.5 that handles JSON better
+      model: 'gpt-3.5-turbo', // Use a more modern version of 3.5 that handles JSON better
       response_format: { type: 'json_object' },
     });
 

@@ -66,6 +66,9 @@
   "settings": {
     "title": "الإعدادات",
     "language": "اللغة",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "french": "الفرنسية",
     "textSize": "حجم النص",
     "offlineStorage": "التخزين المحلي",
     "storageUsed": "المساحة المستخدمة",
