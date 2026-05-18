@@ -18,8 +18,12 @@ import { storyCharacterService } from '@/services/storyCharacterService';
 import { authService } from '@/services/authService';
 import { settingsService } from '@/services/settingsService';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../hooks/useRTL';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
+  const { isRTL, textAlign, flexDirection } = useRTL();
   const [selectedMainCharacters, setSelectedMainCharacters] = useState<string[]>([]);
   const [selectedSideCharacters, setSelectedSideCharacters] = useState<string[]>([]);
   const [characters, setCharacters] = useState<any[]>([]);
@@ -132,10 +136,10 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
       
-      <View style={styles.fixedHeader}>
+      <View style={[styles.fixedHeader, { flexDirection }]}>
         <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>Home</Text>
-        <View style={styles.coinsContainer}>
+        <Text style={styles.headerTitle}>{t('home.title')}</Text>
+        <View style={[styles.coinsContainer, { flexDirection }]}>
           <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>
@@ -151,16 +155,16 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                Select the main characters for your story:
+            <View style={[styles.sectionHeader, { flexDirection }]}>
+              <Text style={[styles.sectionTitle, { textAlign }]}>
+                {t('home.selectMainCharacters')}
               </Text>
               <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Edit</Text>
+                <Text style={styles.editButtonText}>{t('home.edit')}</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.charactersContainer}>
+            <View style={[styles.charactersContainer, { flexDirection }]}>
               {mainCharacters.map((c: any) => {
                 const isSelected = selectedMainCharacters.includes(c.id || c._id);
                 return (
@@ -207,9 +211,11 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Select side characters:</Text>
+            <Text style={[styles.sectionTitle, { textAlign, marginBottom: 20 }]}>
+              {t('home.selectSideCharacters')}
+            </Text>
             
-            <View style={styles.sideCharactersContainer}>
+            <View style={[styles.sideCharactersContainer, { flexDirection }]}>
               {sideCharacters.map((c: any) => {
                 const isSelected = selectedSideCharacters.includes(c.id || c._id);
                 const isStoryCharacter = storyCharacters.some(sc => (sc.id || sc._id) === (c.id || c._id));
@@ -267,16 +273,20 @@ export default function HomeScreen() {
        
 
         <TouchableOpacity 
-          style={[styles.startButton, !canStart && styles.startButtonDisabled]} 
+          style={[styles.startButton, { flexDirection }, !canStart && styles.startButtonDisabled]} 
           onPress={handleStart}
           disabled={!canStart}
         >
           <Ionicons name="layers-outline" size={20} color={canStart ? "#FFFFFF" : "#64B5F6"} />
-          <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>{storyCost} Start</Text>
+          <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>
+            {storyCost} {t('home.start')}
+          </Text>
         </TouchableOpacity>
         
         {selectedMainCharacters.length > 0 && coins < storyCost && (
-          <Text style={styles.insufficientCoinsText}>Required: {storyCost} coins</Text>
+          <Text style={styles.insufficientCoinsText}>
+            {t('home.insufficientCoins', { cost: storyCost })}
+          </Text>
         )}
       </View>
     </View>

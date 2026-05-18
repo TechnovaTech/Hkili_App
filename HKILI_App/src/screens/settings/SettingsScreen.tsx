@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     padding: 16,
+    marginBottom: 12,
   },
   settingContent: {
     flex: 1,

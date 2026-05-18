@@ -12,6 +12,12 @@
     "done": "Done",
     "close": "Close"
   },
+  "nav": {
+    "home": "Home",
+    "library": "My Story",
+    "subscription": "Subscription",
+    "settings": "Settings"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -31,7 +37,13 @@
     "storyLibrary": "Story Library",
     "offlineStories": "Offline Stories",
     "coins": "Coins",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "title": "Home",
+    "selectMainCharacters": "Select the main characters for your story:",
+    "selectSideCharacters": "Select side characters:",
+    "edit": "Edit",
+    "start": "Start",
+    "insufficientCoins": "Required: {{cost}} coins"
   },
   "storyGeneration": {
     "title": "Create Your Story",
@@ -61,7 +73,8 @@
     "filterByGenre": "Filter by Genre",
     "favorites": "Favorites",
     "recent": "Recent",
-    "noStories": "No stories found"
+    "noStories": "No stories found",
+    "yearsOld": "{{age}} years old"
   },
   "settings": {
     "title": "Settings",
@@ -110,5 +123,11 @@
     "short": "Short (5 min)",
     "medium": "Medium (10 min)",
     "long": "Long (15 min)"
+  },
+  "subscription": {
+    "title": "Plans",
+    "choosePlan": "Choose Your Plan",
+    "coins": "Coins",
+    "buy": "Buy"
   }
 }

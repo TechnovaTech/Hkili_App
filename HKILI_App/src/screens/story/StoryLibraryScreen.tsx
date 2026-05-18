@@ -15,10 +15,14 @@ import { storyService } from '@/services/storyService';
 import { authService } from '@/services/authService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../hooks/useRTL';
 
 export default function StoryLibraryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { isRTL, textAlign, flexDirection } = useRTL();
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [coins, setCoins] = useState(0);
@@ -62,7 +66,7 @@ export default function StoryLibraryScreen() {
 
   const renderStoryItem = ({ item }: { item: Story }) => (
     <TouchableOpacity
-      style={styles.storyCard}
+      style={[styles.storyCard, { flexDirection }]}
       onPress={() => router.push({
         pathname: '/story/viewer',
         params: { storyId: item.id }
@@ -71,18 +75,22 @@ export default function StoryLibraryScreen() {
       <View style={styles.storyImage}>
         <Text style={styles.storyEmoji}>📚</Text>
       </View>
-      <View style={styles.storyContent}>
-        <Text style={styles.storyTitle} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.storyGenre}>{item.genre || 'Story'}</Text>
-        <Text style={styles.storyInfo}>
-          {item.childName}, {item.childAge} years old
+      <View style={[styles.storyContent, { 
+        marginLeft: isRTL ? 0 : 16, 
+        marginRight: isRTL ? 16 : 0,
+        alignItems: isRTL ? 'flex-end' : 'flex-start'
+      }]}>
+        <Text style={[styles.storyTitle, { textAlign }]} numberOfLines={1}>{item.title}</Text>
+        <Text style={[styles.storyGenre, { textAlign }]}>{item.genre || 'Story'}</Text>
+        <Text style={[styles.storyInfo, { textAlign }]}>
+          {item.childName}, {t('library.yearsOld', { age: item.childAge })}
         </Text>
-        <Text style={styles.storyDate}>
+        <Text style={[styles.storyDate, { textAlign }]}>
           {new Date(item.createdAt).toLocaleDateString()}
         </Text>
       </View>
       <TouchableOpacity style={styles.playButton}>
-        <Ionicons name="play" size={20} color="#FFFFFF" />
+        <Ionicons name={isRTL ? "play-back" : "play"} size={20} color="#FFFFFF" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -91,10 +99,10 @@ export default function StoryLibraryScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
       
-      <View style={styles.header}>
+      <View style={[styles.header, { flexDirection }]}>
         <View style={styles.headerSpacer} />
-        <Text style={styles.title}>My Stories</Text>
-        <View style={styles.coinsContainer}>
+        <Text style={styles.title}>{t('library.myStories')}</Text>
+        <View style={[styles.coinsContainer, { flexDirection }]}>
           <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>

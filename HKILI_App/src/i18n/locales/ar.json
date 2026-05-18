@@ -12,6 +12,12 @@
     "done": "تم",
     "close": "إغلاق"
   },
+  "nav": {
+    "home": "الرئيسية",
+    "library": "قصصي",
+    "subscription": "الاشتراك",
+    "settings": "الإعدادات"
+  },
   "auth": {
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
@@ -31,7 +37,13 @@
     "storyLibrary": "مكتبة القصص",
     "offlineStories": "القصص المحفوظة",
     "coins": "العملات",
-    "subscription": "الاشتراك"
+    "subscription": "الاشتراك",
+    "title": "الرئيسية",
+    "selectMainCharacters": "اختر الشخصيات الرئيسية لقصتك:",
+    "selectSideCharacters": "اختر الشخصيات الجانبية:",
+    "edit": "تعديل",
+    "start": "ابدأ",
+    "insufficientCoins": "مطلوب: {{cost}} عملات"
   },
   "storyGeneration": {
     "title": "أنشئ قصتك",
@@ -61,7 +73,8 @@
     "filterByGenre": "تصفية حسب النوع",
     "favorites": "المفضلة",
     "recent": "الأحدث",
-    "noStories": "لم يتم العثور على قصص"
+    "noStories": "لم يتم العثور على قصص",
+    "yearsOld": "{{age}} سنوات"
   },
   "settings": {
     "title": "الإعدادات",
@@ -109,6 +122,12 @@
   "lengths": {
     "short": "قصير (5 دقائق)",
     "medium": "متوسط (10 دقائق)",
-    "long": "طويل (15 دقيقة)"
+    "long": "طويلة (15 دقيقة)"
+  },
+  "subscription": {
+    "title": "الخطط",
+    "choosePlan": "اختر خطتك",
+    "coins": "عملات",
+    "buy": "شراء"
   }
 }

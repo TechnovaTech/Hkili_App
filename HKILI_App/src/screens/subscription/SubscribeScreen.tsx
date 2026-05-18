@@ -12,8 +12,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { planService, Plan } from '../../services/planService';
 import { authService } from '../../services/authService';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../hooks/useRTL';
 
 export default function SubscribeScreen() {
+  const { t } = useTranslation();
+  const { isRTL, textAlign, flexDirection } = useRTL();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -64,10 +68,10 @@ export default function SubscribeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
       
-      <View style={styles.fixedHeader}>
+      <View style={[styles.fixedHeader, { flexDirection }]}>
         <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>Plans</Text>
-        <View style={styles.coinsContainer}>
+        <Text style={styles.headerTitle}>{t('subscription.title')}</Text>
+        <View style={[styles.coinsContainer, { flexDirection }]}>
           <Text style={styles.coinsText}>{coins}</Text>
           <Ionicons name="layers-outline" size={20} color="#4CAF50" />
         </View>
@@ -80,12 +84,12 @@ export default function SubscribeScreen() {
           </View>
         </View>
 
-        <Text style={styles.upgradeTitle}>Choose Your Plan</Text>
+        <Text style={[styles.upgradeTitle, { textAlign }]}>{t('subscription.choosePlan')}</Text>
 
         {loading ? (
           <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
         ) : (
-          <View style={styles.plansRow}>
+          <View style={[styles.plansRow, { flexDirection }]}>
             {plans.map((plan) => (
               <TouchableOpacity
                 key={plan._id}
@@ -112,7 +116,7 @@ export default function SubscribeScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.buyButton} onPress={handleBuy}>
-          <Text style={styles.buyButtonText}>Buy</Text>
+          <Text style={styles.buyButtonText}>{t('subscription.buy')}</Text>
         </TouchableOpacity>
       </View>
     </View>

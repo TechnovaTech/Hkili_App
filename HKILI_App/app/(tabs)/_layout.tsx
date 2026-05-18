@@ -2,10 +2,14 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { useRTL } from '../../src/hooks/useRTL';
 
 export default function TabsLayout() {
   const router = useRouter();
   const segments = useSegments();
+  const { t } = useTranslation();
+  const { flexDirection } = useRTL();
   const currentTab = segments[1] || 'home';
   
   return (
@@ -22,25 +26,33 @@ export default function TabsLayout() {
         <Tabs.Screen name="settings" />
       </Tabs>
       
-      <View style={styles.bottomNavbar}>
+      <View style={[styles.bottomNavbar, { flexDirection }]}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/home')}>
           <Ionicons name="home" size={24} color={currentTab === 'home' ? '#4CAF50' : '#888888'} />
-          <Text style={[styles.navText, currentTab === 'home' && styles.activeNavText]}>Home</Text>
+          <Text style={[styles.navText, currentTab === 'home' && styles.activeNavText]}>
+            {t('nav.home')}
+          </Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/library')}>
           <Ionicons name="book-outline" size={24} color={currentTab === 'library' ? '#4CAF50' : '#888888'} />
-          <Text style={[styles.navText, currentTab === 'library' && styles.activeNavText]}>My Story</Text>
+          <Text style={[styles.navText, currentTab === 'library' && styles.activeNavText]}>
+            {t('nav.library')}
+          </Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/subscription')}>
           <Ionicons name="card-outline" size={24} color={currentTab === 'subscription' ? '#4CAF50' : '#888888'} />
-          <Text style={[styles.navText, currentTab === 'subscription' && styles.activeNavText]}>Subscription</Text>
+          <Text style={[styles.navText, currentTab === 'subscription' && styles.activeNavText]}>
+            {t('nav.subscription')}
+          </Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/settings')}>
           <Ionicons name="settings-outline" size={24} color={currentTab === 'settings' ? '#4CAF50' : '#888888'} />
-          <Text style={[styles.navText, currentTab === 'settings' && styles.activeNavText]}>Settings</Text>
+          <Text style={[styles.navText, currentTab === 'settings' && styles.activeNavText]}>
+            {t('nav.settings')}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

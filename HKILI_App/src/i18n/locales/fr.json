@@ -12,6 +12,12 @@
     "done": "Terminé",
     "close": "Fermer"
   },
+  "nav": {
+    "home": "Accueil",
+    "library": "Mes Histoires",
+    "subscription": "Abonnement",
+    "settings": "Paramètres"
+  },
   "auth": {
     "login": "Connexion",
     "register": "S'inscrire",
@@ -31,7 +37,13 @@
     "storyLibrary": "Bibliothèque d'histoires",
     "offlineStories": "Histoires hors ligne",
     "coins": "Pièces",
-    "subscription": "Abonnement"
+    "subscription": "Abonnement",
+    "title": "Accueil",
+    "selectMainCharacters": "Sélectionnez les personnages principaux de votre histoire :",
+    "selectSideCharacters": "Sélectionnez les personnages secondaires :",
+    "edit": "Modifier",
+    "start": "Démarrer",
+    "insufficientCoins": "Requis : {{cost}} pièces"
   },
   "storyGeneration": {
     "title": "Créez votre histoire",
@@ -61,7 +73,8 @@
     "filterByGenre": "Filtrer par genre",
     "favorites": "Favoris",
     "recent": "Récent",
-    "noStories": "Aucune histoire trouvée"
+    "noStories": "Aucune histoire trouvée",
+    "yearsOld": "{{age}} ans"
   },
   "settings": {
     "title": "Paramètres",
@@ -110,5 +123,11 @@
     "short": "Court (5 min)",
     "medium": "Moyen (10 min)",
     "long": "Long (15 min)"
+  },
+  "subscription": {
+    "title": "Plans",
+    "choosePlan": "Choisissez votre plan",
+    "coins": "Pièces",
+    "buy": "Acheter"
   }
 }
