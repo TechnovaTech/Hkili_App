@@ -4,24 +4,28 @@ import { useTranslation } from 'react-i18next';
 
 export const useRTL = () => {
   const { i18n } = useTranslation();
-  const [isRTL, setIsRTL] = useState(I18nManager.isRTL);
+  const isArabic = i18n.language?.startsWith('ar');
+  const nativeRTL = I18nManager.isRTL;
+
+  // If the language direction matches the native direction, we use standard 'row'.
+  // If they don't match (e.g. language is Arabic but native is LTR, or vice versa), 
+  // we use 'row-reverse' to "fake" the correct direction until the next restart.
+  const shouldReverse = isArabic !== nativeRTL;
 
   useEffect(() => {
-    const isArabic = i18n.language === 'ar';
-    
-    if (isArabic !== I18nManager.isRTL) {
+    if (isArabic !== nativeRTL) {
       I18nManager.allowRTL(isArabic);
       I18nManager.forceRTL(isArabic);
-      setIsRTL(isArabic);
       
-      // Note: On native platforms, this would require app restart
-      // On web, it works immediately
+      // Note: On native platforms, a full app restart is usually required
+      // for native components to pick up the RTL change.
+      // However, our JS-based dynamic styles with 'row-reverse' will react immediately.
     }
-  }, [i18n.language]);
+  }, [isArabic, nativeRTL]);
 
   return {
-    isRTL,
-    textAlign: isRTL ? 'right' as const : 'left' as const,
-    flexDirection: isRTL ? 'row-reverse' as const : 'row' as const,
+    isRTL: isArabic,
+    textAlign: isArabic ? 'right' as const : 'left' as const,
+    flexDirection: shouldReverse ? 'row-reverse' as const : 'row' as const,
   };
 };

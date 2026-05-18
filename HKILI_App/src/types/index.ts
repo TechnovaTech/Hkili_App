@@ -44,6 +44,7 @@ export interface Story {
   isFavorite: boolean;
   isDownloaded: boolean;
   duration?: number;
+  language?: string;
 }
 
 export interface StorySegment {

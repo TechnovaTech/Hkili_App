@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { useTranslation } from 'react-i18next';
 import { storyService } from '@/services/storyService';
 import { Story } from '@/types';
 import { theme } from '@/theme';
@@ -20,11 +21,18 @@ import { theme } from '@/theme';
 
 export default function StoryViewerScreen() {
   const router = useRouter();
+  const { i18n } = useTranslation();
   const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
   const id = Array.isArray(storyId) ? storyId[0] : storyId;
 
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Content alignment based on story language
+  const storyLang = (story?.language || i18n.language).toLowerCase();
+  const isStoryRTL = storyLang === 'ar';
+  const storyTextAlign = isStoryRTL ? 'right' : 'left';
+  const storyFlexDirection = isStoryRTL ? 'row-reverse' : 'row';
 
   // TTS player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -125,8 +133,17 @@ export default function StoryViewerScreen() {
     const wps = (0.9 * 130) / 60;
     const skipWords = Math.floor(fromSeconds * wps);
     const remainingText = words.slice(Math.min(skipWords, words.length - 1)).join(' ');
+
+    // Map story language to BCP 47 language tag for TTS
+    // Priority: story.language -> i18n.language
+    const langToUse = (story?.language || i18n.language).toLowerCase();
+    
+    const ttsLanguage = langToUse === 'ar' ? 'ar-SA' : 
+                        langToUse === 'fr' ? 'fr-FR' : 
+                        'en-US';
+
     Speech.speak(remainingText, {
-      language: 'en-US',
+      language: ttsLanguage,
       rate: 0.9,
       pitch: 1.0,
       onDone: () => { setIsPlaying(false); setElapsed(totalDuration); pausedAtRef.current = 0; stopTimer(); },
@@ -220,16 +237,16 @@ export default function StoryViewerScreen() {
 
       {/* Story Content */}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.storyTitle}>{story.title}</Text>
+        <Text style={[styles.storyTitle, { textAlign: storyTextAlign }]}>{story.title}</Text>
 
         {/* Image 1 — Start */}
         {renderStoryImage(img1)}
 
-        <Text style={styles.sectionTitle}>The Story</Text>
+        <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>The Story</Text>
 
         <View style={styles.textBlock}>
           {part1.map((seg: any, i: number) => (
-            <Text key={`p1-${i}`} style={styles.storyText}>{seg.text}</Text>
+            <Text key={`p1-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
           ))}
         </View>
 
@@ -238,7 +255,7 @@ export default function StoryViewerScreen() {
 
         <View style={styles.textBlock}>
           {part2.map((seg: any, i: number) => (
-            <Text key={`p2-${i}`} style={styles.storyText}>{seg.text}</Text>
+            <Text key={`p2-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
           ))}
         </View>
 
