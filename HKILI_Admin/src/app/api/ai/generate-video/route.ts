@@ -90,18 +90,34 @@ export async function POST(request: NextRequest) {
     
     console.log(`Generated Prompt: ${promptText}`);
 
-    // 4. Generate Image using DALL-E 3 (for high quality base)
-    console.log("Generating base image with DALL-E 3...");
+    // 4. Generate base image. Newer OpenAI keys only have the gpt-image-* family
+    // (legacy dall-e-3 returns "model does not exist"). gpt-image-1 returns base64,
+    // so we upload it to Cloudinary to obtain a public URL for RunwayML.
+    const imageModel = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
+    console.log(`Generating base image with ${imageModel}...`);
     const imageResponse = await openai.images.generate({
-      model: "dall-e-3",
+      model: imageModel,
       prompt: promptText + " Cartoon style, vivid colors, high quality, cinematic lighting.",
       n: 1,
-      size: "1792x1024", // Landscape
-      response_format: "url",
+      size: "1536x1024", // Landscape (gpt-image-1 supported size)
+      quality: "high",
     });
 
-    const imageUrl = imageResponse.data?.[0]?.url;
-    if (!imageUrl) throw new Error("Failed to generate base image from DALL-E 3");
+    const baseImage = imageResponse.data?.[0];
+    let imageUrl = baseImage?.url ?? null;
+    if (!imageUrl && baseImage?.b64_json) {
+      const buffer = Buffer.from(baseImage.b64_json, 'base64');
+      const uploaded: any = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            { folder: 'hkili_videos/base', resource_type: 'image' },
+            (error, result) => (error ? reject(error) : resolve(result))
+          )
+          .end(buffer);
+      });
+      imageUrl = uploaded?.secure_url ?? null;
+    }
+    if (!imageUrl) throw new Error(`Failed to generate base image from ${imageModel}`);
     console.log("Base image generated:", imageUrl);
 
     // 5. Generate Video using RunwayML (Image to Video)

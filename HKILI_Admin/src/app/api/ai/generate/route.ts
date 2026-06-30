@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { v2 as cloudinary } from 'cloudinary';
 import Story from '@/models/Story';
 import User from '@/models/User';
 import Setting from '@/models/Setting';
@@ -18,6 +19,37 @@ Moral of the story: [MORAL]
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`;
 
 const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`;
+
+// Image model. Newer OpenAI project keys only have access to the `gpt-image-*`
+// family — the legacy `dall-e-3`/`dall-e-2` models return "model does not exist".
+// gpt-image-1 returns base64 (b64_json), NOT a URL, so generated images are
+// uploaded to Cloudinary for permanent storage. Override via OPENAI_IMAGE_MODEL.
+const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Upload a base64-encoded image to Cloudinary and return its permanent secure URL.
+async function uploadBase64ToCloudinary(b64: string): Promise<string | null> {
+  try {
+    const buffer = Buffer.from(b64, 'base64');
+    const result: any = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { folder: 'hkili-app/stories', resource_type: 'image' },
+          (error, uploaded) => (error ? reject(error) : resolve(uploaded))
+        )
+        .end(buffer);
+    });
+    return result?.secure_url ?? null;
+  } catch (e) {
+    console.error('Cloudinary upload failed:', e);
+    return null;
+  }
+}
 
 function buildPrompt(template: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
@@ -139,9 +171,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`Story generated: ${storyTitle} in ${targetLanguage}`);
 
-    // Generate 3 story-relevant images in parallel using DALL-E
-    // Use English for image prompts as DALL-E performs better with English
-    // We include the category and characters to provide context even if the title is in another language
+    // Generate 3 story-relevant images in parallel.
+    // Prompts are in English (image models perform better with English) and
+    // include the category and characters for context even when the title is
+    // in another language.
     const imageContext = `Category: ${categoryName}, Setting: ${place || 'magical land'}, Characters: ${mainCharacterNames.join(', ')}`;
     const imagePrompts = [
       `Children's storybook illustration, opening scene for a ${categoryName} story titled "${storyTitle}". ${imageContext}. Colorful, warm, friendly art style, high quality.`,
@@ -149,30 +182,43 @@ export async function POST(request: NextRequest) {
       `Children's storybook illustration, heartwarming ending for "${storyTitle}". ${imageContext}, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style, high quality.`,
     ];
 
-    console.log('Generating images with prompts:', imagePrompts);
+    console.log(`Generating images with model "${IMAGE_MODEL}":`, imagePrompts);
     const imageResults = await Promise.allSettled(
       imagePrompts.map(prompt =>
         openai.images.generate({
-          model: 'dall-e-3',
+          model: IMAGE_MODEL,
           prompt,
           n: 1,
           size: '1024x1024',
-          quality: 'standard',
+          quality: 'medium', // gpt-image-1 quality: low | medium | high | auto
         })
       )
     );
 
-    const [img1, img2, img3] = imageResults.map((r, idx) => {
-      if (r.status === 'fulfilled') {
-        const url = r.value.data?.[0]?.url ?? null;
-        console.log(`Image ${idx + 1} generated successfully:`, url);
-        return url;
-      } else {
-        console.error(`Image ${idx + 1} failed with reason:`, r.reason);
+    // gpt-image-1 returns base64 (b64_json) which we persist to Cloudinary.
+    // Fall back to a returned URL if a model/key ever provides one directly.
+    const imageUrls = await Promise.all(
+      imageResults.map(async (r, idx) => {
+        if (r.status !== 'fulfilled') {
+          console.error(`Image ${idx + 1} generation failed:`, r.reason?.message || r.reason);
+          return null;
+        }
+        const datum = r.value.data?.[0];
+        if (datum?.b64_json) {
+          const url = await uploadBase64ToCloudinary(datum.b64_json);
+          console.log(`Image ${idx + 1} generated and uploaded:`, url);
+          return url;
+        }
+        if (datum?.url) {
+          console.log(`Image ${idx + 1} generated (url):`, datum.url);
+          return datum.url;
+        }
+        console.error(`Image ${idx + 1} returned no image data`);
         return null;
-      }
-    });
+      })
+    );
 
+    const [img1, img2, img3] = imageUrls;
     console.log('Final image URLs to be saved:', { img1, img2, img3 });
 
     const newStory = await Story.create({
