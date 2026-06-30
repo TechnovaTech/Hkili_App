@@ -147,6 +147,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
     }
 
+    // Enforce a strict JSON output schema so the result is ALWAYS parseable,
+    // regardless of the admin-managed prompt template. The story is stored as
+    // an array of chapter "segments" and each chapter carries its own English
+    // image prompt used to generate a per-chapter illustration.
+    finalSystemMessage = `${finalSystemMessage}
+
+CRITICAL OUTPUT FORMAT — return ONE valid JSON object with EXACTLY this shape and nothing else:
+{
+  "title": "overall story title",
+  "chapters": [
+    { "title": "chapter title", "content": "the full chapter text", "imagePrompt": "a detailed prompt describing this chapter's main scene for AI image generation" }
+  ],
+  "moral": "the moral of the story"
+}
+Rules:
+- Use 3 to 5 chapters.
+- "title" and every chapter "content" MUST be written in ${targetLanguage.toUpperCase()}.
+- Every "imagePrompt" MUST be written in ENGLISH (image models perform better in English), even when the story is in another language.
+- Do NOT output any text, markdown, or code fences outside the JSON object.`;
+
     const openai = new OpenAI({ apiKey });
 
     // Log the prompts being sent to OpenAI for debugging
@@ -167,22 +187,56 @@ export async function POST(request: NextRequest) {
 
     const parsedResult = JSON.parse(result);
     const storyTitle = parsedResult.title || 'Untitled AI Story';
-    const storyContent = parsedResult.content || '';
 
-    console.log(`Story generated: ${storyTitle} in ${targetLanguage}`);
+    // ---- Normalize the model output into an array of chapters ----
+    // Tolerates: { chapters: [...] }, { content: { "Chapter 1": {...} } },
+    // { content: [...] }, and plain-string content. This is what fixes the
+    // "Cast to string failed for value {...}" error: content is no longer
+    // saved as a raw object.
+    type Chapter = { title?: string; content: string; imagePrompt?: string };
+    const pick = (o: any, ...keys: string[]): string | undefined => {
+      for (const k of keys) {
+        if (o && typeof o[k] === 'string' && o[k].trim()) return o[k] as string;
+      }
+      return undefined;
+    };
+    const toChapter = (c: any): Chapter => ({
+      title: pick(c, 'title', 'Chapter Title', 'chapterTitle'),
+      content: pick(c, 'content', 'Chapter Content', 'chapterContent', 'text') ?? (typeof c === 'string' ? c : ''),
+      imagePrompt: pick(c, 'imagePrompt', 'Image Prompt', 'image_prompt', 'imagePromptEn'),
+    });
 
-    // Generate 3 story-relevant images in parallel.
-    // Prompts are in English (image models perform better with English) and
-    // include the category and characters for context even when the title is
-    // in another language.
+    let chapters: Chapter[] = [];
+    if (Array.isArray(parsedResult.chapters)) {
+      chapters = parsedResult.chapters.map(toChapter);
+    } else if (parsedResult.content && typeof parsedResult.content === 'object' && !Array.isArray(parsedResult.content)) {
+      chapters = Object.values(parsedResult.content).map(toChapter);
+    } else if (Array.isArray(parsedResult.content)) {
+      chapters = parsedResult.content.map(toChapter);
+    }
+    chapters = chapters.filter(c => c.content && c.content.trim());
+
+    // Fallback: treat whatever we got as a single plain-text chapter.
+    if (chapters.length === 0) {
+      const text = typeof parsedResult.content === 'string'
+        ? parsedResult.content
+        : (parsedResult.content != null ? JSON.stringify(parsedResult.content) : result);
+      chapters = [{ content: text }];
+    }
+
+    console.log(`Story generated: ${storyTitle} in ${targetLanguage} (${chapters.length} chapters)`);
+
+    // ---- Generate one illustration per chapter (capped) from its image prompt ----
+    const MAX_IMAGES = 5;
+    const imageChapters = chapters.slice(0, MAX_IMAGES);
     const imageContext = `Category: ${categoryName}, Setting: ${place || 'magical land'}, Characters: ${mainCharacterNames.join(', ')}`;
-    const imagePrompts = [
-      `Children's storybook illustration, opening scene for a ${categoryName} story titled "${storyTitle}". ${imageContext}. Colorful, warm, friendly art style, high quality.`,
-      `Children's storybook illustration, middle action scene from the story "${storyTitle}". ${imageContext}. Vibrant, expressive, whimsical art style, high quality.`,
-      `Children's storybook illustration, heartwarming ending for "${storyTitle}". ${imageContext}, moral: ${moral || 'be kind'}. Warm, uplifting, colorful art style, high quality.`,
-    ];
+    const imagePrompts = imageChapters.map((c, i) =>
+      c.imagePrompt
+        ? `Children's storybook illustration. ${c.imagePrompt}. ${imageContext}. Colorful, warm, friendly art style, high quality.`
+        : `Children's storybook illustration for "${storyTitle}", scene ${i + 1}. ${imageContext}. Colorful, warm, friendly art style, high quality.`
+    );
 
-    console.log(`Generating images with model "${IMAGE_MODEL}":`, imagePrompts);
+    console.log(`Generating ${imagePrompts.length} images with model "${IMAGE_MODEL}"`);
     const imageResults = await Promise.allSettled(
       imagePrompts.map(prompt =>
         openai.images.generate({
@@ -197,29 +251,39 @@ export async function POST(request: NextRequest) {
 
     // gpt-image-1 returns base64 (b64_json) which we persist to Cloudinary.
     // Fall back to a returned URL if a model/key ever provides one directly.
-    const imageUrls = await Promise.all(
+    const chapterImageUrls = await Promise.all(
       imageResults.map(async (r, idx) => {
         if (r.status !== 'fulfilled') {
           console.error(`Image ${idx + 1} generation failed:`, r.reason?.message || r.reason);
           return null;
         }
         const datum = r.value.data?.[0];
-        if (datum?.b64_json) {
-          const url = await uploadBase64ToCloudinary(datum.b64_json);
-          console.log(`Image ${idx + 1} generated and uploaded:`, url);
-          return url;
-        }
-        if (datum?.url) {
-          console.log(`Image ${idx + 1} generated (url):`, datum.url);
-          return datum.url;
-        }
+        if (datum?.b64_json) return uploadBase64ToCloudinary(datum.b64_json);
+        if (datum?.url) return datum.url;
         console.error(`Image ${idx + 1} returned no image data`);
         return null;
       })
     );
 
-    const [img1, img2, img3] = imageUrls;
-    console.log('Final image URLs to be saved:', { img1, img2, img3 });
+    // ---- Build the segment array the mobile app expects (content is a JSON string) ----
+    const segments: { id: string; text: string; imageUrl?: string }[] = chapters.map((c, i) => ({
+      id: String(i + 1),
+      text: c.title ? `${c.title}\n\n${c.content}` : c.content,
+      imageUrl: chapterImageUrls[i] || undefined,
+    }));
+    if (typeof parsedResult.moral === 'string' && parsedResult.moral.trim()) {
+      segments.push({ id: String(segments.length + 1), text: parsedResult.moral.trim() });
+    }
+    const storyContent = JSON.stringify(segments);
+
+    // The current mobile viewer renders up to three images (start / middle / end).
+    const generatedImages = chapterImageUrls.filter((u): u is string => !!u);
+    const img1 = generatedImages[0] ?? null;
+    const img2 = generatedImages.length > 2
+      ? generatedImages[Math.floor(generatedImages.length / 2)]
+      : (generatedImages[1] ?? null);
+    const img3 = generatedImages.length > 1 ? generatedImages[generatedImages.length - 1] : null;
+    console.log('Final image URLs to be saved:', { count: generatedImages.length, img1, img2, img3 });
 
     const newStory = await Story.create({
       title: storyTitle,
