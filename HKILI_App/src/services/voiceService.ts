@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { apiClient } from './apiClient';
 import { ApiResponse, VoiceProfile } from '@/types';
 
@@ -18,11 +19,24 @@ class VoiceService {
 
       // 2. Upload the audio file directly to Cloudinary (resource_type=video for audio).
       const form = new FormData();
-      form.append('file', {
-        uri: localUri,
-        type: 'audio/mpeg',
-        name: 'voice-sample.m4a',
-      } as any);
+
+      if (Platform.OS === 'web') {
+        // On web the recording URI is a blob: URL — FormData needs a real Blob,
+        // not the React-Native { uri, type, name } object (which serializes to
+        // "[object Object]" and makes Cloudinary return 400).
+        const blob = await (await fetch(localUri)).blob();
+        const ext = (blob.type.split('/')[1] || 'webm').split(';')[0];
+        form.append('file', blob, `voice-sample.${ext}`);
+      } else {
+        // Native (iOS/Android): pass the local file descriptor object.
+        const ext = (localUri.split('.').pop() || 'm4a').toLowerCase();
+        form.append('file', {
+          uri: localUri,
+          type: `audio/${ext === 'm4a' ? 'm4a' : ext}`,
+          name: `voice-sample.${ext}`,
+        } as any);
+      }
+
       form.append('api_key', String(sign.apiKey));
       form.append('timestamp', String(sign.timestamp));
       form.append('signature', String(sign.signature));
@@ -34,7 +48,8 @@ class VoiceService {
       );
       const data = await res.json();
       if (!res.ok || !data?.secure_url) {
-        console.error('Cloudinary upload failed:', data);
+        // Surface Cloudinary's actual reason (e.g. "Invalid Signature").
+        console.error('Cloudinary upload failed:', JSON.stringify(data));
         return null;
       }
       return data.secure_url as string;
