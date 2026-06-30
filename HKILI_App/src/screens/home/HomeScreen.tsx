@@ -11,7 +11,10 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { characterService } from '@/services/characterService';
 import { getAvatarSource } from '../../utils/avatarUtils';
 import { storyCharacterService } from '@/services/storyCharacterService';
@@ -133,19 +136,24 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
-      
+    <ScreenBackground>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
       <View style={[styles.fixedHeader, { flexDirection }]}>
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>{t('home.title')}</Text>
-        <View style={[styles.coinsContainer, { flexDirection }]}>
+        <LinearGradient
+          colors={theme.gradients.gold}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.coinsContainer, { flexDirection }]}
+        >
           <Text style={styles.coinsText}>{coins}</Text>
-          <Ionicons name="layers-outline" size={20} color="#4CAF50" />
-        </View>
+          <Ionicons name="layers" size={16} color="#5D4037" />
+        </LinearGradient>
       </View>
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
@@ -173,7 +181,12 @@ export default function HomeScreen() {
                     style={[styles.characterCard, isSelected && styles.selectedCharacterCard]}
                     onPress={() => toggleMainCharacterSelection(c.id || c._id)}
                   >
-                    <View style={styles.avatarContainer}>
+                    <LinearGradient
+                      colors={isSelected ? theme.gradients.highlight : theme.gradients.card}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.avatarContainer}
+                    >
                       <View style={styles.characterAvatar}>
                         <Image 
                           source={getAvatarSource(c.avatarUrl, c.gender, c.name)} 
@@ -195,12 +208,12 @@ export default function HomeScreen() {
                           <Ionicons name="checkmark" size={12} color="#FFFFFF" />
                         </View>
                       )}
-                    </View>
+                    </LinearGradient>
                     <Text style={[styles.characterName, isSelected && styles.selectedCharacterName]}>{c.name}</Text>
                   </TouchableOpacity>
                 );
               })}
-              
+
               <TouchableOpacity
                 style={styles.addCharacterButton}
                 onPress={handleAddMainCharacter}
@@ -226,7 +239,12 @@ export default function HomeScreen() {
                     style={[styles.sideCharacterCard, isSelected && styles.selectedCharacterCard]}
                     onPress={() => toggleSideCharacterSelection(c.id || c._id)}
                   >
-                    <View style={styles.sideAvatarContainer}>
+                    <LinearGradient
+                      colors={isSelected ? theme.gradients.highlight : theme.gradients.card}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.sideAvatarContainer}
+                    >
                       <View style={styles.characterAvatar}>
                         <Image 
                           source={getAvatarSource(c.avatarUrl, c.gender, c.name)} 
@@ -250,12 +268,12 @@ export default function HomeScreen() {
                           <Ionicons name="checkmark" size={12} color="#FFFFFF" />
                         </View>
                       )}
-                    </View>
+                    </LinearGradient>
                     <Text style={[styles.characterName, isSelected && styles.selectedCharacterName]}>{c.name}</Text>
                   </TouchableOpacity>
                 );
               })}
-              
+
               <TouchableOpacity
                 style={styles.addSideCharacterButton}
                 onPress={handleAddSideCharacter}
@@ -270,26 +288,41 @@ export default function HomeScreen() {
       </KeyboardAvoidingView>
 
       <View style={styles.startButtonContainer}>
-       
-
-        <TouchableOpacity 
-          style={[styles.startButton, { flexDirection }, !canStart && styles.startButtonDisabled]} 
+        <TouchableOpacity
+          style={[styles.startButtonWrapper, canStart && styles.startButtonGlow]}
           onPress={handleStart}
           disabled={!canStart}
+          activeOpacity={0.85}
         >
-          <Ionicons name="layers-outline" size={20} color={canStart ? "#FFFFFF" : "#64B5F6"} />
-          <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>
-            {storyCost} {t('home.start')}
-          </Text>
+          {canStart ? (
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.startButton, { flexDirection }]}
+            >
+              <Ionicons name="sparkles" size={20} color="#FFFFFF" />
+              <Text style={styles.startButtonText}>
+                {storyCost} {t('home.start')}
+              </Text>
+            </LinearGradient>
+          ) : (
+            <View style={[styles.startButton, styles.startButtonDisabled, { flexDirection }]}>
+              <Ionicons name="layers-outline" size={20} color="#64B5F6" />
+              <Text style={[styles.startButtonText, styles.startButtonTextDisabled]}>
+                {storyCost} {t('home.start')}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
-        
+
         {selectedMainCharacters.length > 0 && coins < storyCost && (
           <Text style={styles.insufficientCoinsText}>
             {t('home.insufficientCoins', { cost: storyCost })}
           </Text>
         )}
       </View>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -311,25 +344,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    backgroundColor: '#0A1929',
+    paddingBottom: 18,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    shadowColor: '#FFC107',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 6,
   },
   coinsText: {
-    fontSize: 16,
-    color: '#4CAF50',
-    fontWeight: '600',
+    fontSize: 15,
+    color: '#5D4037',
+    fontWeight: '800',
   },
   headerSpacer: {
     width: 32,
@@ -403,8 +444,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedCharacterCard: {
-    borderColor: '#81C784',
-    backgroundColor: 'rgba(129, 199, 132, 0.1)',
+    borderColor: '#00E676',
+    backgroundColor: 'rgba(0, 230, 118, 0.08)',
+    shadowColor: '#00E676',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
   },
   avatarContainer: {
     width: '100%',
@@ -518,41 +564,40 @@ const styles = StyleSheet.create({
     height: 100,
   },
   startButtonContainer: {
-    flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingBottom: 100,
-    gap: 12,
-    backgroundColor: '#0A1929',
   },
-  languageButton: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+  startButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  languageText: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '600',
+  startButtonGlow: {
+    overflow: 'visible',
+    shadowColor: '#00E676',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    elevation: 12,
   },
   startButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 10,
   },
   startButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   startButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   startButtonTextDisabled: {
     color: '#64B5F6',

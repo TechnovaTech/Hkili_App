@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { StoryCard } from '@/components/story/StoryCard';
 import { Loading } from '@/components/ui/Loading';
-import { theme } from '@/theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { Story } from '@/types';
 import { offlineStorageService } from '@/services/offlineStorageService';
 import { storyService } from '@/services/storyService';
@@ -110,6 +111,7 @@ export default function OfflineStoriesScreen() {
   }
 
   return (
+    <ScreenBackground>
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('home.offlineStories')}</Text>
@@ -142,22 +144,24 @@ export default function OfflineStoriesScreen() {
         }
       />
     </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
+    paddingTop: 60,
     paddingBottom: theme.spacing.md,
   },
   title: {
     ...theme.typography.h2,
     color: theme.colors.text,
+    fontWeight: '800',
+    letterSpacing: 0.5,
     marginBottom: theme.spacing.xs,
   },
   subtitle: {

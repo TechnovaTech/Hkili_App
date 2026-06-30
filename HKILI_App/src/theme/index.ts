@@ -15,6 +15,23 @@ export const theme = {
     error: '#F44336',
     border: '#1976D2',
     overlay: 'rgba(10, 25, 41, 0.8)',
+    glassBorder: 'rgba(129, 199, 132, 0.25)',
+    glassFill: 'rgba(255, 255, 255, 0.06)',
+  },
+  // Gradient palettes for `expo-linear-gradient` (use as the `colors` prop).
+  gradients: {
+    // Deep night-sky backdrop used app-wide.
+    background: ['#0A1929', '#0D2137', '#0A1F33'] as const,
+    // Primary call-to-action — vivid green glow.
+    primary: ['#00E676', '#1FB85F', '#2E7D32'] as const,
+    // Cool secondary accent.
+    secondary: ['#42A5F5', '#1E88E5', '#1565C0'] as const,
+    // Warm coin / reward accent.
+    gold: ['#FFE082', '#FFC107', '#FF8F00'] as const,
+    // Subtle card surface sheen.
+    card: ['rgba(33, 150, 243, 0.18)', 'rgba(76, 175, 80, 0.10)'] as const,
+    // Selected / active highlight.
+    highlight: ['rgba(0, 230, 118, 0.35)', 'rgba(33, 150, 243, 0.18)'] as const,
   },
   spacing: {
     xs: 4,
@@ -76,6 +93,28 @@ export const theme = {
       shadowOpacity: 0.3,
       shadowRadius: 8,
       elevation: 4,
+    },
+    lg: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.4,
+      shadowRadius: 18,
+      elevation: 10,
+    },
+    // Colored glow for accent elements (CTAs, selected cards).
+    glow: {
+      shadowColor: '#00E676',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.55,
+      shadowRadius: 16,
+      elevation: 12,
+    },
+    glowGold: {
+      shadowColor: '#FFC107',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 14,
+      elevation: 10,
     },
   },
 } as const;

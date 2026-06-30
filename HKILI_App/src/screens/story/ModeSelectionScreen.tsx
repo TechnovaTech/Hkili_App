@@ -12,8 +12,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { categoryService, Category } from '@/services/categoryService';
 import { playClickSound } from '@/utils/soundUtils';
 
@@ -89,15 +91,20 @@ export default function ModeSelectionScreen() {
           activeOpacity={0.8}
         >
           {imageSource ? (
-            <Image 
-              source={imageSource} 
+            <Image
+              source={imageSource}
               style={styles.cardImage}
               resizeMode="cover"
             />
           ) : (
-            <View style={[styles.cardImage, { backgroundColor: theme.colors.surface, justifyContent: 'center', alignItems: 'center' }]}>
+            <LinearGradient
+              colors={theme.gradients.card}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.cardImage, { justifyContent: 'center', alignItems: 'center' }]}
+            >
                <Ionicons name="image-outline" size={40} color={theme.colors.text} />
-            </View>
+            </LinearGradient>
           )}
         </TouchableOpacity>
         <Text style={styles.modeTitle}>{mode.name}</Text>
@@ -106,36 +113,37 @@ export default function ModeSelectionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
-      
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
-          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Choose a mode</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
+            <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Choose a mode</Text>
+          <View style={{ width: 24 }} />
         </View>
-      ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.modesGrid}>
-            {categories.map(renderModeCard)}
+
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
-        </ScrollView>
-      )}
-    </SafeAreaView>
+        ) : (
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            <View style={styles.modesGrid}>
+              {categories.map(renderModeCard)}
+            </View>
+          </ScrollView>
+        )}
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -144,19 +152,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: theme.colors.text,
+    letterSpacing: 0.5,
   },
   loadingContainer: {
     flex: 1,
@@ -187,9 +190,12 @@ const styles = StyleSheet.create({
   },
   modeCard: {
     height: 140,
-    borderRadius: 25,
+    borderRadius: 20,
     marginBottom: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   cardImage: {
     width: '100%',
@@ -197,7 +203,7 @@ const styles = StyleSheet.create({
   },
   modeTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '700',
     color: theme.colors.text,
     textAlign: 'center',
   },

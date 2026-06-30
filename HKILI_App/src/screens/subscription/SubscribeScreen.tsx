@@ -9,9 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { planService, Plan } from '../../services/planService';
 import { authService } from '../../services/authService';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { useRTL } from '../../hooks/useRTL';
 
@@ -65,61 +68,90 @@ export default function SubscribeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
-      
+    <ScreenBackground>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
       <View style={[styles.fixedHeader, { flexDirection }]}>
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>{t('subscription.title')}</Text>
-        <View style={[styles.coinsContainer, { flexDirection }]}>
+        <LinearGradient
+          colors={theme.gradients.gold}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.coinsContainer, { flexDirection }]}
+        >
           <Text style={styles.coinsText}>{coins}</Text>
-          <Ionicons name="layers-outline" size={20} color="#4CAF50" />
-        </View>
+          <Ionicons name="layers" size={18} color="#5D4037" />
+        </LinearGradient>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.characterContainer}>
-          <View style={styles.foxCircle}>
+          <LinearGradient
+            colors={theme.gradients.highlight}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.foxCircle}
+          >
             <Text style={styles.foxEmoji}>🦊</Text>
-          </View>
+          </LinearGradient>
         </View>
 
         <Text style={[styles.upgradeTitle, { textAlign }]}>{t('subscription.choosePlan')}</Text>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color="#00E676" style={{ marginTop: 20 }} />
         ) : (
           <View style={[styles.plansRow, { flexDirection }]}>
-            {plans.map((plan) => (
-              <TouchableOpacity
-                key={plan._id}
-                style={[
-                  styles.planCard,
-                  selectedPlanId === plan._id && styles.selectedPlanCard
-                ]}
-                onPress={() => setSelectedPlanId(plan._id)}
-              >
-                <View style={styles.coinContainer}>
-                  <Text style={styles.coinText}>{plan.coins}</Text>
-                  <Ionicons name="layers" size={24} color="#FFD700" />
-                </View>
-                
-                <View style={styles.priceContainer}>
-                  <Text style={styles.originalPrice}>₹{plan.originalPrice}</Text>
-                  <Text style={styles.discountPrice}>₹{plan.discountPrice}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {plans.map((plan) => {
+              const isSelected = selectedPlanId === plan._id;
+              return (
+                <TouchableOpacity
+                  key={plan._id}
+                  style={[
+                    styles.planCardWrapper,
+                    isSelected && styles.selectedPlanCardWrapper
+                  ]}
+                  onPress={() => setSelectedPlanId(plan._id)}
+                  activeOpacity={0.85}
+                >
+                  <LinearGradient
+                    colors={isSelected ? theme.gradients.highlight : theme.gradients.card}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[styles.planCard, isSelected && styles.selectedPlanCard]}
+                  >
+                    <View style={styles.coinContainer}>
+                      <Text style={styles.coinText}>{plan.coins}</Text>
+                      <Ionicons name="layers" size={24} color="#FFD700" />
+                    </View>
+
+                    <View style={styles.priceContainer}>
+                      <Text style={styles.originalPrice}>₹{plan.originalPrice}</Text>
+                      <Text style={styles.discountPrice}>₹{plan.discountPrice}</Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.buyButton} onPress={handleBuy}>
-          <Text style={styles.buyButtonText}>{t('subscription.buy')}</Text>
+        <TouchableOpacity style={styles.buyButtonWrapper} onPress={handleBuy} activeOpacity={0.85}>
+          <LinearGradient
+            colors={theme.gradients.gold}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.buyButton}
+          >
+            <Ionicons name="sparkles" size={20} color="#5D4037" />
+            <Text style={styles.buyButtonText}>{t('subscription.buy')}</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -134,25 +166,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    backgroundColor: '#0A1929',
+    paddingBottom: 18,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    ...theme.shadows.glowGold,
   },
   coinsText: {
-    fontSize: 16,
-    color: '#4CAF50',
-    fontWeight: '600',
+    fontSize: 15,
+    color: '#5D4037',
+    fontWeight: '800',
   },
   headerSpacer: {
     width: 32,
@@ -172,20 +208,21 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(76, 175, 80, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(76, 175, 80, 0.3)',
+    borderColor: 'rgba(0, 230, 118, 0.35)',
+    ...theme.shadows.glow,
   },
   foxEmoji: {
     fontSize: 50,
   },
   upgradeTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
+    letterSpacing: 0.5,
     marginBottom: 30,
   },
   plansRow: {
@@ -194,20 +231,29 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 10,
   },
-  planCard: {
+  planCardWrapper: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    overflow: 'hidden',
+    ...theme.shadows.md,
+  },
+  selectedPlanCardWrapper: {
+    borderColor: '#00E676',
+    overflow: 'visible',
+    ...theme.shadows.glow,
+  },
+  planCard: {
+    borderRadius: 18,
     padding: 12,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
     height: 140,
     justifyContent: 'space-between',
   },
   selectedPlanCard: {
-    backgroundColor: 'rgba(76, 175, 80, 0.15)',
-    borderColor: '#4CAF50',
+    borderRadius: 18,
+    overflow: 'hidden',
   },
   coinContainer: {
     alignItems: 'center',
@@ -232,25 +278,32 @@ const styles = StyleSheet.create({
   discountPrice: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#00E676',
   },
   footer: {
     padding: 20,
     paddingBottom: 100,
-    backgroundColor: '#0A1929',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(129, 199, 132, 0.15)',
+  },
+  buyButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'visible',
+    ...theme.shadows.glowGold,
   },
   buyButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderRadius: 16,
     paddingVertical: 16,
     width: '100%',
-    alignItems: 'center',
   },
   buyButtonText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: '#5D4037',
+    letterSpacing: 0.5,
   },
 });

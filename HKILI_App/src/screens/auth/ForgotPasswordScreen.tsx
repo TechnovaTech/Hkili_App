@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -40,7 +43,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       {/* Fixed Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -52,7 +55,7 @@ export default function ForgotPasswordScreen() {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>Forgot your password?</Text>
-        
+
         {/* Email Field */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Email*</Text>
@@ -68,17 +71,31 @@ export default function ForgotPasswordScreen() {
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity 
-          style={[styles.submitButton, loading && styles.disabledButton]} 
+        <TouchableOpacity
+          style={[styles.submitButtonWrapper, loading ? styles.disabledButtonWrapper : theme.shadows.glow]}
           onPress={handleSubmit}
           disabled={loading}
+          activeOpacity={0.85}
         >
-          <Text style={styles.submitButtonText}>
-            {loading ? 'Sending...' : 'Submit'}
-          </Text>
+          {loading ? (
+            <View style={[styles.submitButton, styles.disabledButton]}>
+              <Text style={[styles.submitButtonText, styles.disabledButtonText]}>
+                Sending...
+              </Text>
+            </View>
+          ) : (
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.submitButton}
+            >
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </LinearGradient>
+          )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -93,15 +110,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#2D1B3D',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   backButton: {
     marginRight: 16,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   content: {
     flex: 1,
@@ -109,9 +128,10 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
     marginBottom: 40,
   },
   fieldContainer: {
@@ -124,27 +144,41 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 16,
     color: '#FFFFFF',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
+  },
+  submitButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  disabledButtonWrapper: {
+    overflow: 'hidden',
   },
   submitButton: {
-    backgroundColor: '#FF6B35',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   submitButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  disabledButtonText: {
+    color: '#64B5F6',
   },
 });

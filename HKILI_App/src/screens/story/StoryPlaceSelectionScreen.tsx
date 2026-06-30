@@ -11,8 +11,10 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { theme } from '@/theme';
+import { theme } from '../../theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
@@ -62,8 +64,9 @@ export default function StoryPlaceSelectionScreen() {
   const canProceed = storyPlace.trim().length > 0 && selectedMoral !== null;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+    <ScreenBackground>
+      <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -115,39 +118,57 @@ export default function StoryPlaceSelectionScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.startButton, !canProceed && styles.startButtonDisabled]}
+          style={[styles.startButtonWrapper, canProceed && styles.startButtonGlow]}
           onPress={handleStart}
           disabled={!canProceed}
+          activeOpacity={0.85}
         >
-          <Text style={styles.startButtonText}>Generate Story</Text>
+          {canProceed ? (
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.startButton}
+            >
+              <Ionicons name="sparkles" size={20} color="#FFFFFF" />
+              <Text style={styles.startButtonText}>Generate Story</Text>
+            </LinearGradient>
+          ) : (
+            <View style={[styles.startButton, styles.startButtonDisabled]}>
+              <Ionicons name="sparkles-outline" size={20} color={theme.colors.text} />
+              <Text style={styles.startButtonText}>Generate Story</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
     gap: 15,
   },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: theme.colors.text, flex: 1 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: theme.colors.text, flex: 1, letterSpacing: 0.5 },
   highlight: { color: theme.colors.primary },
   scroll: { flex: 1, paddingHorizontal: 20 },
   section: { marginTop: 28 },
   sectionLabel: { fontSize: 16, fontWeight: '600', color: theme.colors.text, marginBottom: 14 },
   asterisk: { color: theme.colors.primary },
   textInput: {
-    backgroundColor: theme.colors.surfaceVariant,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 16,
@@ -159,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   moralCard: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderRadius: theme.borderRadius.lg,
     padding: 16,
     marginBottom: 14,
@@ -167,9 +188,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 110,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
-  selectedCard: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  selectedCard: {
+    backgroundColor: 'rgba(0, 230, 118, 0.08)',
+    borderColor: '#00E676',
+    ...theme.shadows.glow,
+  },
   emoji: { fontSize: 22, marginBottom: 8 },
   moralText: { fontSize: 13, fontWeight: '500', color: theme.colors.text, textAlign: 'center', lineHeight: 18 },
   footer: {
@@ -180,16 +206,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingBottom: 36,
-    backgroundColor: theme.colors.background,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: 'rgba(129, 199, 132, 0.15)',
+  },
+  startButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  startButtonGlow: {
+    overflow: 'visible',
+    ...theme.shadows.glow,
   },
   startButton: {
-    backgroundColor: theme.colors.primary,
+    flexDirection: 'row',
     paddingVertical: 16,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
-  startButtonDisabled: { backgroundColor: 'rgba(255,255,255,0.15)' },
-  startButtonText: { fontSize: 17, fontWeight: '600', color: theme.colors.text },
+  startButtonDisabled: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  startButtonText: { fontSize: 17, fontWeight: '800', color: theme.colors.text, letterSpacing: 0.5 },
 });

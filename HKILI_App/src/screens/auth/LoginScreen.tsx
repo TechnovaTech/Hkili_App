@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 
 import { authService } from '../../services/authService';
 
@@ -64,18 +67,20 @@ export default function LoginScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Signing in...</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Signing in...</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       {/* Header */}
       <View style={styles.header}>
-        
+
         <Text style={styles.headerTitle}>Sign In</Text>
       </View>
 
@@ -120,8 +125,15 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Sign In Button */}
-        <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
-          <Text style={styles.signInButtonText}>Sign In</Text>
+        <TouchableOpacity style={[styles.signInButtonWrapper, theme.shadows.glow]} onPress={handleLogin} activeOpacity={0.85}>
+          <LinearGradient
+            colors={theme.gradients.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.signInButton}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* OR Divider */}
@@ -132,8 +144,15 @@ export default function LoginScreen() {
         </View>
 
         {/* Google Sign In Button */}
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-          <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
+        <TouchableOpacity style={[styles.googleButtonWrapper, theme.shadows.md]} onPress={handleGoogleLogin} activeOpacity={0.85}>
+          <LinearGradient
+            colors={theme.gradients.secondary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.googleButton}
+          >
+            <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* Sign Up Link */}
@@ -143,7 +162,7 @@ export default function LoginScreen() {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -154,7 +173,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#0A1929',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -168,14 +186,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   backButton: {
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   content: {
     flex: 1,
@@ -191,14 +212,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 16,
     color: '#FFFFFF',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   forgotContainer: {
     alignItems: 'flex-end',
@@ -208,17 +230,22 @@ const styles = StyleSheet.create({
     color: '#81C784',
     fontSize: 14,
   },
+  signInButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 30,
+  },
   signInButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 30,
+    justifyContent: 'center',
   },
   signInButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   orContainer: {
     flexDirection: 'row',
@@ -235,12 +262,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginHorizontal: 16,
   },
+  googleButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 40,
+  },
   googleButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 40,
+    justifyContent: 'center',
   },
   googleButtonText: {
     color: '#FFFFFF',

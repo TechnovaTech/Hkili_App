@@ -7,8 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 
 const ONBOARDING_KEY = 'onboarding_completed';
 
@@ -79,13 +83,18 @@ export default function OnboardingScreen() {
   const renderSlide = (item: any, index: number) => (
     <View key={item.id} style={styles.slide}>
       <View style={styles.imageContainer}>
-        <View style={styles.imageCircle}>
+        <LinearGradient
+          colors={theme.gradients.highlight}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.imageCircle}
+        >
           <View style={styles.gradientOverlay}>
             <Text style={styles.imageText}>{item.image}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </View>
-      
+
       <View style={styles.contentContainer}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -94,17 +103,24 @@ export default function OnboardingScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       {/* Page Indicators */}
       <View style={styles.indicatorContainer}>
         {onboardingData.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.indicator,
-              index === currentIndex ? styles.activeIndicator : styles.inactiveIndicator,
-            ]}
-          />
+          index === currentIndex ? (
+            <LinearGradient
+              key={index}
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.indicator, styles.activeIndicator]}
+            />
+          ) : (
+            <View
+              key={index}
+              style={[styles.indicator, styles.inactiveIndicator]}
+            />
+          )
         ))}
       </View>
 
@@ -123,19 +139,27 @@ export default function OnboardingScreen() {
 
       {/* Bottom Section */}
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>
-            {onboardingData[currentIndex].buttonText}
-          </Text>
+        <TouchableOpacity style={styles.buttonWrapper} onPress={handleNext} activeOpacity={0.85}>
+          <LinearGradient
+            colors={theme.gradients.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>
+              {onboardingData[currentIndex].buttonText}
+            </Text>
+            <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+          </LinearGradient>
         </TouchableOpacity>
-        
+
         <TouchableOpacity onPress={handleSkip} style={styles.skipContainer}>
           <Text style={styles.skipText}>
             Already have an account? <Text style={styles.signInText}>Sign in</Text>
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -157,8 +181,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: '#4CAF50',
     width: 32,
+    shadowColor: '#00E676',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 6,
+    elevation: 6,
   },
   inactiveIndicator: {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
@@ -185,17 +213,9 @@ const styles = StyleSheet.create({
     borderRadius: 140,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
     borderWidth: 3,
-    borderColor: 'rgba(76, 175, 80, 0.2)',
-    shadowColor: '#4CAF50',
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    borderColor: 'rgba(0, 230, 118, 0.35)',
+    ...theme.shadows.glow,
   },
   gradientOverlay: {
     width: '100%',
@@ -218,9 +238,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
+    letterSpacing: 0.5,
     marginBottom: 16,
     lineHeight: 34,
     paddingHorizontal: 10,
@@ -236,25 +257,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingBottom: 50,
   },
-  button: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 18,
-    borderRadius: 12,
-    alignItems: 'center',
+  buttonWrapper: {
+    borderRadius: 16,
+    overflow: 'visible',
     marginBottom: 20,
-    shadowColor: '#4CAF50',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    ...theme.shadows.glow,
+  },
+  button: {
+    flexDirection: 'row',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
   buttonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   skipContainer: {
     alignItems: 'center',

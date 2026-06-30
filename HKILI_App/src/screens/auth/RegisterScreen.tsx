@@ -15,6 +15,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { authService } from '../../services/authService';
 
 export default function RegisterScreen() {
@@ -74,9 +77,9 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
-      
+    <ScreenBackground>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
       {/* Fixed Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -147,20 +150,41 @@ export default function RegisterScreen() {
 
           {/* Sign Up Button */}
           <TouchableOpacity
-            style={[styles.signUpButton, (!acceptTerms || loading) && styles.disabledButton]}
+            style={[styles.signUpButtonWrapper, (!acceptTerms || loading) ? styles.disabledButtonWrapper : theme.shadows.glow]}
             onPress={handleSignUp}
             disabled={!acceptTerms || loading}
+            activeOpacity={0.85}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+            {(!acceptTerms || loading) ? (
+              <View style={[styles.signUpButton, styles.disabledButton]}>
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={[styles.signUpButtonText, styles.disabledButtonText]}>Sign Up</Text>
+                )}
+              </View>
             ) : (
-              <Text style={styles.signUpButtonText}>Sign Up</Text>
+              <LinearGradient
+                colors={theme.gradients.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.signUpButton}
+              >
+                <Text style={styles.signUpButtonText}>Sign Up</Text>
+              </LinearGradient>
             )}
           </TouchableOpacity>
 
           {/* Google Sign In Button */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
-            <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
+          <TouchableOpacity style={[styles.googleButtonWrapper, theme.shadows.md]} onPress={handleGoogleSignIn} activeOpacity={0.85}>
+            <LinearGradient
+              colors={theme.gradients.secondary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.googleButton}
+            >
+              <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
           {/* Login Link */}
@@ -174,7 +198,7 @@ export default function RegisterScreen() {
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -189,16 +213,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#0A1929',
-    borderBottomWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   backButton: {
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   keyboardView: {
     flex: 1,
@@ -217,14 +242,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 16,
     color: '#FFFFFF',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   inputError: {
     borderColor: '#FF5252',
@@ -266,27 +292,44 @@ const styles = StyleSheet.create({
     color: '#2196F3',
     textDecorationLine: 'underline',
   },
-  signUpButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    paddingVertical: 18,
-    alignItems: 'center',
+  signUpButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
     marginBottom: 20,
   },
+  disabledButtonWrapper: {
+    overflow: 'hidden',
+  },
+  signUpButton: {
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  disabledButtonText: {
+    color: '#64B5F6',
   },
   signUpButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  googleButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 30,
   },
   googleButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 30,
+    justifyContent: 'center',
   },
   googleButtonText: {
     color: '#FFFFFF',

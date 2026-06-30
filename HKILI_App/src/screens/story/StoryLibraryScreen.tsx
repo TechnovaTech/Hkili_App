@@ -9,12 +9,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { storyService } from '@/services/storyService';
 import { authService } from '@/services/authService';
 import { Story } from '@/types';
-import { theme } from '@/theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { useRTL } from '../../hooks/useRTL';
 
@@ -89,23 +91,36 @@ export default function StoryLibraryScreen() {
           {new Date(item.createdAt).toLocaleDateString()}
         </Text>
       </View>
-      <TouchableOpacity style={styles.playButton}>
-        <Ionicons name={isRTL ? "play-back" : "play"} size={20} color="#FFFFFF" />
-      </TouchableOpacity>
+      <View style={styles.playButton}>
+        <LinearGradient
+          colors={theme.gradients.secondary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.playButtonInner}
+        >
+          <Ionicons name={isRTL ? "play-back" : "play"} size={20} color="#FFFFFF" />
+        </LinearGradient>
+      </View>
     </TouchableOpacity>
   );
 
   return (
+    <ScreenBackground>
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
-      
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
       <View style={[styles.header, { flexDirection }]}>
         <View style={styles.headerSpacer} />
         <Text style={styles.title}>{t('library.myStories')}</Text>
-        <View style={[styles.coinsContainer, { flexDirection }]}>
+        <LinearGradient
+          colors={theme.gradients.gold}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.coinsContainer, { flexDirection }]}
+        >
           <Text style={styles.coinsText}>{coins}</Text>
-          <Ionicons name="layers-outline" size={20} color="#4CAF50" />
-        </View>
+          <Ionicons name="layers" size={18} color="#5D4037" />
+        </LinearGradient>
       </View>
 
       {loading ? (
@@ -128,21 +143,28 @@ export default function StoryLibraryScreen() {
               <Text style={styles.emptySubtext}>
                 Create your first story to get started!
               </Text>
-              <TouchableOpacity style={styles.createButton} onPress={() => router.push('/(tabs)/home')}>
-                <Text style={styles.createButtonText}>Create Story</Text>
+              <TouchableOpacity style={styles.createButtonWrapper} onPress={() => router.push('/(tabs)/home')} activeOpacity={0.85}>
+                <LinearGradient
+                  colors={theme.gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.createButton}
+                >
+                  <Text style={styles.createButtonText}>Create Story</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           }
         />
       )}
     </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -151,14 +173,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '800',
     color: theme.colors.text,
+    letterSpacing: 0.5,
   },
   headerSpacer: {
     width: 32,
@@ -166,12 +188,16 @@ const styles = StyleSheet.create({
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    ...theme.shadows.glowGold,
   },
   coinsText: {
-    fontSize: 16,
-    color: theme.colors.primary,
-    fontWeight: '600',
+    fontSize: 15,
+    color: '#5D4037',
+    fontWeight: '800',
   },
   storiesList: {
     paddingHorizontal: 20,
@@ -183,12 +209,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   storyCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    ...theme.shadows.md,
   },
   storyImage: {
     width: 60,
@@ -229,7 +258,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.secondary,
+    overflow: 'hidden',
+  },
+  playButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -253,15 +287,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
+  createButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'visible',
+    ...theme.shadows.glow,
+  },
   createButton: {
-    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 16,
   },
   createButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
 });

@@ -15,10 +15,13 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useRTL } from '../../hooks/useRTL';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
+import { theme } from '../../theme';
 import { User } from '@/types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -173,7 +176,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       <View style={[styles.header, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
         <Text style={[styles.title, { textAlign }]}>{t('settings.title')}</Text>
       </View>
@@ -399,28 +402,35 @@ export default function SettingsScreen() {
                 <Text style={styles.cancelBtnText}>{t('profile.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalBtn, styles.saveBtn]}
+                style={[styles.modalBtn, styles.saveBtnWrapper]}
                 onPress={handleSaveProfile}
                 disabled={saving}
+                activeOpacity={0.85}
               >
-                {saving ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.saveBtnText}>{t('profile.save')}</Text>
-                )}
+                <LinearGradient
+                  colors={theme.gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.saveBtn}
+                >
+                  {saving ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>{t('profile.save')}</Text>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A1929',
   },
   header: {
     paddingHorizontal: 20,
@@ -428,9 +438,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   content: {
     flex: 1,
@@ -440,12 +451,13 @@ const styles = StyleSheet.create({
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(76, 175, 80, 0.3)',
+    borderColor: 'rgba(129, 199, 132, 0.30)',
+    ...theme.shadows.md,
   },
   avatar: {
     width: 56,
@@ -480,10 +492,13 @@ const styles = StyleSheet.create({
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   settingContent: {
     flex: 1,
@@ -493,16 +508,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
     marginBottom: 4,
+    fontWeight: '700',
   },
   settingSubtitle: {
     fontSize: 14,
     color: '#81C784',
   },
   languageList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     marginTop: 4,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
   },
   languageItem: {
     flexDirection: 'row',
@@ -512,7 +530,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   activeLanguageItem: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    backgroundColor: 'rgba(0, 230, 118, 0.08)',
   },
   languageIcon: {
     fontSize: 20,
@@ -530,12 +548,17 @@ const styles = StyleSheet.create({
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(244, 67, 54, 0.12)',
+    borderRadius: 16,
     padding: 16,
     marginTop: 20,
     borderWidth: 1,
-    borderColor: 'rgba(244, 67, 54, 0.3)',
+    borderColor: 'rgba(244, 67, 54, 0.40)',
+    shadowColor: '#F44336',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
   logoutText: {
     fontSize: 16,
@@ -629,8 +652,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  saveBtnWrapper: {
+    padding: 0,
+    overflow: 'hidden',
+    ...theme.shadows.glow,
+  },
   saveBtn: {
-    backgroundColor: '#4CAF50',
+    flex: 1,
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   saveBtnText: {
     color: '#FFFFFF',

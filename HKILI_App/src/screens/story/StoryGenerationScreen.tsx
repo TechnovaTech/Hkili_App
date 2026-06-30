@@ -8,8 +8,10 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { theme } from '@/theme';
+import { theme } from '../../theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { apiClient } from '@/services/apiClient';
 import { storyService } from '@/services/storyService';
 
@@ -93,8 +95,9 @@ export default function StoryGenerationScreen() {
 
   if (status === 'error') {
     return (
+      <ScreenBackground>
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
             <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
@@ -106,17 +109,26 @@ export default function StoryGenerationScreen() {
           <Ionicons name="alert-circle-outline" size={80} color="#FF9800" />
           <Text style={styles.errorTitle}>Generation Failed</Text>
           <Text style={styles.errorText}>{errorMsg}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => router.push('/(tabs)/home')}>
-            <Text style={styles.retryButtonText}>Go Back Home</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => router.push('/(tabs)/home')} activeOpacity={0.85}>
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.retryButtonInner}
+            >
+              <Text style={styles.retryButtonText}>Go Back Home</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
+      </ScreenBackground>
     );
   }
 
   return (
+    <ScreenBackground>
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A1929" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
           <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
@@ -129,18 +141,26 @@ export default function StoryGenerationScreen() {
           Please wait while we craft your personalized story.
         </Text>
         <View style={styles.imageContainer}>
-          <Animated.View style={[styles.animatedContainer, { transform: [{ scale: scaleAnim }] }]}>
-            <Text style={styles.storyEmoji}>📚</Text>
+          <Animated.View style={[styles.animatedGlow, { transform: [{ scale: scaleAnim }] }]}>
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.animatedContainer}
+            >
+              <Text style={styles.storyEmoji}>📚</Text>
+            </LinearGradient>
           </Animated.View>
         </View>
         <Text style={styles.bottomText}>One moment please...</Text>
       </View>
     </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A1929' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,28 +168,33 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: '#0A1929',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: '#FFFFFF', flex: 1, textAlign: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', flex: 1, textAlign: 'center', letterSpacing: 0.5 },
   content: { flex: 1, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center', gap: 20 },
   description: { color: '#B0B0B0', textAlign: 'center', lineHeight: 22 },
   imageContainer: { width: 200, height: 200, justifyContent: 'center', alignItems: 'center' },
+  animatedGlow: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    ...theme.shadows.glow,
+  },
   animatedContainer: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    backgroundColor: 'rgba(76,175,80,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(76,175,80,0.3)',
+    borderColor: 'rgba(0, 230, 118, 0.4)',
   },
   storyEmoji: { fontSize: 60 },
-  bottomText: { color: '#4CAF50', fontSize: 14 },
+  bottomText: { color: '#00E676', fontSize: 14, fontWeight: '700', letterSpacing: 0.5 },
   errorTitle: { fontSize: 22, fontWeight: 'bold', color: '#FFFFFF', marginTop: 16 },
   errorText: { color: '#B0B0B0', textAlign: 'center', fontSize: 15, lineHeight: 22, marginTop: 8 },
-  retryButton: { marginTop: 28, backgroundColor: '#FF9800', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 8 },
-  retryButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
+  retryButton: { marginTop: 28, borderRadius: 16, overflow: 'visible', ...theme.shadows.glow },
+  retryButtonInner: { paddingVertical: 14, paddingHorizontal: 30, borderRadius: 16, overflow: 'hidden' },
+  retryButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 });

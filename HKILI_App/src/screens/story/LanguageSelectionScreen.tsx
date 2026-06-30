@@ -9,8 +9,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
 
 const languages = [
@@ -34,48 +36,54 @@ export default function LanguageSelectionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
-      
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Select Story Language</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.subtitle}>In which language should the story be written?</Text>
-        
-        <View style={styles.languageList}>
-          {languages.map((lang) => (
-            <TouchableOpacity
-              key={lang.id}
-              style={styles.languageCard}
-              onPress={() => handleLanguageSelect(lang.id)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.languageIconContainer}>
-                <Text style={styles.languageIcon}>{lang.icon}</Text>
-              </View>
-              <View style={styles.languageInfo}>
-                <Text style={styles.languageName}>{lang.name}</Text>
-                <Text style={styles.nativeName}>{lang.nativeName}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color={theme.colors.primary} />
-            </TouchableOpacity>
-          ))}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Select Story Language</Text>
+          <View style={{ width: 24 }} />
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.subtitle}>In which language should the story be written?</Text>
+
+          <View style={styles.languageList}>
+            {languages.map((lang) => (
+              <TouchableOpacity
+                key={lang.id}
+                style={styles.languageCard}
+                onPress={() => handleLanguageSelect(lang.id)}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={theme.gradients.card}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.languageIconContainer}
+                >
+                  <Text style={styles.languageIcon}>{lang.icon}</Text>
+                </LinearGradient>
+                <View style={styles.languageInfo}>
+                  <Text style={styles.languageName}>{lang.name}</Text>
+                  <Text style={styles.nativeName}>{lang.nativeName}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color={theme.colors.accent} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -84,16 +92,16 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: theme.colors.text,
     flex: 1,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   content: {
     flex: 1,
@@ -115,20 +123,22 @@ const styles = StyleSheet.create({
   languageCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   languageIconContainer: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.25)',
   },
   languageIcon: {
     fontSize: 24,

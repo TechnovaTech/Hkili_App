@@ -112,11 +112,13 @@ export const StoryCard: React.FC<StoryCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.glassFill,
+    borderRadius: theme.borderRadius.xl,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     marginBottom: theme.spacing.md,
     overflow: 'hidden',
-    ...theme.shadows.sm,
+    ...theme.shadows.md,
   },
   imageContainer: {
     position: 'relative',
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
   placeholderImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: theme.colors.surfaceVariant,
+    backgroundColor: 'rgba(33, 150, 243, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },

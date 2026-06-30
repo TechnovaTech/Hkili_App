@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
@@ -71,37 +72,38 @@ export default function MoralSelectionScreen() {
         activeOpacity={0.8}
       >
         <Text style={styles.emoji}>{moral.emoji}</Text>
-        <Text style={styles.moralText}>{moral.text}</Text>
+        <Text style={[styles.moralText, isSelected && styles.selectedMoralText]}>{moral.text}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
-      
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push({ pathname: '/story/story-place-selection', params: { mode, character } })}>
-          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          Choose a moral for <Text style={styles.highlightText}>the story</Text>
-        </Text>
-      </View>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.moralsGrid}>
-          {morals.map(renderMoral)}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.push({ pathname: '/story/story-place-selection', params: { mode, character } })}>
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            Choose a moral for <Text style={styles.highlightText}>the story</Text>
+          </Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.moralsGrid}>
+            {morals.map(renderMoral)}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -109,24 +111,19 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
     gap: 15,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '800',
     color: theme.colors.text,
     flex: 1,
+    letterSpacing: 0.5,
   },
   highlightText: {
-    color: theme.colors.primary,
+    color: theme.colors.accent,
   },
   content: {
     flex: 1,
@@ -140,23 +137,21 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   moralCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 20,
     padding: 20,
     marginBottom: 15,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 120,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   selectedCard: {
-    backgroundColor: theme.colors.primary,
+    borderColor: '#00E676',
+    backgroundColor: 'rgba(0, 230, 118, 0.08)',
+    ...theme.shadows.glow,
   },
   emoji: {
     fontSize: 24,
@@ -168,5 +163,9 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  selectedMoralText: {
+    color: '#81C784',
+    fontWeight: '700',
   },
 });

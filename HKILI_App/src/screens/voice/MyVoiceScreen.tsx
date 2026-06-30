@@ -12,11 +12,13 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Audio } from 'expo-av';
 import { useTranslation } from 'react-i18next';
 import { useRTL } from '../../hooks/useRTL';
 import { voiceService } from '../../services/voiceService';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { VoiceProfile } from '@/types';
 import { theme } from '@/theme';
 
@@ -236,8 +238,8 @@ export default function MyVoiceScreen() {
   const fmt = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+    <ScreenBackground>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <View style={[styles.header, { flexDirection }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
@@ -252,13 +254,18 @@ export default function MyVoiceScreen() {
 
         {/* Recorder card */}
         <View style={styles.recorderCard}>
-          <View style={styles.micCircle}>
+          <LinearGradient
+            colors={recState === 'recording' ? theme.gradients.highlight : theme.gradients.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.micCircle}
+          >
             <Ionicons
               name={recState === 'recording' ? 'mic' : 'mic-outline'}
               size={40}
               color={recState === 'recording' ? '#F44336' : theme.colors.primary}
             />
-          </View>
+          </LinearGradient>
 
           {recState === 'recording' && (
             <Text style={styles.timer}>{fmt(elapsed)}</Text>
@@ -272,16 +279,30 @@ export default function MyVoiceScreen() {
 
           {/* Controls */}
           {recState === 'idle' && (
-            <TouchableOpacity style={styles.primaryBtn} onPress={startRecording}>
-              <Ionicons name="mic" size={20} color="#fff" />
-              <Text style={styles.primaryBtnText}>{t('voice.startRecording')}</Text>
+            <TouchableOpacity style={styles.primaryBtnWrapper} onPress={startRecording} activeOpacity={0.85}>
+              <LinearGradient
+                colors={theme.gradients.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.primaryBtn}
+              >
+                <Ionicons name="mic" size={20} color="#fff" />
+                <Text style={styles.primaryBtnText}>{t('voice.startRecording')}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           )}
 
           {recState === 'recording' && (
-            <TouchableOpacity style={[styles.primaryBtn, styles.stopBtn]} onPress={stopRecording}>
-              <Ionicons name="stop" size={20} color="#fff" />
-              <Text style={styles.primaryBtnText}>{t('voice.stopRecording')}</Text>
+            <TouchableOpacity style={[styles.primaryBtnWrapper, styles.stopBtnWrapper]} onPress={stopRecording} activeOpacity={0.85}>
+              <LinearGradient
+                colors={['#FF6B6B', '#F44336', '#C62828']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.primaryBtn}
+              >
+                <Ionicons name="stop" size={20} color="#fff" />
+                <Text style={styles.primaryBtnText}>{t('voice.stopRecording')}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           )}
 
@@ -307,18 +328,26 @@ export default function MyVoiceScreen() {
               />
 
               <TouchableOpacity
-                style={[styles.primaryBtn, saving && { opacity: 0.6 }]}
+                style={[styles.primaryBtnWrapper, saving && { opacity: 0.6 }]}
                 onPress={saveVoice}
                 disabled={saving}
+                activeOpacity={0.85}
               >
-                {saving ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
-                    <Text style={styles.primaryBtnText}>{t('voice.saveVoice')}</Text>
-                  </>
-                )}
+                <LinearGradient
+                  colors={theme.gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.primaryBtn}
+                >
+                  {saving ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                      <Text style={styles.primaryBtnText}>{t('voice.saveVoice')}</Text>
+                    </>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             </>
           )}
@@ -353,7 +382,7 @@ export default function MyVoiceScreen() {
           ))
         )}
       </ScrollView>
-    </View>
+    </ScreenBackground>
   );
 }
 
@@ -366,10 +395,12 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) + 10 : 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: theme.colors.primary },
+  headerTitle: { fontSize: 20, fontWeight: '800', color: theme.colors.primary, letterSpacing: 0.5 },
   iconBtn: { padding: 5 },
-  content: { flex: 1, paddingHorizontal: 20 },
+  content: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
   subtitle: { fontSize: 14, color: theme.colors.textSecondary, marginBottom: 20, lineHeight: 20 },
   recorderCard: {
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -378,33 +409,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 28,
     borderWidth: 1,
-    borderColor: 'rgba(76,175,80,0.2)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   micCircle: {
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: 'rgba(76,175,80,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 230, 118, 0.25)',
+    ...theme.shadows.glow,
   },
   timer: { fontSize: 28, fontWeight: 'bold', color: '#F44336', marginBottom: 16 },
   recordedLabel: { fontSize: 15, color: theme.colors.primary, marginBottom: 16 },
   hint: { fontSize: 13, color: theme.colors.textSecondary, marginBottom: 20, lineHeight: 19 },
+  primaryBtnWrapper: {
+    borderRadius: 12,
+    overflow: 'visible',
+    width: '100%',
+    ...theme.shadows.glow,
+  },
+  stopBtnWrapper: {
+    shadowColor: '#F44336',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 12,
+  },
   primaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: theme.colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 12,
     width: '100%',
   },
-  stopBtn: { backgroundColor: '#F44336' },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   recordedActions: { flexDirection: 'row', gap: 12, marginBottom: 16, width: '100%' },
   secondaryBtn: {
     flex: 1,
@@ -412,11 +457,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: 'rgba(76,175,80,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(76,175,80,0.3)',
+    borderColor: 'rgba(129, 199, 132, 0.3)',
+    ...theme.shadows.sm,
   },
   secondaryBtnText: { color: theme.colors.primary, fontSize: 14, fontWeight: '600' },
   input: {
@@ -429,17 +475,20 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
   },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: theme.colors.text, marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.text, marginBottom: 12, letterSpacing: 0.3 },
   emptyText: { color: theme.colors.textSecondary, fontSize: 14, marginTop: 8 },
   voiceItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
     padding: 14,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   voiceInfo: { flex: 1, marginLeft: 12 },
   voiceName: { fontSize: 16, color: '#fff', fontWeight: '600', marginBottom: 2 },

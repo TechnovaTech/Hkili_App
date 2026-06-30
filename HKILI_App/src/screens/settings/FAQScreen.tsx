@@ -10,9 +10,11 @@ import {
   UIManager,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -91,7 +93,7 @@ export default function FAQScreen() {
   ];
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -108,19 +110,25 @@ export default function FAQScreen() {
         ))}
         <View style={styles.footer}>
           <Text style={styles.footerText}>{t('faq.footer')}</Text>
-          <TouchableOpacity style={styles.contactButton}>
-            <Text style={styles.contactButtonText}>{t('faq.contactSupport')}</Text>
+          <TouchableOpacity style={styles.contactButtonWrapper} activeOpacity={0.85}>
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.contactButton}
+            >
+              <Text style={styles.contactButtonText}>{t('faq.contactSupport')}</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -128,14 +136,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
   backButton: {
     marginRight: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: theme.colors.text,
+    letterSpacing: 0.5,
   },
   content: {
     flex: 1,
@@ -148,12 +159,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   faqItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    ...theme.shadows.md,
   },
   faqHeader: {
     flexDirection: 'row',
@@ -189,11 +201,17 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginBottom: 12,
   },
+  contactButtonWrapper: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    ...theme.shadows.glow,
+  },
   contactButton: {
-    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contactButtonText: {
     color: '#FFFFFF',

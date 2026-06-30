@@ -13,6 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
@@ -22,6 +23,7 @@ import { storyService } from '@/services/storyService';
 import { voiceService } from '@/services/voiceService';
 import { Story, VoiceProfile } from '@/types';
 import { theme } from '@/theme';
+import { ScreenBackground } from '../../components/ui/ScreenBackground';
 
 
 export default function StoryViewerScreen() {
@@ -328,20 +330,31 @@ export default function StoryViewerScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
+      <ScreenBackground>
+        <View style={[styles.container, styles.center]}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </ScreenBackground>
     );
   }
 
   if (!story) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={styles.errorText}>{tStory('storyViewer.notFound')}</Text>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backBtnText}>{tStory('storyViewer.goBack')}</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenBackground>
+        <View style={[styles.container, styles.center]}>
+          <Text style={styles.errorText}>{tStory('storyViewer.notFound')}</Text>
+          <TouchableOpacity style={styles.backBtnWrapper} onPress={() => router.back()} activeOpacity={0.85}>
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.backBtn}
+            >
+              <Text style={styles.backBtnText}>{tStory('storyViewer.goBack')}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </ScreenBackground>
     );
   }
 
@@ -362,8 +375,8 @@ export default function StoryViewerScreen() {
   const img3 = getImageUri(story.image3);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+    <ScreenBackground>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       {/* Header */}
       <View style={styles.header}>
@@ -381,22 +394,29 @@ export default function StoryViewerScreen() {
         {/* Image 1 — Start */}
         {renderStoryImage(img1)}
 
-        <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>{tStory('storyViewer.theStory')}</Text>
+        <LinearGradient
+          colors={theme.gradients.card}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.contentCard}
+        >
+          <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>{tStory('storyViewer.theStory')}</Text>
 
-        <View style={styles.textBlock}>
-          {part1.map((seg: any, i: number) => (
-            <Text key={`p1-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
-          ))}
-        </View>
+          <View style={styles.textBlock}>
+            {part1.map((seg: any, i: number) => (
+              <Text key={`p1-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
+            ))}
+          </View>
 
-        {/* Image 2 — Middle */}
-        {renderStoryImage(img2)}
+          {/* Image 2 — Middle */}
+          {renderStoryImage(img2)}
 
-        <View style={styles.textBlock}>
-          {part2.map((seg: any, i: number) => (
-            <Text key={`p2-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
-          ))}
-        </View>
+          <View style={styles.textBlock}>
+            {part2.map((seg: any, i: number) => (
+              <Text key={`p2-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
+            ))}
+          </View>
+        </LinearGradient>
 
         {/* Image 3 — End */}
         {renderStoryImage(img3)}
@@ -419,17 +439,24 @@ export default function StoryViewerScreen() {
         <View style={styles.controls}>
           <View style={{ width: 52 }} />
 
-          <TouchableOpacity onPress={handlePlay} style={styles.playBtn} activeOpacity={0.8} disabled={synthLoading}>
-            {synthLoading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Ionicons
-                name={isPlaying ? 'pause' : 'play'}
-                size={28}
-                color="#FFFFFF"
-                style={{ marginLeft: isPlaying ? 0 : 3 }}
-              />
-            )}
+          <TouchableOpacity onPress={handlePlay} style={styles.playBtnWrapper} activeOpacity={0.85} disabled={synthLoading}>
+            <LinearGradient
+              colors={theme.gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.playBtn}
+            >
+              {synthLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Ionicons
+                  name={isPlaying ? 'pause' : 'play'}
+                  size={28}
+                  color="#FFFFFF"
+                  style={{ marginLeft: isPlaying ? 0 : 3 }}
+                />
+              )}
+            </LinearGradient>
           </TouchableOpacity>
 
           {/* Narrator picker button */}
@@ -504,12 +531,12 @@ export default function StoryViewerScreen() {
         </TouchableOpacity>
       </Modal>
 
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
+  container: { flex: 1 },
   center: { justifyContent: 'center', alignItems: 'center' },
   header: {
     flexDirection: 'row',
@@ -518,16 +545,27 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) + 10 : 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(129, 199, 132, 0.15)',
   },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: theme.colors.primary },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: theme.colors.primary, letterSpacing: 0.5 },
   iconBtn: { padding: 5 },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   storyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '800',
     color: theme.colors.text,
+    letterSpacing: 0.5,
     marginBottom: 20,
+  },
+  contentCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+    padding: 18,
+    marginBottom: 20,
+    ...theme.shadows.md,
   },
   sectionTitle: {
     fontSize: 18,
@@ -559,9 +597,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#0A1929',
+    backgroundColor: 'rgba(10, 25, 41, 0.92)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.15)',
+    borderTopColor: 'rgba(129, 199, 132, 0.18)',
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: Platform.OS === 'ios' ? 32 : 18,
@@ -592,18 +630,19 @@ const styles = StyleSheet.create({
     gap: 24,
   },
 
+  playBtnWrapper: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    overflow: 'visible',
+    ...theme.shadows.glow,
+  },
   playBtn: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 5,
   },
   voiceBtn: {
     width: 52,
@@ -670,11 +709,15 @@ const styles = StyleSheet.create({
   addVoiceText: { color: '#4CAF50', fontSize: 15, fontWeight: '600' },
 
   errorText: { color: theme.colors.text, fontSize: 18, marginBottom: 20 },
+  backBtnWrapper: {
+    borderRadius: 12,
+    overflow: 'visible',
+    ...theme.shadows.glow,
+  },
   backBtn: {
-    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   backBtnText: { color: '#FFFFFF', fontWeight: 'bold' },
 });
