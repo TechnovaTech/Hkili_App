@@ -65,7 +65,11 @@
     "volume": "الصوت",
     "favorite": "المفضلة",
     "download": "تحميل",
-    "share": "مشاركة"
+    "share": "مشاركة",
+    "yourStory": "قصتك",
+    "theStory": "القصة",
+    "notFound": "لم يتم العثور على القصة",
+    "goBack": "رجوع"
   },
   "library": {
     "myStories": "قصصي",

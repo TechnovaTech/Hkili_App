@@ -65,7 +65,11 @@
     "volume": "Volume",
     "favorite": "Favori",
     "download": "Télécharger",
-    "share": "Partager"
+    "share": "Partager",
+    "yourStory": "Votre histoire",
+    "theStory": "L'histoire",
+    "notFound": "Histoire introuvable",
+    "goBack": "Retour"
   },
   "library": {
     "myStories": "Mes histoires",

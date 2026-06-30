@@ -21,18 +21,23 @@ import { theme } from '@/theme';
 
 export default function StoryViewerScreen() {
   const router = useRouter();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
   const id = Array.isArray(storyId) ? storyId[0] : storyId;
 
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Content alignment based on story language
-  const storyLang = (story?.language || i18n.language).toLowerCase();
+  // Content alignment based on story language.
+  // Normalize to a 2-letter code (story.language may be 'EN'/'AR'/'FR' or 'en-US').
+  const storyLang = ((story?.language || i18n.language) || 'en').toLowerCase().slice(0, 2);
   const isStoryRTL = storyLang === 'ar';
   const storyTextAlign = isStoryRTL ? 'right' : 'left';
   const storyFlexDirection = isStoryRTL ? 'row-reverse' : 'row';
+
+  // Translate UI labels in the STORY's language, not the app's UI language,
+  // so a French/Arabic story doesn't show English labels (and vice-versa).
+  const tStory = (key: string) => t(key, { lng: storyLang });
 
   // TTS player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -198,9 +203,9 @@ export default function StoryViewerScreen() {
   if (!story) {
     return (
       <View style={[styles.container, styles.center]}>
-        <Text style={styles.errorText}>Story not found</Text>
+        <Text style={styles.errorText}>{tStory('storyViewer.notFound')}</Text>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backBtnText}>Go Back</Text>
+          <Text style={styles.backBtnText}>{tStory('storyViewer.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -231,7 +236,7 @@ export default function StoryViewerScreen() {
         <TouchableOpacity onPress={() => { Speech.stop(); router.push('/(tabs)/home'); }} style={styles.iconBtn}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Your Story</Text>
+        <Text style={styles.headerTitle}>{tStory('storyViewer.yourStory')}</Text>
         <View style={{ width: 34 }} />
       </View>
 
@@ -242,7 +247,7 @@ export default function StoryViewerScreen() {
         {/* Image 1 — Start */}
         {renderStoryImage(img1)}
 
-        <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>The Story</Text>
+        <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>{tStory('storyViewer.theStory')}</Text>
 
         <View style={styles.textBlock}>
           {part1.map((seg: any, i: number) => (
