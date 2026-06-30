@@ -80,6 +80,28 @@
     "noStories": "Aucune histoire trouvée",
     "yearsOld": "{{age}} ans"
   },
+  "profile": {
+    "title": "Profil",
+    "guest": "Utilisateur invité",
+    "noName": "Appuyez pour ajouter votre nom",
+    "editTitle": "Modifier le profil",
+    "name": "Nom",
+    "namePlaceholder": "Entrez votre nom",
+    "email": "Email",
+    "changePassword": "Changer le mot de passe (optionnel)",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "updateSuccess": "Profil mis à jour avec succès",
+    "updateError": "Impossible de mettre à jour le profil",
+    "deleteAccount": "Supprimer le compte",
+    "deleteConfirmTitle": "Supprimer le compte",
+    "deleteConfirmMessage": "Cela supprimera définitivement votre compte et toutes vos données. Cette action est irréversible.",
+    "deleteConfirmButton": "Supprimer",
+    "deleteError": "Impossible de supprimer le compte",
+    "guestEditNotice": "Connectez-vous pour gérer votre profil"
+  },
   "settings": {
     "title": "Paramètres",
     "language": "Langue",

@@ -80,6 +80,28 @@
     "noStories": "No stories found",
     "yearsOld": "{{age}} years old"
   },
+  "profile": {
+    "title": "Profile",
+    "guest": "Guest User",
+    "noName": "Tap to add your name",
+    "editTitle": "Edit Profile",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "changePassword": "Change Password (optional)",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "save": "Save",
+    "cancel": "Cancel",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Could not update profile",
+    "deleteAccount": "Delete Account",
+    "deleteConfirmTitle": "Delete Account",
+    "deleteConfirmMessage": "This will permanently delete your account and all your data. This action cannot be undone.",
+    "deleteConfirmButton": "Delete",
+    "deleteError": "Could not delete account",
+    "guestEditNotice": "Sign in to manage your profile"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",

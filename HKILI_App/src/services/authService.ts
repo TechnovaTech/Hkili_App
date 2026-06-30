@@ -77,6 +77,22 @@ class AuthService {
     return apiClient.get<User>('/auth/me');
   }
 
+  async updateProfile(data: {
+    name?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }): Promise<ApiResponse<User>> {
+    return apiClient.patch<User>('/auth/me', data);
+  }
+
+  async deleteAccount(): Promise<ApiResponse<void>> {
+    const response = await apiClient.delete<void>('/auth/me');
+    if (response.success) {
+      await tokenStorage.clear();
+    }
+    return response;
+  }
+
   async createGuestSession(): Promise<User> {
     return {
       id: 'guest',

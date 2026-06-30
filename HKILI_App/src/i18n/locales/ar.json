@@ -80,6 +80,28 @@
     "noStories": "لم يتم العثور على قصص",
     "yearsOld": "{{age}} سنوات"
   },
+  "profile": {
+    "title": "الملف الشخصي",
+    "guest": "مستخدم ضيف",
+    "noName": "اضغط لإضافة اسمك",
+    "editTitle": "تعديل الملف الشخصي",
+    "name": "الاسم",
+    "namePlaceholder": "أدخل اسمك",
+    "email": "البريد الإلكتروني",
+    "changePassword": "تغيير كلمة المرور (اختياري)",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
+    "updateError": "تعذّر تحديث الملف الشخصي",
+    "deleteAccount": "حذف الحساب",
+    "deleteConfirmTitle": "حذف الحساب",
+    "deleteConfirmMessage": "سيؤدي هذا إلى حذف حسابك وجميع بياناتك نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteConfirmButton": "حذف",
+    "deleteError": "تعذّر حذف الحساب",
+    "guestEditNotice": "سجّل الدخول لإدارة ملفك الشخصي"
+  },
   "settings": {
     "title": "الإعدادات",
     "language": "اللغة",
