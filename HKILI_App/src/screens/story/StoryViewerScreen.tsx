@@ -9,13 +9,18 @@ import {
   Image,
   ActivityIndicator,
   Platform,
+  Modal,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { storyService } from '@/services/storyService';
-import { Story } from '@/types';
+import { voiceService } from '@/services/voiceService';
+import { Story, VoiceProfile } from '@/types';
 import { theme } from '@/theme';
 
 
@@ -47,6 +52,17 @@ export default function StoryViewerScreen() {
   const fullTextRef = useRef('');
   const pausedAtRef = useRef(0); // tracks word index where we paused
 
+  // Narrator / voice-cloning state
+  const [voices, setVoices] = useState<VoiceProfile[]>([]);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null); // null = default narrator (device TTS)
+  const [voicePickerVisible, setVoicePickerVisible] = useState(false);
+  const [synthLoading, setSynthLoading] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  // In-memory cache of synthesized audio URLs for this story, keyed by voiceId.
+  const audioUrlCacheRef = useRef<Record<string, string>>({});
+
+  const selectedVoice = voices.find((v) => v.id === selectedVoiceId) || null;
+
 
   useEffect(() => {
     if (storyData) {
@@ -63,8 +79,24 @@ export default function StoryViewerScreen() {
     return () => {
       Speech.stop();
       if (timerRef.current) clearInterval(timerRef.current);
+      if (soundRef.current) {
+        soundRef.current.unloadAsync().catch(() => {});
+        soundRef.current = null;
+      }
     };
   }, [id, storyData]);
+
+  // Load the user's cloned voices so they can pick a narrator.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await voiceService.listVoices();
+        if (res.success && res.data) setVoices(res.data);
+      } catch {
+        // non-fatal — default narrator still works
+      }
+    })();
+  }, []);
 
   const fetchStory = async (sid: string) => {
     try {
@@ -157,7 +189,92 @@ export default function StoryViewerScreen() {
     });
   };
 
+  // ---- Cloned-voice playback (expo-av) ----------------------------------
+
+  // Get a synthesized audio URL for the chosen cloned voice, using a cache
+  // (memory + AsyncStorage) so we don't pay to regenerate the same story.
+  const getClonedAudioUrl = async (voiceId: string): Promise<string | null> => {
+    if (audioUrlCacheRef.current[voiceId]) return audioUrlCacheRef.current[voiceId];
+
+    const cacheKey = `clonedAudio:${id}:${voiceId}`;
+    try {
+      const stored = await AsyncStorage.getItem(cacheKey);
+      if (stored) {
+        audioUrlCacheRef.current[voiceId] = stored;
+        return stored;
+      }
+    } catch {}
+
+    const res = await voiceService.synthesize({
+      voiceId,
+      storyId: id,
+      text: fullTextRef.current,
+      language: storyLang.toUpperCase(),
+    });
+    if (res.success && res.data?.audioUrl) {
+      audioUrlCacheRef.current[voiceId] = res.data.audioUrl;
+      AsyncStorage.setItem(cacheKey, res.data.audioUrl).catch(() => {});
+      return res.data.audioUrl;
+    }
+    return null;
+  };
+
+  const onSoundStatus = (status: any) => {
+    if (!status.isLoaded) return;
+    if (typeof status.durationMillis === 'number') {
+      setTotalDuration(Math.ceil(status.durationMillis / 1000));
+    }
+    setElapsed(Math.floor((status.positionMillis ?? 0) / 1000));
+    setIsPlaying(status.isPlaying);
+    if (status.didJustFinish) {
+      setIsPlaying(false);
+      setElapsed(Math.ceil((status.durationMillis ?? 0) / 1000));
+    }
+  };
+
+  const playClonedVoice = async (voiceId: string) => {
+    try {
+      // Resume if already loaded.
+      if (soundRef.current) {
+        await soundRef.current.playAsync();
+        setIsPlaying(true);
+        return;
+      }
+      setSynthLoading(true);
+      const url = await getClonedAudioUrl(voiceId);
+      setSynthLoading(false);
+      if (!url) {
+        Alert.alert(tStory('storyViewer.yourStory'), tStory('voice.synthError'));
+        return;
+      }
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true },
+        onSoundStatus
+      );
+      soundRef.current = sound;
+      setIsPlaying(true);
+    } catch (e) {
+      setSynthLoading(false);
+      console.error('playClonedVoice error:', e);
+      Alert.alert(tStory('storyViewer.yourStory'), tStory('voice.synthError'));
+    }
+  };
+
   const handlePlay = async () => {
+    // Cloned-voice path
+    if (selectedVoiceId) {
+      if (isPlaying && soundRef.current) {
+        await soundRef.current.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await playClonedVoice(selectedVoiceId);
+      }
+      return;
+    }
+
+    // Default narrator path (device TTS)
     if (isPlaying) {
       pausedAtRef.current = elapsed;
       await Speech.stop();
@@ -169,6 +286,23 @@ export default function StoryViewerScreen() {
       startTimer(from);
       speakFrom(from);
     }
+  };
+
+  // Switch narrator: stop whatever is playing and reset position.
+  const handleSelectVoice = async (voiceId: string | null) => {
+    Speech.stop();
+    stopTimer();
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync().catch(() => {});
+      soundRef.current = null;
+    }
+    pausedAtRef.current = 0;
+    setElapsed(0);
+    setIsPlaying(false);
+    setSelectedVoiceId(voiceId);
+    setVoicePickerVisible(false);
+    // Reset duration estimate for default narrator; cloned will set real duration on play.
+    if (!voiceId && story) setTotalDuration(estimateDuration(fullTextRef.current));
   };
 
 
@@ -281,22 +415,94 @@ export default function StoryViewerScreen() {
           <Text style={styles.timeText}>{formatTime(totalDuration)}</Text>
         </View>
 
-        {/* Controls row: play button centered, voice button at right corner */}
+        {/* Controls row: play button centered, narrator button at right corner */}
         <View style={styles.controls}>
           <View style={{ width: 52 }} />
 
-          <TouchableOpacity onPress={handlePlay} style={styles.playBtn} activeOpacity={0.8}>
-            <Ionicons
-              name={isPlaying ? 'pause' : 'play'}
-              size={28}
-              color="#FFFFFF"
-              style={{ marginLeft: isPlaying ? 0 : 3 }}
-            />
+          <TouchableOpacity onPress={handlePlay} style={styles.playBtn} activeOpacity={0.8} disabled={synthLoading}>
+            {synthLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Ionicons
+                name={isPlaying ? 'pause' : 'play'}
+                size={28}
+                color="#FFFFFF"
+                style={{ marginLeft: isPlaying ? 0 : 3 }}
+              />
+            )}
           </TouchableOpacity>
 
-          <View style={{ width: 52 }} />
+          {/* Narrator picker button */}
+          <TouchableOpacity
+            onPress={() => setVoicePickerVisible(true)}
+            style={styles.voiceBtn}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={selectedVoiceId ? 'person' : 'person-outline'}
+              size={20}
+              color={selectedVoiceId ? '#4CAF50' : '#81C784'}
+            />
+          </TouchableOpacity>
         </View>
+
+        {/* Current narrator label */}
+        <Text style={styles.narratorLabel} numberOfLines={1}>
+          {tStory('voice.narrator')}: {selectedVoice ? selectedVoice.name : tStory('voice.defaultNarrator')}
+        </Text>
       </View>
+
+      {/* Narrator picker modal */}
+      <Modal
+        visible={voicePickerVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setVoicePickerVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setVoicePickerVisible(false)}
+        >
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>{tStory('voice.chooseNarrator')}</Text>
+
+            {/* Default narrator */}
+            <TouchableOpacity
+              style={[styles.voiceOption, !selectedVoiceId && styles.voiceOptionActive]}
+              onPress={() => handleSelectVoice(null)}
+            >
+              <Ionicons name="volume-medium-outline" size={22} color="#81C784" />
+              <Text style={styles.voiceOptionText}>{tStory('voice.defaultNarrator')}</Text>
+              {!selectedVoiceId && <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />}
+            </TouchableOpacity>
+
+            {/* Cloned voices */}
+            {voices.map((v) => (
+              <TouchableOpacity
+                key={v.id}
+                style={[styles.voiceOption, selectedVoiceId === v.id && styles.voiceOptionActive]}
+                onPress={() => handleSelectVoice(v.id)}
+              >
+                <Ionicons name="person-circle-outline" size={22} color="#81C784" />
+                <Text style={styles.voiceOptionText}>{v.name}</Text>
+                {selectedVoiceId === v.id && <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />}
+              </TouchableOpacity>
+            ))}
+
+            {/* Add / manage voices */}
+            <TouchableOpacity
+              style={styles.addVoiceBtn}
+              onPress={() => { setVoicePickerVisible(false); router.push('/voice/my-voice' as any); }}
+            >
+              <Ionicons name="add-circle-outline" size={20} color="#4CAF50" />
+              <Text style={styles.addVoiceText}>
+                {voices.length === 0 ? tStory('voice.recordYourVoice') : tStory('voice.manageVoices')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
     </View>
   );
@@ -399,6 +605,69 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 5,
   },
+  voiceBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(76,175,80,0.3)',
+  },
+  narratorLabel: {
+    fontSize: 12,
+    color: '#81C784',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#102A43',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  voiceOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 6,
+  },
+  voiceOptionActive: {
+    backgroundColor: 'rgba(76,175,80,0.12)',
+  },
+  voiceOptionText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  addVoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(76,175,80,0.3)',
+  },
+  addVoiceText: { color: '#4CAF50', fontSize: 15, fontWeight: '600' },
 
   errorText: { color: theme.colors.text, fontSize: 18, marginBottom: 20 },
   backBtn: {

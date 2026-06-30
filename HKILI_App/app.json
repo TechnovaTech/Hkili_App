@@ -15,12 +15,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.company.aistorytelling"
+      "bundleIdentifier": "com.company.aistorytelling",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "We use the microphone so you can record your voice and use it as the story narrator."
+      }
     },
     "android": {
       "package": "com.company.aistorytelling",
       "permissions": [
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -32,7 +36,7 @@
       [
         "expo-av",
         {
-          "microphonePermission": false
+          "microphonePermission": "We use the microphone so you can record your voice and use it as the story narrator."
         }
       ]
     ],

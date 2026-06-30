@@ -11,6 +11,15 @@ export interface User {
   coins: number;
 }
 
+export interface VoiceProfile {
+  id: string;
+  name: string;
+  language?: string;
+  status?: 'processing' | 'ready' | 'failed';
+  sampleUrl?: string;
+  createdAt?: string;
+}
+
 export interface Character {
   id: string;
   name: string;

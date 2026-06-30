@@ -38,6 +38,7 @@ export default function RootLayout() {
           <Stack.Screen name="auth" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="story" />
+          <Stack.Screen name="voice" />
         </Stack>
       </SafeAreaProvider>
     </I18nextProvider>

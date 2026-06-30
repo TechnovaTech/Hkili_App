@@ -258,6 +258,24 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {!isGuest && (
+          <TouchableOpacity
+            style={[styles.settingItem, { flexDirection }]}
+            onPress={() => router.push('/voice/my-voice' as any)}
+          >
+            <Ionicons name="mic-outline" size={24} color="#4CAF50" />
+            <View style={[styles.settingContent, {
+              marginLeft: isRTL ? 0 : 16,
+              marginRight: isRTL ? 16 : 0,
+              alignItems: isRTL ? 'flex-end' : 'flex-start'
+            }]}>
+              <Text style={[styles.settingTitle, { textAlign }]}>{t('voice.title')}</Text>
+              <Text style={[styles.settingSubtitle, { textAlign }]}>{t('voice.settingsSubtitle')}</Text>
+            </View>
+            <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#81C784" />
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           style={[styles.settingItem, { flexDirection }]}
           onPress={() => router.push('/faq')}
