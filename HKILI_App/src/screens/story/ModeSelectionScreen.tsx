@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { theme } from '@/theme';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { categoryService, Category } from '@/services/categoryService';
@@ -23,6 +24,7 @@ const { width } = Dimensions.get('window');
 
 export default function ModeSelectionScreen() {
   const params = useLocalSearchParams();
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,7 +123,7 @@ export default function ModeSelectionScreen() {
           <TouchableOpacity onPress={() => router.push('/(tabs)/home')}>
             <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Choose a mode</Text>
+          <Text style={styles.headerTitle}>{t('storyFlow.modeTitle')}</Text>
           <View style={{ width: 24 }} />
         </View>
 
@@ -131,6 +133,30 @@ export default function ModeSelectionScreen() {
           </View>
         ) : (
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            {/* Alternative flow: bring your own images (GPT-4o vision) */}
+            <TouchableOpacity
+              style={styles.imageStoryCard}
+              onPress={async () => {
+                await playClickSound();
+                router.push({ pathname: '/story/image-story', params });
+              }}
+              activeOpacity={0.85}
+            >
+              <LinearGradient
+                colors={theme.gradients.highlight}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.imageStoryInner}
+              >
+                <Ionicons name="images" size={26} color={theme.colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.imageStoryTitle}>{t('storyFlow.useMyImages')}</Text>
+                  <Text style={styles.imageStorySub} numberOfLines={2}>{t('storyFlow.imageSubtitle')}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={22} color={theme.colors.accent} />
+              </LinearGradient>
+            </TouchableOpacity>
+
             <View style={styles.modesGrid}>
               {categories.map(renderModeCard)}
             </View>
@@ -207,4 +233,21 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     textAlign: 'center',
   },
+  imageStoryCard: {
+    borderRadius: 18,
+    marginBottom: 24,
+    overflow: 'visible',
+    ...theme.shadows.glow,
+  },
+  imageStoryInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 230, 118, 0.35)',
+  },
+  imageStoryTitle: { fontSize: 16, fontWeight: '800', color: theme.colors.text, marginBottom: 2 },
+  imageStorySub: { fontSize: 12, color: theme.colors.textSecondary, lineHeight: 16 },
 });

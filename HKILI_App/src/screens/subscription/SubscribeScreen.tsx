@@ -11,12 +11,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
+import { Alert } from 'react-native';
 import { planService, Plan } from '../../services/planService';
 import { authService } from '../../services/authService';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { useRTL } from '../../hooks/useRTL';
+import { formatPrice } from '../../utils/currencyUtils';
 
 export default function SubscribeScreen() {
   const { t } = useTranslation();
@@ -25,26 +27,29 @@ export default function SubscribeScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [coins, setCoins] = useState(0);
+  const [country, setCountry] = useState<string | undefined>(undefined);
+  const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
     loadPlans();
   }, []);
 
-  const fetchUserCoins = useCallback(async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const res = await authService.getCurrentUser();
       if (res.success && res.data) {
         setCoins(res.data.coins || 0);
+        setCountry(res.data.country || undefined);
       }
     } catch (error) {
-      console.error('Error fetching user coins:', error);
+      console.error('Error fetching user:', error);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      fetchUserCoins();
-    }, [fetchUserCoins])
+      fetchUser();
+    }, [fetchUser])
   );
 
   const loadPlans = async () => {
@@ -63,8 +68,29 @@ export default function SubscribeScreen() {
     }
   };
 
-  const handleBuy = () => {
-    // No function as requested
+  const handleBuy = async () => {
+    if (!selectedPlanId || purchasing) return;
+    const plan = plans.find((p) => p._id === selectedPlanId);
+    setPurchasing(true);
+    try {
+      // STUB checkout — backend credits coins without a real charge.
+      const res = await planService.purchase(selectedPlanId);
+      if (res.success) {
+        const newCoins = (res as any).coins;
+        if (typeof newCoins === 'number') setCoins(newCoins);
+        else fetchUser();
+        Alert.alert(
+          t('subscription.title'),
+          t('subscription.buySuccess', { coins: plan?.coins ?? res.data?.coinsAdded ?? '' })
+        );
+      } else {
+        Alert.alert(t('subscription.title'), res.message || res.error || t('subscription.buyError'));
+      }
+    } catch (e) {
+      Alert.alert(t('subscription.title'), t('subscription.buyError'));
+    } finally {
+      setPurchasing(false);
+    }
   };
 
   return (
@@ -127,8 +153,8 @@ export default function SubscribeScreen() {
                     </View>
 
                     <View style={styles.priceContainer}>
-                      <Text style={styles.originalPrice}>₹{plan.originalPrice}</Text>
-                      <Text style={styles.discountPrice}>₹{plan.discountPrice}</Text>
+                      <Text style={styles.originalPrice}>{formatPrice(plan.originalPrice, country)}</Text>
+                      <Text style={styles.discountPrice}>{formatPrice(plan.discountPrice, country)}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -136,18 +162,33 @@ export default function SubscribeScreen() {
             })}
           </View>
         )}
+
+        {!country && !loading && plans.length > 0 && (
+          <Text style={styles.priceNote}>{t('subscription.localPriceNote')}</Text>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.buyButtonWrapper} onPress={handleBuy} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.buyButtonWrapper}
+          onPress={handleBuy}
+          activeOpacity={0.85}
+          disabled={purchasing || !selectedPlanId}
+        >
           <LinearGradient
             colors={theme.gradients.gold}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.buyButton}
           >
-            <Ionicons name="sparkles" size={20} color="#5D4037" />
-            <Text style={styles.buyButtonText}>{t('subscription.buy')}</Text>
+            {purchasing ? (
+              <ActivityIndicator color="#5D4037" />
+            ) : (
+              <>
+                <Ionicons name="sparkles" size={20} color="#5D4037" />
+                <Text style={styles.buyButtonText}>{t('subscription.buy')}</Text>
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -279,6 +320,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#00E676',
+  },
+  priceNote: {
+    marginTop: 20,
+    fontSize: 13,
+    color: '#81C784',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   footer: {
     padding: 20,

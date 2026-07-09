@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         role: user.role,
         coins: user.coins || 0,
+        country: user.country || '',
         isGuest: false
       }
     })
@@ -85,7 +86,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, currentPassword, newPassword } = body || {}
+    const { name, country, currentPassword, newPassword } = body || {}
 
     await dbConnect()
     const user = await User.findById(payload.userId)
@@ -99,6 +100,11 @@ export async function PATCH(request: NextRequest) {
     // Update display name when provided.
     if (typeof name === 'string') {
       user.name = name.trim()
+    }
+
+    // Update country (ISO alpha-2) when provided — drives local currency.
+    if (typeof country === 'string') {
+      user.country = country.trim().toUpperCase().slice(0, 2)
     }
 
     // Optional password change — requires the current password to match.
@@ -129,6 +135,7 @@ export async function PATCH(request: NextRequest) {
         name: user.name,
         role: user.role,
         coins: user.coins || 0,
+        country: user.country || '',
         isGuest: false
       },
       message: 'Profile updated successfully'

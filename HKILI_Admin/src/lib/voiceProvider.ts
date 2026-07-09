@@ -5,8 +5,9 @@
  * To switch providers you only change env vars (and, for Fish/Replicate, fill
  * in the two stubbed methods). Nothing else in the codebase needs to change.
  *
- *   VOICE_PROVIDER = elevenlabs | fish | replicate   (default: elevenlabs)
- *   ELEVENLABS_API_KEY = <key>                        (when provider=elevenlabs)
+ *   VOICE_PROVIDER = replicate | elevenlabs | fish    (default: replicate)
+ *   REPLICATE_API_TOKEN = <token>                     (when provider=replicate, open-source XTTS-v2)
+ *   ELEVENLABS_API_KEY  = <key>                       (when provider=elevenlabs, paid)
  *
  * Contract:
  *   - isConfigured(): is the selected provider ready to use?
@@ -166,26 +167,126 @@ const fishProvider: VoiceProvider = {
 }
 
 // ---------------------------------------------------------------------------
-// Replicate (XTTS-v2) — STUB. Pay-per-use, no monthly fee.
-// Fill these + set REPLICATE_API_TOKEN to enable.
+// Replicate (Coqui XTTS-v2) — open-source, pay-per-use (no monthly fee).
+// XTTS-v2 does ZERO-SHOT cloning: there is no separate "enroll/clone" step —
+// you pass the voice sample as `speaker` at synthesis time. So cloneVoice()
+// simply validates + stores the sample URL as the providerVoiceId, and
+// synthesize() feeds that URL to the model.
+//   VOICE_PROVIDER=replicate
+//   REPLICATE_API_TOKEN=<token>
+//   REPLICATE_XTTS_VERSION=<version hash>   (optional override)
 // ---------------------------------------------------------------------------
+const DEFAULT_XTTS_VERSION =
+  '684bc3855b37866c0c65add2ff39c78f3dea3f4ff103a436465326e0f438d55e'
+
+// XTTS-v2 uses 2-letter language codes.
+function xttsLang(l?: VoiceLanguage): string {
+  switch ((l || 'EN').toUpperCase()) {
+    case 'FR':
+      return 'fr'
+    case 'AR':
+      return 'ar'
+    default:
+      return 'en'
+  }
+}
+
+// Create a Replicate prediction and wait for its output URL. Uses `Prefer: wait`
+// for a near-synchronous response, then polls as a fallback for longer runs.
+async function runReplicatePrediction(input: Record<string, unknown>): Promise<string> {
+  const token = process.env.REPLICATE_API_TOKEN!
+  const version = process.env.REPLICATE_XTTS_VERSION || DEFAULT_XTTS_VERSION
+
+  const createRes = await fetch('https://api.replicate.com/v1/predictions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'wait',
+    },
+    body: JSON.stringify({ version, input }),
+  })
+
+  if (!createRes.ok) {
+    const detail = await createRes.text().catch(() => '')
+    throw new VoiceProviderError(
+      `Replicate request failed: ${createRes.status} ${detail}`.trim(),
+      createRes.status === 401 ? 401 : 400
+    )
+  }
+
+  let pred: any = await createRes.json()
+  const getUrl: string | undefined = pred?.urls?.get
+  let tries = 0
+  while (
+    pred.status !== 'succeeded' &&
+    pred.status !== 'failed' &&
+    pred.status !== 'canceled' &&
+    getUrl &&
+    tries < 60
+  ) {
+    await new Promise((r) => setTimeout(r, 2000))
+    const pollRes = await fetch(getUrl, { headers: { Authorization: `Bearer ${token}` } })
+    pred = await pollRes.json()
+    tries++
+  }
+
+  if (pred.status !== 'succeeded') {
+    throw new VoiceProviderError(
+      `Replicate synthesis ${pred.status || 'failed'}: ${pred.error || 'no output'}`
+    )
+  }
+
+  const out = Array.isArray(pred.output) ? pred.output[0] : pred.output
+  if (!out || typeof out !== 'string') {
+    throw new VoiceProviderError('Replicate returned no audio output')
+  }
+  return out
+}
+
 const replicateProvider: VoiceProvider = {
   name: 'replicate',
+
   isConfigured() {
     return !!process.env.REPLICATE_API_TOKEN
   },
-  async cloneVoice() {
-    // XTTS does zero-shot cloning at synth time (no separate "clone" step):
-    // store the sampleUrl as the providerVoiceId and pass it as speaker on synth.
-    throw new VoiceProviderError(
-      'Replicate provider is not implemented yet. Set VOICE_PROVIDER=elevenlabs or implement replicateProvider.'
-    )
+
+  async cloneVoice({ sampleUrl }) {
+    // Zero-shot: no persistent clone. Just make sure the sample is reachable,
+    // then use the sample URL itself as the voice id (used as `speaker` later).
+    let ok = false
+    try {
+      const head = await fetch(sampleUrl, { method: 'HEAD' })
+      ok = head.ok
+    } catch {
+      ok = false
+    }
+    if (!ok) {
+      // Some hosts reject HEAD — fall back to a normal GET.
+      const g = await fetch(sampleUrl).catch(() => null)
+      if (!g || !g.ok) {
+        throw new VoiceProviderError('Could not read the recorded voice sample')
+      }
+    }
+    return { providerVoiceId: sampleUrl }
   },
-  async synthesize() {
-    throw new VoiceProviderError('Replicate provider is not implemented yet.')
+
+  async synthesize({ text, providerVoiceId, language }) {
+    const outputUrl = await runReplicatePrediction({
+      text,
+      speaker: providerVoiceId, // the stored Cloudinary sample URL
+      language: xttsLang(language),
+      cleanup_voice: false,
+    })
+    const audioRes = await fetch(outputUrl)
+    if (!audioRes.ok) {
+      throw new VoiceProviderError('Could not download the synthesized audio')
+    }
+    return Buffer.from(await audioRes.arrayBuffer())
   },
+
   async deleteVoice() {
-    /* no-op until implemented */
+    /* nothing stored remotely for zero-shot XTTS — no-op */
   },
 }
 
@@ -196,7 +297,7 @@ const PROVIDERS: Record<string, VoiceProvider> = {
 }
 
 export function getVoiceProvider(): VoiceProvider {
-  const key = (process.env.VOICE_PROVIDER || 'elevenlabs').toLowerCase()
+  const key = (process.env.VOICE_PROVIDER || 'replicate').toLowerCase()
   const provider = PROVIDERS[key]
   if (!provider) {
     throw new VoiceProviderError(
@@ -209,8 +310,16 @@ export function getVoiceProvider(): VoiceProvider {
 /** Guard used by routes to fail fast with a clear, user-facing message. */
 export function assertVoiceConfigured(provider: VoiceProvider) {
   if (!provider.isConfigured()) {
+    const envHint =
+      provider.name === 'replicate'
+        ? 'REPLICATE_API_TOKEN'
+        : provider.name === 'elevenlabs'
+          ? 'ELEVENLABS_API_KEY'
+          : provider.name === 'fish'
+            ? 'FISH_API_KEY'
+            : 'the provider API key'
     throw new VoiceProviderError(
-      `Voice cloning is not configured on the server. Set the API key for "${provider.name}" (e.g. ELEVENLABS_API_KEY).`,
+      `Voice cloning is not configured on the server. Set ${envHint} for the "${provider.name}" provider.`,
       503
     )
   }

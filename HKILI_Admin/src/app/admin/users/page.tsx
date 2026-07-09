@@ -9,6 +9,9 @@ interface User {
   name?: string
   createdAt: string
   status: 'active' | 'blocked'
+  coins?: number
+  role?: 'user' | 'admin'
+  country?: string
 }
 
 export default function UsersManagement() {
@@ -71,6 +74,30 @@ export default function UsersManagement() {
       }
     } catch (error) {
       console.error('Error updating user status:', error)
+    }
+  }
+
+  const handleEditCoins = async (user: User) => {
+    const input = prompt(`Set coin balance for ${user.email}`, String(user.coins ?? 0))
+    if (input === null) return
+    const coins = parseInt(input, 10)
+    if (isNaN(coins) || coins < 0) {
+      alert('Please enter a valid number of coins (0 or more).')
+      return
+    }
+    try {
+      const res = await fetch(`/api/users/${user._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ coins }),
+      })
+      if (res.ok) {
+        setUsers(users.map(u => (u._id === user._id ? { ...u, coins } : u)))
+      } else {
+        alert('Failed to update coins')
+      }
+    } catch (error) {
+      console.error('Error updating coins:', error)
     }
   }
 
@@ -139,6 +166,8 @@ export default function UsersManagement() {
           <thead>
             <tr className="bg-gray-50 text-gray-600 text-sm">
               <th className="px-6 py-4 font-medium">Email</th>
+              <th className="px-6 py-4 font-medium">Name</th>
+              <th className="px-6 py-4 font-medium">Coins</th>
               <th className="px-6 py-4 font-medium">Status</th>
               <th className="px-6 py-4 font-medium">Joined Date</th>
               <th className="px-6 py-4 font-medium">Actions</th>
@@ -149,11 +178,20 @@ export default function UsersManagement() {
               <tr key={user._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-900">{user.email}</div>
+                  {user.role === 'admin' && (
+                    <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-700">ADMIN</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 text-gray-700">{user.name || '—'}</td>
+                <td className="px-6 py-4">
+                  <span className="inline-flex items-center gap-1 font-semibold text-gray-900">
+                    🪙 {user.coins ?? 0}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    user.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
+                    user.status === 'active'
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
                     {user.status ? (user.status.charAt(0).toUpperCase() + user.status.slice(1)) : 'Unknown'}
@@ -164,7 +202,13 @@ export default function UsersManagement() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex space-x-3">
-                    <button 
+                    <button
+                      onClick={() => handleEditCoins(user)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Coins
+                    </button>
+                    <button
                       onClick={() => handleBlockUnblock(user._id, user.status)}
                       className={`text-sm font-medium ${
                         user.status === 'active' ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'
@@ -172,7 +216,7 @@ export default function UsersManagement() {
                     >
                       {user.status === 'active' ? 'Block' : 'Unblock'}
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(user._id)}
                       className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >

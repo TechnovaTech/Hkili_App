@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { theme } from '@/theme';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
@@ -23,6 +24,7 @@ const languages = [
 
 export default function LanguageSelectionScreen() {
   const params = useLocalSearchParams();
+  const { t } = useTranslation();
 
   const handleLanguageSelect = async (languageId: string) => {
     await playClickSound();
@@ -44,12 +46,12 @@ export default function LanguageSelectionScreen() {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Select Story Language</Text>
+          <Text style={styles.headerTitle}>{t('storyFlow.languageTitle')}</Text>
           <View style={{ width: 24 }} />
         </View>
 
         <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.subtitle}>In which language should the story be written?</Text>
+          <Text style={styles.subtitle}>{t('storyFlow.languageSubtitle')}</Text>
 
           <View style={styles.languageList}>
             {languages.map((lang) => (

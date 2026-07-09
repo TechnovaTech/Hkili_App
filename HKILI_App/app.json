@@ -38,6 +38,12 @@
         {
           "microphonePermission": "We use the microphone so you can record your voice and use it as the story narrator."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "We access your photos so you can add your own pictures to a story."
+        }
       ]
     ],
     "experiments": {

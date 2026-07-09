@@ -23,6 +23,7 @@ import { useRTL } from '../../hooks/useRTL';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
 import { User } from '@/types';
+import { COUNTRIES } from '../../utils/currencyUtils';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -41,6 +42,7 @@ export default function SettingsScreen() {
   // Edit-profile modal state
   const [editVisible, setEditVisible] = useState(false);
   const [nameInput, setNameInput] = useState('');
+  const [countryInput, setCountryInput] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -101,6 +103,7 @@ export default function SettingsScreen() {
       return;
     }
     setNameInput(user?.name || '');
+    setCountryInput(user?.country || '');
     setCurrentPassword('');
     setNewPassword('');
     setEditVisible(true);
@@ -110,8 +113,9 @@ export default function SettingsScreen() {
     if (saving) return;
     setSaving(true);
     try {
-      const payload: { name?: string; currentPassword?: string; newPassword?: string } = {
+      const payload: { name?: string; country?: string; currentPassword?: string; newPassword?: string } = {
         name: nameInput.trim(),
+        country: countryInput,
       };
       if (newPassword) {
         payload.currentPassword = currentPassword;
@@ -367,6 +371,29 @@ export default function SettingsScreen() {
               placeholder={t('profile.namePlaceholder')}
               placeholderTextColor="#6B7280"
             />
+
+            <Text style={[styles.inputLabel, { textAlign }]}>{t('profile.country')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.countryRow}
+              contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+            >
+              {COUNTRIES.map((c) => {
+                const active = countryInput === c.code;
+                return (
+                  <TouchableOpacity
+                    key={c.code}
+                    onPress={() => setCountryInput(c.code)}
+                    style={[styles.countryChip, active && styles.countryChipActive]}
+                  >
+                    <Text style={[styles.countryChipText, active && styles.countryChipTextActive]}>
+                      {c.name} · {c.currency}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
             <Text style={[styles.inputLabel, { textAlign }]}>{t('profile.email')}</Text>
             <TextInput
@@ -631,6 +658,29 @@ const styles = StyleSheet.create({
   },
   inputDisabled: {
     opacity: 0.6,
+  },
+  countryRow: {
+    marginBottom: 12,
+  },
+  countryChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+  },
+  countryChipActive: {
+    backgroundColor: 'rgba(0, 230, 118, 0.12)',
+    borderColor: '#00E676',
+  },
+  countryChipText: {
+    color: '#B0B0B0',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  countryChipTextActive: {
+    color: '#FFFFFF',
   },
   modalActions: {
     flexDirection: 'row',

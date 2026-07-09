@@ -6,25 +6,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-
-const theme = {
-  colors: {
-    primary: '#6366f1',
-    background: '#0f0f0f',
-    textSecondary: '#a1a1aa',
-  },
-  spacing: {
-    md: 16,
-    lg: 24,
-  },
-  typography: {
-    body: {
-      fontSize: 16,
-      fontWeight: 'normal' as const,
-      lineHeight: 24,
-    },
-  },
-};
+import { theme } from '../../theme';
 
 interface LoadingProps {
   message?: string;

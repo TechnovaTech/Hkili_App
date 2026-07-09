@@ -37,12 +37,16 @@ export async function PATCH(
 
     const body = await request.json()
     await dbConnect()
-    
-    const user = await User.findByIdAndUpdate(
-      id,
-      { status: body.status },
-      { new: true }
-    )
+
+    // Whitelist the fields an admin may edit (never blindly merge the body).
+    const update: Record<string, any> = {}
+    if (body.status === 'active' || body.status === 'blocked') update.status = body.status
+    if (typeof body.name === 'string') update.name = body.name.trim()
+    if (typeof body.country === 'string') update.country = body.country.trim().toUpperCase().slice(0, 2)
+    if (body.role === 'user' || body.role === 'admin') update.role = body.role
+    if (typeof body.coins === 'number' && body.coins >= 0) update.coins = Math.floor(body.coins)
+
+    const user = await User.findByIdAndUpdate(id, update, { new: true }).select('-password')
 
     if (!user) {
       return NextResponse.json(

@@ -13,25 +13,28 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
 
+// Each moral's displayed text comes from i18n (key), so it shows in the story
+// language; `key` is also what we send to the backend as the chosen moral.
 const morals = [
-  { id: '1', text: 'No specific moral', emoji: '⏭️' },
-  { id: '2', text: 'Always be kind.', emoji: '💖' },
-  { id: '3', text: 'Be honest.', emoji: '👆' },
-  { id: '4', text: 'Be the change you want to see in the world.', emoji: '🗺️' },
-  { id: '5', text: "Always tell the truth because a liar won't be trusted.", emoji: '😕' },
-  { id: '6', text: 'Think before you act.', emoji: '🤔' },
-  { id: '7', text: 'Never give up.', emoji: '💪' },
-  { id: '8', text: 'Respect others.', emoji: '🛡️' },
-  { id: '9', text: 'The importance of being a good friend.', emoji: '👫' },
-  { id: '10', text: 'Learning to forgive', emoji: '🙏' },
-  { id: '11', text: "You can't always get what you want.", emoji: '🧝' },
-  { id: '12', text: 'Good things come to those who wait.', emoji: '⏳' },
+  { id: '1', key: 'morals.m1', emoji: '⏭️' },
+  { id: '2', key: 'morals.m2', emoji: '💖' },
+  { id: '3', key: 'morals.m3', emoji: '👆' },
+  { id: '4', key: 'morals.m4', emoji: '🗺️' },
+  { id: '5', key: 'morals.m5', emoji: '😕' },
+  { id: '6', key: 'morals.m6', emoji: '🤔' },
+  { id: '7', key: 'morals.m7', emoji: '💪' },
+  { id: '8', key: 'morals.m8', emoji: '🛡️' },
+  { id: '9', key: 'morals.m9', emoji: '👫' },
+  { id: '10', key: 'morals.m10', emoji: '🙏' },
+  { id: '11', key: 'morals.m11', emoji: '🧝' },
+  { id: '12', key: 'morals.m12', emoji: '⏳' },
 ];
 
 export default function StoryPlaceSelectionScreen() {
@@ -39,8 +42,10 @@ export default function StoryPlaceSelectionScreen() {
     categoryId: string;
     mainCharacterIds: string;
     sideCharacterIds: string;
+    language: string;
   }>();
-  const { categoryId, mainCharacterIds, sideCharacterIds } = params;
+  const { language } = params;
+  const { t } = useTranslation();
 
   const [storyPlace, setStoryPlace] = useState('');
   const [selectedMoral, setSelectedMoral] = useState<string | null>(null);
@@ -50,7 +55,9 @@ export default function StoryPlaceSelectionScreen() {
   const handleStart = async () => {
     if (!storyPlace.trim() || !selectedMoral) return;
     await playClickSound();
-    const moralText = morals.find(m => m.id === selectedMoral)?.text || '';
+    // Send the moral in the STORY's language so it matches the generated text.
+    const moralKey = morals.find(m => m.id === selectedMoral)?.key || '';
+    const moralText = moralKey ? t(moralKey, { lng: (language || 'en').toLowerCase() }) : '';
     router.push({
       pathname: '/story/story-generation',
       params: {
@@ -73,7 +80,7 @@ export default function StoryPlaceSelectionScreen() {
           <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          Set up your <Text style={styles.highlight}>story</Text>
+          {t('storyFlow.setupTitle')} <Text style={styles.highlight}>{t('storyFlow.setupTitleHighlight')}</Text>
         </Text>
       </View>
 
@@ -81,11 +88,11 @@ export default function StoryPlaceSelectionScreen() {
         {/* Place Input */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>
-            Where should the story take place?<Text style={styles.asterisk}> *</Text>
+            {t('storyFlow.placeLabel')}<Text style={styles.asterisk}> *</Text>
           </Text>
           <TextInput
             style={styles.textInput}
-            placeholder="e.g.: Kindergarten"
+            placeholder={t('storyFlow.placePlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
             value={storyPlace}
             onChangeText={setStoryPlace}
@@ -94,7 +101,7 @@ export default function StoryPlaceSelectionScreen() {
 
         {/* Moral Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Choose a moral for the story:</Text>
+          <Text style={styles.sectionLabel}>{t('storyFlow.moralLabel')}</Text>
           <View style={styles.moralsGrid}>
             {morals.map((moral) => {
               const isSelected = selectedMoral === moral.id;
@@ -106,7 +113,7 @@ export default function StoryPlaceSelectionScreen() {
                   activeOpacity={0.8}
                 >
                   <Text style={styles.emoji}>{moral.emoji}</Text>
-                  <Text style={styles.moralText}>{moral.text}</Text>
+                  <Text style={styles.moralText}>{t(moral.key)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -131,12 +138,12 @@ export default function StoryPlaceSelectionScreen() {
               style={styles.startButton}
             >
               <Ionicons name="sparkles" size={20} color="#FFFFFF" />
-              <Text style={styles.startButtonText}>Generate Story</Text>
+              <Text style={styles.startButtonText}>{t('storyFlow.generateStory')}</Text>
             </LinearGradient>
           ) : (
             <View style={[styles.startButton, styles.startButtonDisabled]}>
               <Ionicons name="sparkles-outline" size={20} color={theme.colors.text} />
-              <Text style={styles.startButtonText}>Generate Story</Text>
+              <Text style={styles.startButtonText}>{t('storyFlow.generateStory')}</Text>
             </View>
           )}
         </TouchableOpacity>

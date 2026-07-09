@@ -22,6 +22,7 @@ export default function StoryLayout() {
       />
       <Stack.Screen name="viewer" />
       <Stack.Screen name="offline" />
+      <Stack.Screen name="image-story" />
     </Stack>
   );
 }

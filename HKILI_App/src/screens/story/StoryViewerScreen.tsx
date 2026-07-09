@@ -358,7 +358,9 @@ export default function StoryViewerScreen() {
     );
   }
 
-  // Split content into 2 halves
+  // Build the chapter list. AI stories arrive as segments each carrying its
+  // own per-chapter imageUrl. Older/plain stories may be a single blob → split
+  // into paragraphs so they still render as readable chunks.
   let segments = story.content || [];
   if (segments.length === 1 && segments[0].text) {
     const paras = segments[0].text.split(/\n\s*\n/);
@@ -366,13 +368,17 @@ export default function StoryViewerScreen() {
       segments = paras.map((p: string, i: number) => ({ id: `p-${i}`, text: p.trim() })).filter((s: any) => s.text);
     }
   }
-  const half = Math.ceil(segments.length / 2);
-  const part1 = segments.slice(0, half);
-  const part2 = segments.slice(half);
 
-  const img1 = getImageUri(story.image1);
-  const img2 = getImageUri(story.image2);
-  const img3 = getImageUri(story.image3);
+  // Prefer the per-chapter image embedded in each segment. Fall back to the
+  // legacy image1/2/3 fields (spread across chapters) for older stories that
+  // predate per-segment images.
+  const hasSegmentImages = segments.some((s: any) => s.imageUrl);
+  const legacyImages = [story.image1, story.image2, story.image3].filter(Boolean) as string[];
+  const imageForChapter = (seg: any, index: number): string | undefined => {
+    if (seg.imageUrl) return seg.imageUrl;
+    if (hasSegmentImages) return undefined;
+    return legacyImages[index];
+  };
 
   return (
     <ScreenBackground>
@@ -391,35 +397,29 @@ export default function StoryViewerScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <Text style={[styles.storyTitle, { textAlign: storyTextAlign }]}>{story.title}</Text>
 
-        {/* Image 1 — Start */}
-        {renderStoryImage(img1)}
+        {/* One illustration per chapter, followed by that chapter's text */}
+        {segments.map((seg: any, i: number) => {
+          const chapterImg = getImageUri(imageForChapter(seg, i));
+          return (
+            <View key={seg.id || `seg-${i}`} style={styles.chapterBlock}>
+              {renderStoryImage(chapterImg)}
 
-        <LinearGradient
-          colors={theme.gradients.card}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.contentCard}
-        >
-          <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>{tStory('storyViewer.theStory')}</Text>
-
-          <View style={styles.textBlock}>
-            {part1.map((seg: any, i: number) => (
-              <Text key={`p1-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
-            ))}
-          </View>
-
-          {/* Image 2 — Middle */}
-          {renderStoryImage(img2)}
-
-          <View style={styles.textBlock}>
-            {part2.map((seg: any, i: number) => (
-              <Text key={`p2-${i}`} style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
-            ))}
-          </View>
-        </LinearGradient>
-
-        {/* Image 3 — End */}
-        {renderStoryImage(img3)}
+              <LinearGradient
+                colors={theme.gradients.card}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.contentCard}
+              >
+                {segments.length > 1 && (
+                  <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>
+                    {tStory('storyViewer.chapter')} {i + 1}
+                  </Text>
+                )}
+                <Text style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
+              </LinearGradient>
+            </View>
+          );
+        })}
 
         <View style={{ height: 120 }} />
       </ScrollView>
@@ -559,6 +559,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 20,
   },
+  chapterBlock: { marginBottom: 4 },
   contentCard: {
     borderRadius: 20,
     borderWidth: 1,

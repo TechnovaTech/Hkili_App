@@ -68,6 +68,7 @@
     "share": "Partager",
     "yourStory": "Votre histoire",
     "theStory": "L'histoire",
+    "chapter": "Chapitre",
     "notFound": "Histoire introuvable",
     "goBack": "Retour"
   },
@@ -134,7 +135,9 @@
     "deleteConfirmMessage": "Cela supprimera définitivement votre compte et toutes vos données. Cette action est irréversible.",
     "deleteConfirmButton": "Supprimer",
     "deleteError": "Impossible de supprimer le compte",
-    "guestEditNotice": "Connectez-vous pour gérer votre profil"
+    "guestEditNotice": "Connectez-vous pour gérer votre profil",
+    "country": "Pays",
+    "selectCountry": "Sélectionnez votre pays"
   },
   "settings": {
     "title": "Paramètres",
@@ -188,6 +191,56 @@
     "title": "Plans",
     "choosePlan": "Choisissez votre plan",
     "coins": "Pièces",
-    "buy": "Acheter"
+    "buy": "Acheter",
+    "processing": "Traitement...",
+    "buySuccess": "{{coins}} pièces ajoutées à votre compte !",
+    "buyError": "L'achat n'a pas pu être effectué.",
+    "localPriceNote": "Définissez votre pays dans les Paramètres pour voir les prix locaux."
+  },
+  "storyFlow": {
+    "languageTitle": "Choisir la langue de l'histoire",
+    "languageSubtitle": "Dans quelle langue l'histoire doit-elle être écrite ?",
+    "modeTitle": "Choisissez un mode",
+    "setupTitle": "Configurez votre",
+    "setupTitleHighlight": "histoire",
+    "placeLabel": "Où l'histoire doit-elle se dérouler ?",
+    "placePlaceholder": "ex. : École maternelle",
+    "moralLabel": "Choisissez une morale pour l'histoire :",
+    "generateStory": "Générer l'histoire",
+    "genTitle": "Génération de votre histoire...",
+    "genSubtitle": "Veuillez patienter pendant que nous créons votre histoire personnalisée.",
+    "genWait": "Un instant s'il vous plaît...",
+    "genStatusWriting": "Écriture de l'histoire...",
+    "genStatusIllustrating": "Création des illustrations...",
+    "genStatusFinishing": "Touches finales...",
+    "genFailed": "Échec de la génération",
+    "genGoHome": "Retour à l'accueil",
+    "genHeader": "Génération de l'histoire",
+    "elapsed": "Temps écoulé",
+    "useMyImages": "Utiliser mes propres images",
+    "imageTitle": "Créer à partir de vos images",
+    "imageSubtitle": "Ajoutez 3 à 5 images dans l'ordre — nous écrirons une histoire qui correspond à chacune.",
+    "imageAdd": "Ajouter des images",
+    "imageDescLabel": "Brève description (optionnel)",
+    "imageDescPlaceholder": "ex. : Le premier jour d'école d'un chiot",
+    "imageMin": "Veuillez ajouter au moins 3 images.",
+    "imageCreate": "Créer l'histoire",
+    "imgStatusUploading": "Téléversement de vos images...",
+    "imgStatusWriting": "Écriture de l'histoire...",
+    "imgStatusFinishing": "Touches finales..."
+  },
+  "morals": {
+    "m1": "Pas de morale particulière",
+    "m2": "Sois toujours gentil.",
+    "m3": "Sois honnête.",
+    "m4": "Sois le changement que tu veux voir dans le monde.",
+    "m5": "Dis toujours la vérité car on ne fait pas confiance à un menteur.",
+    "m6": "Réfléchis avant d'agir.",
+    "m7": "N'abandonne jamais.",
+    "m8": "Respecte les autres.",
+    "m9": "L'importance d'être un bon ami.",
+    "m10": "Apprendre à pardonner",
+    "m11": "On ne peut pas toujours avoir ce qu'on veut.",
+    "m12": "Les bonnes choses arrivent à ceux qui savent attendre."
   }
 }

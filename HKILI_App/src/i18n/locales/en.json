@@ -68,6 +68,7 @@
     "share": "Share",
     "yourStory": "Your Story",
     "theStory": "The Story",
+    "chapter": "Chapter",
     "notFound": "Story not found",
     "goBack": "Go Back"
   },
@@ -134,7 +135,9 @@
     "deleteConfirmMessage": "This will permanently delete your account and all your data. This action cannot be undone.",
     "deleteConfirmButton": "Delete",
     "deleteError": "Could not delete account",
-    "guestEditNotice": "Sign in to manage your profile"
+    "guestEditNotice": "Sign in to manage your profile",
+    "country": "Country",
+    "selectCountry": "Select your country"
   },
   "settings": {
     "title": "Settings",
@@ -188,6 +191,56 @@
     "title": "Plans",
     "choosePlan": "Choose Your Plan",
     "coins": "Coins",
-    "buy": "Buy"
+    "buy": "Buy",
+    "processing": "Processing...",
+    "buySuccess": "{{coins}} coins added to your account!",
+    "buyError": "Purchase could not be completed.",
+    "localPriceNote": "Set your country in Settings to see local prices."
+  },
+  "storyFlow": {
+    "languageTitle": "Select Story Language",
+    "languageSubtitle": "In which language should the story be written?",
+    "modeTitle": "Choose a mode",
+    "setupTitle": "Set up your",
+    "setupTitleHighlight": "story",
+    "placeLabel": "Where should the story take place?",
+    "placePlaceholder": "e.g.: Kindergarten",
+    "moralLabel": "Choose a moral for the story:",
+    "generateStory": "Generate Story",
+    "genTitle": "Generating your story...",
+    "genSubtitle": "Please wait while we craft your personalized story.",
+    "genWait": "One moment please...",
+    "genStatusWriting": "Writing the story...",
+    "genStatusIllustrating": "Drawing the illustrations...",
+    "genStatusFinishing": "Adding the final touches...",
+    "genFailed": "Generation Failed",
+    "genGoHome": "Go Back Home",
+    "genHeader": "Story Generation",
+    "elapsed": "Elapsed",
+    "useMyImages": "Use my own images",
+    "imageTitle": "Create from your images",
+    "imageSubtitle": "Add 3 to 5 pictures in order — we'll write a story that matches each one.",
+    "imageAdd": "Add images",
+    "imageDescLabel": "Short description (optional)",
+    "imageDescPlaceholder": "e.g.: A puppy's first day at school",
+    "imageMin": "Please add at least 3 images.",
+    "imageCreate": "Create Story",
+    "imgStatusUploading": "Uploading your images...",
+    "imgStatusWriting": "Writing the story...",
+    "imgStatusFinishing": "Adding the final touches..."
+  },
+  "morals": {
+    "m1": "No specific moral",
+    "m2": "Always be kind.",
+    "m3": "Be honest.",
+    "m4": "Be the change you want to see in the world.",
+    "m5": "Always tell the truth because a liar won't be trusted.",
+    "m6": "Think before you act.",
+    "m7": "Never give up.",
+    "m8": "Respect others.",
+    "m9": "The importance of being a good friend.",
+    "m10": "Learning to forgive",
+    "m11": "You can't always get what you want.",
+    "m12": "Good things come to those who wait."
   }
 }

@@ -6,6 +6,22 @@ class StoryService {
     return apiClient.post<Story>('/stories/generate', request);
   }
 
+  /**
+   * Generate a story from user-provided images (GPT-4o vision). The backend
+   * writes one section per image, in order. `images` are Cloudinary URLs.
+   */
+  async generateFromImages(payload: {
+    images: string[];
+    description?: string;
+    language?: string;
+    categoryId?: string;
+    mainCharacterIds?: string[];
+    place?: string;
+    moral?: string;
+  }): Promise<ApiResponse<any>> {
+    return apiClient.post<any>('/ai/generate-from-images', payload);
+  }
+
   async getStories(page = 1, limit = 20): Promise<ApiResponse<{ stories: Story[]; total: number }>> {
     return apiClient.get('/stories', { page, limit });
   }

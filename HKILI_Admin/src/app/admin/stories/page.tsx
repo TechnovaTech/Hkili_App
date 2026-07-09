@@ -42,6 +42,8 @@ export default function StoriesManagement() {
     content: '',
     language: 'EN',
     categoryId: '',
+    place: '',
+    moral: '',
     image1: '',
     image2: '',
     image3: '',
@@ -147,6 +149,8 @@ export default function StoriesManagement() {
         content: story.content,
         language: story.language,
         categoryId: typeof story.categoryId === 'object' ? story.categoryId._id : (story.categoryId || ''),
+        place: story.place || '',
+        moral: story.moral || '',
         image1: story.image1 || '',
         image2: story.image2 || '',
         image3: story.image3 || '',
@@ -158,6 +162,8 @@ export default function StoriesManagement() {
         content: '',
         language: 'EN',
         categoryId: '',
+        place: '',
+        moral: '',
         image1: '',
         image2: '',
         image3: '',
@@ -392,18 +398,55 @@ export default function StoriesManagement() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select
-                      value={formData.categoryId}
-                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="">Select Category (optional)</option>
-                      {categories.map(c => (
-                        <option key={c._id} value={c._id}>{c.name}</option>
-                      ))}
-                    </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                      <select
+                        value={formData.categoryId}
+                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="">Select Category (optional)</option>
+                        {categories.map(c => (
+                          <option key={c._id} value={c._id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                      <select
+                        value={formData.language}
+                        onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="EN">English (EN)</option>
+                        <option value="FR">French (FR)</option>
+                        <option value="AR">Arabic (AR)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Place</label>
+                      <input
+                        type="text"
+                        value={formData.place}
+                        onChange={(e) => setFormData({ ...formData, place: e.target.value })}
+                        placeholder="e.g. Kindergarten"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Moral</label>
+                      <input
+                        type="text"
+                        value={formData.moral}
+                        onChange={(e) => setFormData({ ...formData, moral: e.target.value })}
+                        placeholder="e.g. Always be kind."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
                   </div>
 
                   {/* Story Images */}

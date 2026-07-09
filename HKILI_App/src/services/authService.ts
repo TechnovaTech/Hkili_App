@@ -79,6 +79,7 @@ class AuthService {
 
   async updateProfile(data: {
     name?: string;
+    country?: string;
     currentPassword?: string;
     newPassword?: string;
   }): Promise<ApiResponse<User>> {

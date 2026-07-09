@@ -28,6 +28,12 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  // ISO 3166-1 alpha-2 country code (e.g. 'US', 'IN', 'FR'). Drives the
+  // currency shown for coin plans. Empty until the user sets it.
+  country: {
+    type: String,
+    default: '',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -4,6 +4,7 @@ export interface User {
   name?: string;
   role?: 'user' | 'admin';
   isGuest: boolean;
+  country?: string; // ISO alpha-2, drives local currency
   subscription?: {
     type: 'free' | 'premium';
     expiresAt?: string;

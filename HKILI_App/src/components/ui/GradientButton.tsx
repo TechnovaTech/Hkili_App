@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   View,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,6 +48,13 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   const glow =
     gradient === 'gold' ? theme.shadows.glowGold : theme.shadows.glow;
 
+  // Subtle press-scale micro-interaction for a more tactile, premium feel.
+  const scale = useRef(new Animated.Value(1)).current;
+  const pressIn = () =>
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+  const pressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 6 }).start();
+
   const content = (
     <View style={[styles.content, { flexDirection }]}>
       {loading ? (
@@ -82,21 +90,25 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   }
 
   return (
-    <TouchableOpacity
-      style={[styles.base, !disabled && glow, style]}
-      onPress={onPress}
-      disabled={loading}
-      activeOpacity={0.85}
-    >
-      <LinearGradient
-        colors={theme.gradients[gradient]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.fill, sizeStyle]}
+    <Animated.View style={[!disabled && glow, style, { transform: [{ scale }] }]}>
+      <TouchableOpacity
+        style={styles.base}
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        disabled={loading}
+        activeOpacity={0.9}
       >
-        {content}
-      </LinearGradient>
-    </TouchableOpacity>
+        <LinearGradient
+          colors={theme.gradients[gradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.fill, sizeStyle]}
+        >
+          {content}
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
