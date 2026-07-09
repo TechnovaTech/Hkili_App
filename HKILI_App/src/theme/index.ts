@@ -79,27 +79,32 @@ export const theme = {
       lineHeight: 16,
     },
   },
+    // NOTE: Android `elevation` on translucent (glass) cards renders the shadow
+    // through/around the rounded edges and reads as an ugly "box inside a box".
+    // So the neutral card shadows keep the (subtle) iOS shadow but set
+    // elevation: 0 — the green border already gives cards their definition.
+    // Only the glow presets (used on OPAQUE gradient buttons) keep elevation.
   shadows: {
     sm: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 2,
+      elevation: 0,
     },
     md: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
+      shadowOpacity: 0.25,
       shadowRadius: 8,
-      elevation: 4,
+      elevation: 0,
     },
     lg: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.4,
+      shadowOpacity: 0.35,
       shadowRadius: 18,
-      elevation: 10,
+      elevation: 0,
     },
     // Colored glow for accent elements (CTAs, selected cards).
     glow: {

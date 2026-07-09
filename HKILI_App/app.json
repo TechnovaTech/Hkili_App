@@ -3,12 +3,13 @@
     "name": "Unaï",
     "slug": "ai-storytelling-app",
     "version": "1.0.0",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/icon-unai.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "splash": {
+      "image": "./assets/images/icon-unai-foreground.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a1a1a"
+      "backgroundColor": "#0B7A3B"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,6 +23,10 @@
     },
     "android": {
       "package": "com.company.aistorytelling",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon-unai-foreground.png",
+        "backgroundColor": "#12A24C"
+      },
       "permissions": [
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO"
