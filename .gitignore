@@ -1,0 +1,7 @@
+# Build artifacts — never commit APKs/AABs (use GitHub Releases / Drive for distribution)
+*.apk
+*.aab
+
+# OS
+.DS_Store
+Thumbs.db
