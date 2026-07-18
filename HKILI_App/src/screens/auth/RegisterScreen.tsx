@@ -88,6 +88,13 @@ export default function RegisterScreen() {
       const res = await authService.sendOtp(email.trim(), 'register');
       if (!res.success) {
         const msg = res.error || res.message || 'Could not send the verification code';
+        // Resend throttle (a code was sent <60s ago) — the earlier code is still
+        // valid, so let the user proceed to enter it instead of dead-ending.
+        if (msg.toLowerCase().includes('wait')) {
+          setOtp('');
+          setStep('otp');
+          return;
+        }
         if (msg.toLowerCase().includes('email')) setEmailError(msg);
         else Alert.alert('Error', msg);
         return;

@@ -38,11 +38,19 @@ export default function ForgotPasswordScreen() {
     try {
       const res = await authService.sendOtp(email.trim(), 'reset');
       if (res.success) {
-        setOtp('');
-        setNewPassword('');
-        setStep('reset');
+        if (step === 'email') {
+          setOtp('');
+          setNewPassword('');
+          setStep('reset');
+        }
       } else {
-        Alert.alert('Error', res.error || res.message || 'Could not send the reset code');
+        const msg = res.error || res.message || 'Could not send the reset code';
+        // Resend throttle — the earlier code is still valid; let them enter it.
+        if (msg.toLowerCase().includes('wait') && step === 'email') {
+          setStep('reset');
+          return;
+        }
+        Alert.alert('Error', msg);
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Network error occurred');

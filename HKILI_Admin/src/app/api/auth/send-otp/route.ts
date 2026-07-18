@@ -33,11 +33,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    // ANTI-ENUMERATION: for password reset we return the same success response
+    // whether or not an account exists — no code is actually sent for unknown
+    // emails, so the flow simply can't be completed. A 404 here would let
+    // attackers probe which emails have accounts.
     if (purpose === 'reset' && !existingUser) {
-      return NextResponse.json(
-        { success: false, error: 'No account found with this email', message: 'No account found with this email' },
-        { status: 404 }
-      )
+      return NextResponse.json({ success: true, otpRequired: true, message: 'Verification code sent' })
     }
 
     if (!isEmailConfigured()) {

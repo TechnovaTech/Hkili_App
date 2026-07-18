@@ -36,24 +36,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const otpDoc = await Otp.findOne({ email, purpose: 'reset' })
+    // Atomically consume one attempt slot ($inc with attempts<5 filter) BEFORE
+    // comparing the code — concurrent guesses each burn a slot, so the 5-guess
+    // cap cannot be bypassed by parallel requests (no read-modify-write race).
+    const otpDoc = await Otp.findOneAndUpdate(
+      { email, purpose: 'reset', attempts: { $lt: 5 }, expiresAt: { $gt: new Date() } },
+      { $inc: { attempts: 1 } },
+      { new: true }
+    )
     if (!otpDoc) {
+      await Otp.deleteOne({ email, purpose: 'reset' })
       return NextResponse.json(
-        { success: false, error: 'Please request a reset code first', message: 'Code required' },
-        { status: 400 }
-      )
-    }
-    if (otpDoc.expiresAt < new Date() || otpDoc.attempts >= 5) {
-      await Otp.deleteOne({ _id: otpDoc._id })
-      return NextResponse.json(
-        { success: false, error: 'Code expired. Please request a new one.', message: 'Code expired' },
+        { success: false, error: 'Code expired or too many attempts. Please request a new one.', message: 'Code expired' },
         { status: 400 }
       )
     }
     const codeOk = await bcrypt.compare(String(otp), otpDoc.codeHash)
     if (!codeOk) {
-      otpDoc.attempts += 1
-      await otpDoc.save()
       return NextResponse.json(
         { success: false, error: 'Invalid code', message: 'Invalid code' },
         { status: 400 }

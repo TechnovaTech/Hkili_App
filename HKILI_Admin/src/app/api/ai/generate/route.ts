@@ -321,12 +321,18 @@ Rules:
       createdAt: new Date(),
     });
 
+    let remainingCoins = user.coins;
     if (user.role !== 'admin') {
-      user.coins -= storyCost;
-      await user.save();
+      // Atomic $inc — concurrent generations can't overwrite each other's balance.
+      const updated = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { coins: -storyCost } },
+        { new: true }
+      );
+      remainingCoins = updated?.coins ?? user.coins - storyCost;
     }
 
-    return NextResponse.json({ success: true, data: newStory, remainingCoins: user.coins });
+    return NextResponse.json({ success: true, data: newStory, remainingCoins });
   } catch (error: any) {
     console.error('AI Generation Error:', error);
     return NextResponse.json(

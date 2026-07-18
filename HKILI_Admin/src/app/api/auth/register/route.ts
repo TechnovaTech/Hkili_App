@@ -39,15 +39,22 @@ export async function POST(request: NextRequest) {
 
     // Email OTP verification — enforced whenever an SMTP server is configured.
     if (isEmailConfigured()) {
-      const otpDoc = await Otp.findOne({ email, purpose: 'register' })
-      if (!otpDoc) {
+      const hasCode = await Otp.exists({ email, purpose: 'register' })
+      if (!hasCode) {
         return NextResponse.json(
           { success: false, error: 'Please request a verification code first', message: 'Verification code required' },
           { status: 400 }
         )
       }
-      if (otpDoc.expiresAt < new Date() || otpDoc.attempts >= 5) {
-        await Otp.deleteOne({ _id: otpDoc._id })
+      // Atomically consume one attempt slot before comparing — parallel guesses
+      // each burn a slot, so the 5-attempt cap can't be raced past.
+      const otpDoc = await Otp.findOneAndUpdate(
+        { email, purpose: 'register', attempts: { $lt: 5 }, expiresAt: { $gt: new Date() } },
+        { $inc: { attempts: 1 } },
+        { new: true }
+      )
+      if (!otpDoc) {
+        await Otp.deleteOne({ email, purpose: 'register' })
         return NextResponse.json(
           { success: false, error: 'Verification code expired. Please request a new one.', message: 'Verification code expired' },
           { status: 400 }
@@ -55,8 +62,6 @@ export async function POST(request: NextRequest) {
       }
       const codeOk = otp && (await bcrypt.compare(String(otp), otpDoc.codeHash))
       if (!codeOk) {
-        otpDoc.attempts += 1
-        await otpDoc.save()
         return NextResponse.json(
           { success: false, error: 'Invalid verification code', message: 'Invalid verification code' },
           { status: 400 }

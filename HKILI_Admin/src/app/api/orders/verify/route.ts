@@ -65,12 +65,19 @@ export async function POST(request: NextRequest) {
       { status: 'completed' },
       { new: true }
     )
+    let coins = user.coins || 0
     if (claimed) {
-      user.coins = (user.coins || 0) + claimed.coins
-      await user.save()
+      // $inc is atomic — a concurrent spend/credit can't overwrite this credit
+      // (a plain user.save() would write back a stale balance and lose coins).
+      const updated = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { coins: claimed.coins } },
+        { new: true }
+      )
+      coins = updated?.coins ?? coins + claimed.coins
     }
 
-    return NextResponse.json({ success: true, status: 'completed', coins: user.coins })
+    return NextResponse.json({ success: true, status: 'completed', coins })
   } catch (error: any) {
     console.error('Order verify error:', error?.message || error)
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
