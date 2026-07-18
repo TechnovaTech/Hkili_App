@@ -97,27 +97,30 @@ export default function AddCharacterScreen() {
 
   const handleSave = async () => {
     if (loading) return;
-    
+
     setLoading(true);
     try {
-      if (mode === 'edit' && id) {
-        console.log('Updating character with data:', formData);
-        const response = await characterService.update(id, formData);
-        console.log('Character service update response:', response);
+      const response =
+        mode === 'edit' && id
+          ? await characterService.update(id, formData)
+          : await characterService.create(formData);
+      console.log('Character save response:', response);
+
+      // Only navigate on a real success — otherwise surface the error so the
+      // character isn't silently lost (e.g. when not signed in / token expired).
+      if (response?.success) {
+        router.push('/(tabs)/home');
       } else {
-        console.log('Creating character with data:', formData);
-        const response = await characterService.create(formData);
-        console.log('Character service create response:', response);
+        Alert.alert(
+          'Could not save',
+          response?.error ||
+            response?.message ||
+            'Could not save the character. Please make sure you are signed in and try again.'
+        );
       }
-      
-      // Always redirect regardless of API response for now
-      console.log('Redirecting to home...');
-      router.push('/(tabs)/home');
-      
     } catch (error: any) {
       console.error('Character save error:', error);
-      // Still redirect even on error
-      router.push('/(tabs)/home');
+      Alert.alert('Could not save', error?.message || 'Something went wrong while saving the character.');
     } finally {
       setLoading(false);
     }

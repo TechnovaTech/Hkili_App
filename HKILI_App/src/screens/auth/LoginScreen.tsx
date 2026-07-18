@@ -48,11 +48,6 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Google login logic
-    router.replace('/home');
-  };
-
   const handleSignUp = () => {
     router.push('/auth/register');
   };
@@ -133,25 +128,6 @@ export default function LoginScreen() {
             style={styles.signInButton}
           >
             <Text style={styles.signInButtonText}>Sign In</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        {/* OR Divider */}
-        <View style={styles.orContainer}>
-          <View style={styles.orLine} />
-          <Text style={styles.orText}>OR</Text>
-          <View style={styles.orLine} />
-        </View>
-
-        {/* Google Sign In Button */}
-        <TouchableOpacity style={[styles.googleButtonWrapper, theme.shadows.md]} onPress={handleGoogleLogin} activeOpacity={0.85}>
-          <LinearGradient
-            colors={theme.gradients.secondary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.googleButton}
-          >
-            <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
           </LinearGradient>
         </TouchableOpacity>
 

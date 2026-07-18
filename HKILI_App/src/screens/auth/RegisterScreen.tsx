@@ -67,11 +67,6 @@ export default function RegisterScreen() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    console.log('Google sign in');
-    router.push('/character/add');
-  };
-
   const handleLogin = () => {
     router.push('/auth/login');
   };
@@ -173,18 +168,6 @@ export default function RegisterScreen() {
                 <Text style={styles.signUpButtonText}>Sign Up</Text>
               </LinearGradient>
             )}
-          </TouchableOpacity>
-
-          {/* Google Sign In Button */}
-          <TouchableOpacity style={[styles.googleButtonWrapper, theme.shadows.md]} onPress={handleGoogleSignIn} activeOpacity={0.85}>
-            <LinearGradient
-              colors={theme.gradients.secondary}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.googleButton}
-            >
-              <Text style={styles.googleButtonText}>🔍 Sign in with Google</Text>
-            </LinearGradient>
           </TouchableOpacity>
 
           {/* Login Link */}
