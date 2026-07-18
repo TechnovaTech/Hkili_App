@@ -16,10 +16,20 @@ export const planService = {
   },
 
   /**
-   * Purchase a coin plan. NOTE: the backend checkout is currently a STUB — it
-   * credits coins without a real charge. Returns the updated coin balance.
+   * Start a coin purchase. If Stripe is configured on the backend, returns
+   * { mode:'stripe', checkoutUrl, orderId } — open the URL, then call
+   * verifyOrder(). Otherwise returns { mode:'stub', coins } (credited already).
    */
-  purchase: async (planId: string): Promise<ApiResponse<{ coinsAdded: number; orderId: string }> & { coins?: number }> => {
+  purchase: async (
+    planId: string
+  ): Promise<ApiResponse<any> & { mode?: 'stripe' | 'stub'; checkoutUrl?: string; orderId?: string; coins?: number }> => {
     return apiClient.post('/orders', { planId }) as any;
+  },
+
+  /** Confirm a Stripe order after checkout; credits coins if paid. */
+  verifyOrder: async (
+    orderId: string
+  ): Promise<ApiResponse<any> & { status?: string; coins?: number }> => {
+    return apiClient.post('/orders/verify', { orderId }) as any;
   },
 };

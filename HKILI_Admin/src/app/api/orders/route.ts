@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
+import Stripe from 'stripe'
 import dbConnect from '@/lib/mongodb'
 import Order from '@/models/Order'
 import Plan from '@/models/Plan'
@@ -69,13 +70,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     }
 
-    // --- STUB payment: succeeds immediately, no money changes hands ---
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+
+    // --- REAL Stripe Checkout (when STRIPE_SECRET_KEY is configured) ---
+    // Create a PENDING order + a Stripe Checkout Session. Coins are credited
+    // later by POST /api/orders/verify once Stripe confirms payment_status=paid.
+    if (stripeKey) {
+      const stripe = new Stripe(stripeKey)
+      const order = await Order.create({
+        userId,
+        planId: plan._id,
+        coins: plan.coins,
+        amount: plan.discountPrice,
+        currency: 'INR',
+        provider: 'stripe',
+        providerRef: '',
+        status: 'pending',
+      })
+
+      const origin = new URL(request.url).origin
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: 'inr',
+              unit_amount: Math.round(plan.discountPrice * 100), // paise
+              product_data: { name: `${plan.coins} Coins${plan.name ? ' — ' + plan.name : ''}` },
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${origin}/payment-complete.html?status=success`,
+        cancel_url: `${origin}/payment-complete.html?status=cancel`,
+        metadata: { orderId: order._id.toString(), userId, coins: String(plan.coins) },
+      })
+
+      order.providerRef = session.id
+      await order.save()
+
+      return NextResponse.json({
+        success: true,
+        mode: 'stripe',
+        checkoutUrl: session.url,
+        orderId: order._id.toString(),
+      })
+    }
+
+    // --- STUB payment fallback: succeeds immediately, no money changes hands ---
+    // (Used only when STRIPE_SECRET_KEY is not set — e.g. dev/testing.)
     const order = await Order.create({
       userId,
       planId: plan._id,
       coins: plan.coins,
       amount: plan.discountPrice,
-      currency: 'INR', // plans are authored in INR (base); display currency is client-side
+      currency: 'INR',
       provider: 'stub',
       providerRef: '',
       status: 'completed',
@@ -86,6 +135,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      mode: 'stub',
       data: {
         orderId: order._id.toString(),
         coinsAdded: plan.coins,

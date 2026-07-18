@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { Alert } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { planService, Plan } from '../../services/planService';
 import { authService } from '../../services/authService';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
@@ -73,19 +74,34 @@ export default function SubscribeScreen() {
     const plan = plans.find((p) => p._id === selectedPlanId);
     setPurchasing(true);
     try {
-      // STUB checkout — backend credits coins without a real charge.
       const res = await planService.purchase(selectedPlanId);
-      if (res.success) {
-        const newCoins = (res as any).coins;
-        if (typeof newCoins === 'number') setCoins(newCoins);
-        else fetchUser();
-        Alert.alert(
-          t('subscription.title'),
-          t('subscription.buySuccess', { coins: plan?.coins ?? res.data?.coinsAdded ?? '' })
-        );
-      } else {
+      if (!res.success) {
         Alert.alert(t('subscription.title'), res.message || res.error || t('subscription.buyError'));
+        return;
       }
+
+      // Real Stripe checkout: open the hosted page, then verify the payment.
+      if (res.mode === 'stripe' && res.checkoutUrl && res.orderId) {
+        await WebBrowser.openBrowserAsync(res.checkoutUrl); // resolves when the user closes the browser
+        const v = await planService.verifyOrder(res.orderId);
+        if (v.success && v.status === 'completed') {
+          if (typeof v.coins === 'number') setCoins(v.coins); else fetchUser();
+          Alert.alert(t('subscription.title'), t('subscription.buySuccess', { coins: plan?.coins ?? '' }));
+        } else {
+          // Not confirmed yet (canceled or still processing).
+          fetchUser();
+          Alert.alert(t('subscription.title'), t('subscription.buyPending'));
+        }
+        return;
+      }
+
+      // Stub fallback (no Stripe key on server): coins already credited.
+      const newCoins = (res as any).coins;
+      if (typeof newCoins === 'number') setCoins(newCoins); else fetchUser();
+      Alert.alert(
+        t('subscription.title'),
+        t('subscription.buySuccess', { coins: plan?.coins ?? res.data?.coinsAdded ?? '' })
+      );
     } catch (e) {
       Alert.alert(t('subscription.title'), t('subscription.buyError'));
     } finally {

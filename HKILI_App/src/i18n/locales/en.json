@@ -195,6 +195,7 @@
     "processing": "Processing...",
     "buySuccess": "{{coins}} coins added to your account!",
     "buyError": "Purchase could not be completed.",
+    "buyPending": "Payment not confirmed yet. If you paid, your coins will appear shortly.",
     "localPriceNote": "Set your country in Settings to see local prices."
   },
   "storyFlow": {

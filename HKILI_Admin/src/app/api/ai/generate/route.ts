@@ -58,6 +58,32 @@ function buildPrompt(template: string, vars: Record<string, string>): string {
   );
 }
 
+// Generate one image, tolerating accounts that can't use gpt-image-1.
+// gpt-image-1 requires an OpenAI "verified organization"; when that fails we
+// automatically retry with dall-e-3 (available to any paid account). This is
+// what makes story illustrations show up reliably instead of "sometimes".
+async function generateStoryImage(openai: OpenAI, prompt: string): Promise<any> {
+  try {
+    return await openai.images.generate({
+      model: IMAGE_MODEL,
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'medium', // gpt-image-1: low | medium | high | auto
+    });
+  } catch (e: any) {
+    console.error(`Image model "${IMAGE_MODEL}" failed (${e?.message}); retrying with dall-e-3`);
+    // dall-e-3 returns a URL (not b64); the caller handles both shapes.
+    return await openai.images.generate({
+      model: 'dall-e-3',
+      prompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+    });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -236,17 +262,9 @@ Rules:
         : `Children's storybook illustration for "${storyTitle}", scene ${i + 1}. ${imageContext}. Colorful, warm, friendly art style, high quality.`
     );
 
-    console.log(`Generating ${imagePrompts.length} images with model "${IMAGE_MODEL}"`);
+    console.log(`Generating ${imagePrompts.length} images with model "${IMAGE_MODEL}" (dall-e-3 fallback)`);
     const imageResults = await Promise.allSettled(
-      imagePrompts.map(prompt =>
-        openai.images.generate({
-          model: IMAGE_MODEL,
-          prompt,
-          n: 1,
-          size: '1024x1024',
-          quality: 'medium', // gpt-image-1 quality: low | medium | high | auto
-        })
-      )
+      imagePrompts.map(prompt => generateStoryImage(openai, prompt))
     );
 
     // gpt-image-1 returns base64 (b64_json) which we persist to Cloudinary.

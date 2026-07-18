@@ -195,6 +195,7 @@
     "processing": "Traitement...",
     "buySuccess": "{{coins}} pièces ajoutées à votre compte !",
     "buyError": "L'achat n'a pas pu être effectué.",
+    "buyPending": "Paiement pas encore confirmé. Si vous avez payé, vos pièces apparaîtront bientôt.",
     "localPriceNote": "Définissez votre pays dans les Paramètres pour voir les prix locaux."
   },
   "storyFlow": {
