@@ -11,6 +11,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name?: string;
+  otp?: string; // email verification code (required when the server has email configured)
 }
 
 export interface AuthResponse {
@@ -59,8 +60,21 @@ class AuthService {
     return response;
   }
 
-  async resetPassword(email: string): Promise<ApiResponse<void>> {
-    return apiClient.post('/auth/reset-password', { email });
+  /**
+   * Request a 6-digit email code. purpose 'register' = verify a new email,
+   * 'reset' = forgot password. When the server has no mail service configured
+   * it returns { otpRequired: false } and registration proceeds without a code.
+   */
+  async sendOtp(
+    email: string,
+    purpose: 'register' | 'reset'
+  ): Promise<ApiResponse<void> & { otpRequired?: boolean }> {
+    return apiClient.post('/auth/send-otp', { email, purpose }) as any;
+  }
+
+  /** Complete forgot-password: verify the emailed code and set a new password. */
+  async resetPassword(email: string, otp: string, newPassword: string): Promise<ApiResponse<void>> {
+    return apiClient.post('/auth/reset-password', { email, otp, newPassword });
   }
 
   async logout(): Promise<void> {

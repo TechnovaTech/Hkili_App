@@ -81,6 +81,7 @@ export default function SubscribeScreen() {
       }
 
       // Real Stripe checkout: open the hosted page, then verify the payment.
+      // (Payment is REQUIRED — the backend never credits coins without Stripe.)
       if (res.mode === 'stripe' && res.checkoutUrl && res.orderId) {
         await WebBrowser.openBrowserAsync(res.checkoutUrl); // resolves when the user closes the browser
         const v = await planService.verifyOrder(res.orderId);
@@ -92,16 +93,9 @@ export default function SubscribeScreen() {
           fetchUser();
           Alert.alert(t('subscription.title'), t('subscription.buyPending'));
         }
-        return;
+      } else {
+        Alert.alert(t('subscription.title'), t('subscription.buyError'));
       }
-
-      // Stub fallback (no Stripe key on server): coins already credited.
-      const newCoins = (res as any).coins;
-      if (typeof newCoins === 'number') setCoins(newCoins); else fetchUser();
-      Alert.alert(
-        t('subscription.title'),
-        t('subscription.buySuccess', { coins: plan?.coins ?? res.data?.coinsAdded ?? '' })
-      );
     } catch (e) {
       Alert.alert(t('subscription.title'), t('subscription.buyError'));
     } finally {

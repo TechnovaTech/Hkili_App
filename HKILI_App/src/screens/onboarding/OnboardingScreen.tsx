@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.7,
     shadowRadius: 6,
-    elevation: 6,
+    elevation: 0,
   },
   inactiveIndicator: {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',

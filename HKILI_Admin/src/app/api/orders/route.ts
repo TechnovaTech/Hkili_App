@@ -72,10 +72,17 @@ export async function POST(request: NextRequest) {
 
     const stripeKey = process.env.STRIPE_SECRET_KEY
 
-    // --- REAL Stripe Checkout (when STRIPE_SECRET_KEY is configured) ---
-    // Create a PENDING order + a Stripe Checkout Session. Coins are credited
-    // later by POST /api/orders/verify once Stripe confirms payment_status=paid.
-    if (stripeKey) {
+    // Payments REQUIRE Stripe — there is deliberately no free/stub fallback in
+    // production. Coins are only credited by /api/orders/verify after Stripe
+    // confirms payment_status=paid.
+    if (!stripeKey) {
+      return NextResponse.json(
+        { success: false, message: 'Payments are not configured yet. Please try again later.' },
+        { status: 503 }
+      )
+    }
+
+    {
       const stripe = new Stripe(stripeKey)
       const order = await Order.create({
         userId,
@@ -116,33 +123,6 @@ export async function POST(request: NextRequest) {
         orderId: order._id.toString(),
       })
     }
-
-    // --- STUB payment fallback: succeeds immediately, no money changes hands ---
-    // (Used only when STRIPE_SECRET_KEY is not set — e.g. dev/testing.)
-    const order = await Order.create({
-      userId,
-      planId: plan._id,
-      coins: plan.coins,
-      amount: plan.discountPrice,
-      currency: 'INR',
-      provider: 'stub',
-      providerRef: '',
-      status: 'completed',
-    })
-
-    user.coins = (user.coins || 0) + plan.coins
-    await user.save()
-
-    return NextResponse.json({
-      success: true,
-      mode: 'stub',
-      data: {
-        orderId: order._id.toString(),
-        coinsAdded: plan.coins,
-      },
-      coins: user.coins,
-      message: 'Purchase completed',
-    })
   } catch (error: any) {
     console.error('Order create error:', error?.message || error)
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })

@@ -167,9 +167,6 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, { textAlign }]}>
                 {t('home.selectMainCharacters')}
               </Text>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>{t('home.edit')}</Text>
-              </TouchableOpacity>
             </View>
 
             <View style={[styles.charactersContainer, { flexDirection }]}>
@@ -365,7 +362,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
-    elevation: 6,
+    elevation: 0,
   },
   coinsText: {
     fontSize: 15,
@@ -450,7 +447,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 12,
-    elevation: 8,
+    elevation: 0,
   },
   avatarContainer: {
     width: '100%',
@@ -507,7 +504,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 0,
     overflow: 'hidden',
   },
   avatarImage: {
@@ -578,7 +575,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 16,
-    elevation: 12,
+    elevation: 0,
   },
   startButton: {
     flexDirection: 'row',

@@ -8,6 +8,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -110,7 +111,11 @@ export default function FAQScreen() {
         ))}
         <View style={styles.footer}>
           <Text style={styles.footerText}>{t('faq.footer')}</Text>
-          <TouchableOpacity style={styles.contactButtonWrapper} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.contactButtonWrapper}
+            activeOpacity={0.85}
+            onPress={() => Linking.openURL('mailto:hetalshahmd@gmail.com?subject=Una%C3%AF%20Support').catch(() => {})}
+          >
             <LinearGradient
               colors={theme.gradients.primary}
               start={{ x: 0, y: 0 }}

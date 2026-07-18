@@ -112,14 +112,14 @@ export const theme = {
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.55,
       shadowRadius: 16,
-      elevation: 12,
+      elevation: 0,
     },
     glowGold: {
       shadowColor: '#FFC107',
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.5,
       shadowRadius: 14,
-      elevation: 10,
+      elevation: 0,
     },
   },
 } as const;
