@@ -18,10 +18,12 @@ import { theme } from '@/theme';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { storyCharacterService, StoryCharacter } from '@/services/storyCharacterService';
 import { playClickSound } from '@/utils/soundUtils';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
 export default function ModeCharacterSelectionScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { mode } = params as { mode: string };
   const [characters, setCharacters] = useState<StoryCharacter[]>([]);
@@ -119,7 +121,7 @@ export default function ModeCharacterSelectionScreen() {
           <TouchableOpacity onPress={() => router.push('/story/mode-selection')}>
             <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Which character should be part of the story?</Text>
+          <Text style={styles.headerTitle}>{t('storyFlow.characterQuestion')}</Text>
           <View style={{ width: 24 }} />
         </View>
 
@@ -134,7 +136,7 @@ export default function ModeCharacterSelectionScreen() {
                 characters.map(renderCharacter)
               ) : (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No characters found for this category.</Text>
+                  <Text style={styles.emptyText}>{t('storyFlow.noCharacters')}</Text>
                 </View>
               )}
             </View>

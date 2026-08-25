@@ -307,7 +307,7 @@ export default function SettingsScreen() {
             alignItems: isRTL ? 'flex-end' : 'flex-start'
           }]}>
             <Text style={[styles.settingTitle, { textAlign }]}>{t('settings.about')}</Text>
-            <Text style={[styles.settingSubtitle, { textAlign }]}>Version 1.0.0</Text>
+            <Text style={[styles.settingSubtitle, { textAlign }]}>{t('settings.version', { version: '1.0.0' })}</Text>
           </View>
           <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#81C784" />
         </TouchableOpacity>

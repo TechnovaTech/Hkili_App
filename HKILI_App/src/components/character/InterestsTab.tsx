@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/theme';
 import { CharacterFormData, PREDEFINED_INTERESTS } from '@/types/character';
+import { useTranslation } from 'react-i18next';
 
 interface InterestsTabProps {
   formData: CharacterFormData;
@@ -36,6 +37,7 @@ const INTEREST_ICONS: { [key: string]: string } = {
 };
 
 export default function InterestsTab({ formData, updateFormData, onNext }: InterestsTabProps) {
+  const { t } = useTranslation();
   const [customInterestInput, setCustomInterestInput] = useState('');
   const maxSelections = 5;
   const remainingSlots = maxSelections - formData.interests.length;
@@ -76,7 +78,7 @@ export default function InterestsTab({ formData, updateFormData, onNext }: Inter
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Select Interests</Text>
+          <Text style={styles.title}>{t('character.selectInterests')}</Text>
           <Text style={styles.remainingText}>
             {remainingSlots} slots remaining
           </Text>
@@ -115,13 +117,13 @@ export default function InterestsTab({ formData, updateFormData, onNext }: Inter
 
         {/* Custom Interests */}
         <View style={styles.customSection}>
-          <Text style={styles.customTitle}>Add Custom Interests</Text>
+          <Text style={styles.customTitle}>{t('character.addCustomInterests')}</Text>
           <View style={styles.customInputContainer}>
             <TextInput
               style={styles.customInput}
               value={customInterestInput}
               onChangeText={setCustomInterestInput}
-              placeholder="Games, Cartoons, Dogs, etc."
+              placeholder={t('character.interestsPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               multiline
             />
@@ -138,7 +140,7 @@ export default function InterestsTab({ formData, updateFormData, onNext }: Inter
             </TouchableOpacity>
           </View>
           <Text style={styles.customHint}>
-            Separate multiple interests with commas
+            {t('character.interestsHint')}
           </Text>
         </View>
         {/* Next Button */}
@@ -146,7 +148,7 @@ export default function InterestsTab({ formData, updateFormData, onNext }: Inter
           style={styles.nextButton} 
           onPress={onNext}
         >
-          <Text style={styles.nextButtonText}>Finish & Save</Text>
+          <Text style={styles.nextButtonText}>{t('character.finishSave')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

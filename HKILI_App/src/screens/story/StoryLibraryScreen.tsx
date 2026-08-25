@@ -139,9 +139,9 @@ export default function StoryLibraryScreen() {
               <View style={styles.emptyIcon}>
                 <Ionicons name="book-outline" size={60} color="#81C784" />
               </View>
-              <Text style={styles.emptyText}>No stories yet</Text>
+              <Text style={styles.emptyText}>{t('library.noStoriesYet')}</Text>
               <Text style={styles.emptySubtext}>
-                Create your first story to get started!
+                {t('library.createFirst')}
               </Text>
               <TouchableOpacity style={styles.createButtonWrapper} onPress={() => router.push('/(tabs)/home')} activeOpacity={0.85}>
                 <LinearGradient
@@ -150,7 +150,7 @@ export default function StoryLibraryScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.createButton}
                 >
-                  <Text style={styles.createButtonText}>Create Story</Text>
+                  <Text style={styles.createButtonText}>{t('library.createStory')}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>

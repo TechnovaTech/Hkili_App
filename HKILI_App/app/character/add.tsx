@@ -17,10 +17,12 @@ import BasicInfoTab from '@/components/character/BasicInfoTab';
 import AppearanceTab from '@/components/character/AppearanceTab';
 import InterestsTab from '@/components/character/InterestsTab';
 import { characterService } from '@/services/characterService';
+import { useTranslation } from 'react-i18next';
 
 type TabType = 'basic' | 'appearance' | 'interests';
 
 export default function AddCharacterScreen() {
+  const { t } = useTranslation();
   const { mode, id, isMain } = useLocalSearchParams<{ mode: string; id: string; isMain: string }>();
   const [activeTab, setActiveTab] = useState<TabType>('basic');
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,7 @@ export default function AddCharacterScreen() {
       }
     } catch (error) {
       console.error('Error loading character:', error);
-      Alert.alert('Error', 'Failed to load character');
+      Alert.alert(t('common.error'), t('character.errLoad'));
     } finally {
       setLoading(false);
     }
@@ -112,15 +114,15 @@ export default function AddCharacterScreen() {
         router.push('/(tabs)/home');
       } else {
         Alert.alert(
-          'Could not save',
+          t('character.errSaveTitle'),
           response?.error ||
             response?.message ||
-            'Could not save the character. Please make sure you are signed in and try again.'
+            t('character.errSaveBody')
         );
       }
     } catch (error: any) {
       console.error('Character save error:', error);
-      Alert.alert('Could not save', error?.message || 'Something went wrong while saving the character.');
+      Alert.alert(t('character.errSaveTitle'), error?.message || t('character.errSaveGeneric'));
     } finally {
       setLoading(false);
     }
@@ -130,7 +132,7 @@ export default function AddCharacterScreen() {
     // Navigate through tabs or to next screen
     if (activeTab === 'basic') {
       if (!formData.name) {
-        Alert.alert('Error', 'Please enter a name');
+        Alert.alert(t('common.error'), t('character.errEnterName'));
         return;
       }
       setActiveTab('appearance');
@@ -161,7 +163,7 @@ export default function AddCharacterScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Add Character</Text>
+        <Text style={styles.headerTitle}>{mode === 'edit' ? t('character.editTitle') : t('character.addTitle')}</Text>
       </View>
 
       {/* Tab Navigation */}
@@ -179,7 +181,7 @@ export default function AddCharacterScreen() {
             styles.tabText,
             activeTab === 'basic' && styles.activeTabText
           ]}>
-            Basic Info
+            {t('character.tabBasic')}
           </Text>
         </TouchableOpacity>
 
@@ -196,7 +198,7 @@ export default function AddCharacterScreen() {
             styles.tabText,
             activeTab === 'appearance' && styles.activeTabText
           ]}>
-            Appearance
+            {t('character.tabAppearance')}
           </Text>
         </TouchableOpacity>
 
@@ -213,7 +215,7 @@ export default function AddCharacterScreen() {
             styles.tabText,
             activeTab === 'interests' && styles.activeTabText
           ]}>
-            Interests
+            {t('character.tabInterests')}
           </Text>
         </TouchableOpacity>
       </View>

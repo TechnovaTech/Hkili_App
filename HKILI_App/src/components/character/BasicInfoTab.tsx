@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { theme } from '@/theme';
 import { CharacterFormData } from '@/types/character';
+import { useTranslation } from 'react-i18next';
 
 interface BasicInfoTabProps {
   formData: CharacterFormData;
@@ -17,37 +18,38 @@ interface BasicInfoTabProps {
 }
 
 export default function BasicInfoTab({ formData, updateFormData, onNext }: BasicInfoTabProps) {
+  const { t } = useTranslation();
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
         {/* Name Field */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>
-            Name<Text style={styles.required}>*</Text>
+            {t('character.name')}<Text style={styles.required}>*</Text>
           </Text>
           <Text style={styles.description}>
-            Enter the name of your child or a random name for the character.
+            {t('character.nameHint')}
           </Text>
           <TextInput
             style={styles.input}
             value={formData.name}
             onChangeText={(text) => updateFormData({ name: text })}
-            placeholder="Name"
+            placeholder={t('character.name')}
             placeholderTextColor={theme.colors.textMuted}
           />
         </View>
 
         {/* Age Field */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Age</Text>
+          <Text style={styles.label}>{t('character.age')}</Text>
           <Text style={styles.description}>
-            If you like, you can add the age of your children
+            {t('character.ageHint')}
           </Text>
           <TextInput
             style={styles.input}
             value={formData.age}
             onChangeText={(text) => updateFormData({ age: text })}
-            placeholder="Age"
+            placeholder={t('character.age')}
             placeholderTextColor={theme.colors.textMuted}
             keyboardType="numeric"
           />
@@ -56,10 +58,10 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
         {/* Gender Field */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>
-            Gender<Text style={styles.required}>*</Text>
+            {t('character.gender')}<Text style={styles.required}>*</Text>
           </Text>
           <Text style={styles.description}>
-            Used for pronouns in the generated story.
+            {t('character.genderHint')}
           </Text>
           <View style={styles.genderContainer}>
             {(['male', 'female', 'n/a'] as const).map((gender) => (
@@ -77,7 +79,11 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
                     formData.gender === gender && styles.selectedGenderText,
                   ]}
                 >
-                  {gender}
+                  {gender === 'male'
+                    ? t('character.male')
+                    : gender === 'female'
+                    ? t('character.female')
+                    : t('character.na')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -87,10 +93,10 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
         {/* Character Type Selection */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>
-            Character Type<Text style={styles.required}>*</Text>
+            {t('character.type')}<Text style={styles.required}>*</Text>
           </Text>
           <Text style={styles.description}>
-            Is this a main character or a side character?
+            {t('character.typeHint')}
           </Text>
           <View style={styles.genderContainer}>
             <TouchableOpacity
@@ -106,7 +112,7 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
                   formData.isMainCharacter && styles.selectedGenderText,
                 ]}
               >
-                Main Character
+                {t('character.main')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -122,7 +128,7 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
                   !formData.isMainCharacter && styles.selectedGenderText,
                 ]}
               >
-                Side Character
+                {t('character.side')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -130,7 +136,7 @@ export default function BasicInfoTab({ formData, updateFormData, onNext }: Basic
 
         {/* Next Button */}
         <TouchableOpacity style={styles.nextButton} onPress={onNext}>
-          <Text style={styles.nextButtonText}>Next</Text>
+          <Text style={styles.nextButtonText}>{t('common.next')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

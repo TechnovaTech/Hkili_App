@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
+import { useTranslation } from 'react-i18next';
 
 const ONBOARDING_KEY = 'onboarding_completed';
 
@@ -50,6 +51,7 @@ const onboardingData = [
 ];
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const router = useRouter();
@@ -155,7 +157,7 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity onPress={handleSkip} style={styles.skipContainer}>
           <Text style={styles.skipText}>
-            Already have an account? <Text style={styles.signInText}>Sign in</Text>
+            {t('auth.haveAccount')} <Text style={styles.signInText}>{t('auth.signInShort')}</Text>
           </Text>
         </TouchableOpacity>
       </View>

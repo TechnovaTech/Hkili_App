@@ -14,8 +14,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
 import { authService } from '../../services/authService';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -26,11 +28,11 @@ export default function ForgotPasswordScreen() {
 
   const handleSendCode = async () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
+      Alert.alert(t('common.error'), t('auth.errEnterEmail'));
       return;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      Alert.alert(t('common.error'), t('auth.errInvalidEmail'));
       return;
     }
 
@@ -50,10 +52,10 @@ export default function ForgotPasswordScreen() {
           setStep('reset');
           return;
         }
-        Alert.alert('Error', msg);
+        Alert.alert(t('common.error'), msg);
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      Alert.alert(t('common.error'), error.message || t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -61,11 +63,11 @@ export default function ForgotPasswordScreen() {
 
   const handleReset = async () => {
     if (otp.trim().length !== 6) {
-      Alert.alert('Error', 'Please enter the 6-digit code from your email');
+      Alert.alert(t('common.error'), t('auth.errEnterCode'));
       return;
     }
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters');
+      Alert.alert(t('common.error'), t('auth.errNewPasswordMin'));
       return;
     }
 
@@ -73,14 +75,14 @@ export default function ForgotPasswordScreen() {
     try {
       const res = await authService.resetPassword(email.trim(), otp.trim(), newPassword);
       if (res.success) {
-        Alert.alert('Success', 'Your password has been updated. Please sign in.', [
+        Alert.alert(t('common.success'), t('auth.resetSuccess'), [
           { text: 'OK', onPress: () => router.replace('/auth/login') },
         ]);
       } else {
-        Alert.alert('Error', res.error || res.message || 'Could not reset the password');
+        Alert.alert(t('common.error'), res.error || res.message || t('auth.errResetPassword'));
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      Alert.alert(t('common.error'), error.message || t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -101,27 +103,27 @@ export default function ForgotPasswordScreen() {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Forgot password?</Text>
+        <Text style={styles.headerTitle}>{t('auth.forgotQ')}</Text>
       </View>
 
       {/* Content */}
       <View style={styles.content}>
         {step === 'email' ? (
           <>
-            <Text style={styles.title}>Forgot your password?</Text>
+            <Text style={styles.title}>{t('auth.forgotTitle')}</Text>
             <Text style={styles.subtitle}>
-              Enter your email and we'll send you a 6-digit code to reset it.
+              {t('auth.forgotSubtitle')}
             </Text>
 
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Email*</Text>
+              <Text style={styles.label}>{t('auth.emailLabel')}</Text>
               <TextInput
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                placeholder="Enter your email"
+                placeholder={t('auth.emailPlaceholder')}
                 placeholderTextColor="#64B5F6"
               />
             </View>
@@ -143,20 +145,20 @@ export default function ForgotPasswordScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.submitButton}
                 >
-                  <Text style={styles.submitButtonText}>Send Code</Text>
+                  <Text style={styles.submitButtonText}>{t('auth.sendCode')}</Text>
                 </LinearGradient>
               )}
             </TouchableOpacity>
           </>
         ) : (
           <>
-            <Text style={styles.title}>Check your email</Text>
+            <Text style={styles.title}>{t('auth.checkEmail')}</Text>
             <Text style={styles.subtitle}>
               We sent a 6-digit code to {email}. Enter it below with your new password.
             </Text>
 
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Verification code*</Text>
+              <Text style={styles.label}>{t('auth.codeLabel')}</Text>
               <TextInput
                 style={[styles.input, styles.otpInput]}
                 value={otp}
@@ -169,14 +171,14 @@ export default function ForgotPasswordScreen() {
             </View>
 
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>New password*</Text>
+              <Text style={styles.label}>{t('auth.newPasswordLabel')}</Text>
               <TextInput
                 style={styles.input}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry
                 autoCapitalize="none"
-                placeholder="Enter your new password"
+                placeholder={t('auth.newPasswordPlaceholder')}
                 placeholderTextColor="#64B5F6"
               />
             </View>
@@ -198,13 +200,13 @@ export default function ForgotPasswordScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.submitButton}
                 >
-                  <Text style={styles.submitButtonText}>Reset Password</Text>
+                  <Text style={styles.submitButtonText}>{t('auth.resetPasswordBtn')}</Text>
                 </LinearGradient>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.resendContainer} onPress={handleSendCode} disabled={loading}>
-              <Text style={styles.resendText}>Didn't get the code? Resend</Text>
+              <Text style={styles.resendText}>{t('auth.noCodeResend')}</Text>
             </TouchableOpacity>
           </>
         )}

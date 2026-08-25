@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/theme';
 import { CharacterFormData } from '@/types/character';
 import { MALE_AVATARS, FEMALE_AVATARS, ALL_AVATARS, getAvatarSource } from '../../utils/avatarUtils';
+import { useTranslation } from 'react-i18next';
 
 interface AppearanceTabProps {
   formData: CharacterFormData;
@@ -19,6 +20,7 @@ interface AppearanceTabProps {
 }
 
 export default function AppearanceTab({ formData, updateFormData, onNext }: AppearanceTabProps) {
+  const { t } = useTranslation();
   // Filter avatars by gender if specified
   const filteredAvatars = formData.gender === 'male' 
     ? MALE_AVATARS 
@@ -57,7 +59,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
       <View style={styles.content}>
         <View style={styles.avatarCard}>
           <View style={styles.avatarTop}>
-            <Text style={styles.avatarTitle}>Preview Avatar</Text>
+            <Text style={styles.avatarTitle}>{t('character.previewAvatar')}</Text>
           </View>
           <View style={styles.avatarStage}>
             <View style={styles.avatarFrame}>
@@ -71,7 +73,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Choose an Avatar</Text>
+          <Text style={styles.sectionTitle}>{t('character.chooseAvatar')}</Text>
           <Text style={styles.sectionSubtitle}>
             {formData.gender === 'male' ? 'Showing male characters' : 
              formData.gender === 'female' ? 'Showing female characters' : 
@@ -88,7 +90,7 @@ export default function AppearanceTab({ formData, updateFormData, onNext }: Appe
           onPress={onNext}
           disabled={!formData.avatarUrl}
         >
-          <Text style={styles.nextButtonText}>Next</Text>
+          <Text style={styles.nextButtonText}>{t('common.next')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

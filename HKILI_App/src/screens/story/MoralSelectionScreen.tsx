@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { theme } from '@/theme';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { playClickSound } from '@/utils/soundUtils';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -39,6 +40,7 @@ const morals: Moral[] = [
 ];
 
 export default function MoralSelectionScreen() {
+  const { t } = useTranslation();
   const { mode, character, place } = useLocalSearchParams<{ 
     mode: string; 
     character: string; 
@@ -87,7 +89,7 @@ export default function MoralSelectionScreen() {
             <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
-            Choose a moral for <Text style={styles.highlightText}>the story</Text>
+            {t('storyFlow.moralTitle')} <Text style={styles.highlightText}>{t('storyFlow.moralTitleHighlight')}</Text>
           </Text>
         </View>
 

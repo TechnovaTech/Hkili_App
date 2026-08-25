@@ -35,7 +35,7 @@ export default function OfflineStoriesScreen() {
       const offlineStories = await offlineStorageService.getOfflineStories();
       setStories(offlineStories);
     } catch (error) {
-      Alert.alert(t('common.error'), 'Failed to load offline stories');
+      Alert.alert(t('common.error'), t('offline.errLoad'));
     } finally {
       setLoading(false);
     }
@@ -68,13 +68,13 @@ export default function OfflineStoriesScreen() {
         );
       }
     } catch (error) {
-      Alert.alert(t('common.error'), 'Failed to update favorite status');
+      Alert.alert(t('common.error'), t('offline.errFavorite'));
     }
   };
 
   const handleRemoveOffline = async (story: Story) => {
     Alert.alert(
-      'Remove from Offline',
+      t('offline.removeTitle'),
       `Remove "${story.title}" from offline storage?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -87,9 +87,9 @@ export default function OfflineStoriesScreen() {
               setStories(prevStories =>
                 prevStories.filter(s => s.id !== story.id)
               );
-              Alert.alert('Success', 'Story removed from offline storage');
+              Alert.alert(t('common.success'), t('offline.removed'));
             } catch (error) {
-              Alert.alert(t('common.error'), 'Failed to remove story');
+              Alert.alert(t('common.error'), t('offline.errRemove'));
             }
           },
         },
@@ -107,7 +107,7 @@ export default function OfflineStoriesScreen() {
   );
 
   if (loading) {
-    return <Loading fullScreen message="Loading offline stories..." />;
+    return <Loading fullScreen message={t('offline.loading')} />;
   }
 
   return (
@@ -116,7 +116,7 @@ export default function OfflineStoriesScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>{t('home.offlineStories')}</Text>
         <Text style={styles.subtitle}>
-          Stories available without internet connection
+          {t('offline.subtitle')}
         </Text>
       </View>
 
@@ -135,10 +135,10 @@ export default function OfflineStoriesScreen() {
               color={theme.colors.textMuted}
             />
             <Text style={styles.emptyText}>
-              No offline stories available
+              {t('offline.empty')}
             </Text>
             <Text style={styles.emptySubtext}>
-              Download stories from your library to read them offline
+              {t('offline.emptyHint')}
             </Text>
           </View>
         }

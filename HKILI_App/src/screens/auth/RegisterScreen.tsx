@@ -19,8 +19,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
 import { authService } from '../../services/authService';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -53,15 +55,15 @@ export default function RegisterScreen() {
       } else {
         const msg = response.error || 'Something went wrong';
         if (step === 'otp') {
-          Alert.alert('Verification Failed', msg);
+          Alert.alert(t('auth.errVerification'), msg);
         } else if (msg.toLowerCase().includes('email')) {
           setEmailError(msg);
         } else {
-          Alert.alert('Registration Failed', msg);
+          Alert.alert(t('auth.errRegistration'), msg);
         }
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      Alert.alert(t('common.error'), error.message || t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -71,15 +73,15 @@ export default function RegisterScreen() {
   const handleSignUp = async () => {
     setEmailError('');
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      Alert.alert(t('common.error'), t('auth.errFillAll'));
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert(t('common.error'), t('auth.errPasswordMin'));
       return;
     }
     if (!acceptTerms) {
-      Alert.alert('Error', 'Please accept the terms of service');
+      Alert.alert(t('common.error'), t('auth.errAcceptTerms'));
       return;
     }
 
@@ -96,7 +98,7 @@ export default function RegisterScreen() {
           return;
         }
         if (msg.toLowerCase().includes('email')) setEmailError(msg);
-        else Alert.alert('Error', msg);
+        else Alert.alert(t('common.error'), msg);
         return;
       }
       if (res.otpRequired === false) {
@@ -107,7 +109,7 @@ export default function RegisterScreen() {
       setOtp('');
       setStep('otp');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      Alert.alert(t('common.error'), error.message || t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ export default function RegisterScreen() {
   // Step 2: verify the code and create the account.
   const handleVerify = () => {
     if (otp.trim().length !== 6) {
-      Alert.alert('Error', 'Please enter the 6-digit code from your email');
+      Alert.alert(t('common.error'), t('auth.errEnterCode'));
       return;
     }
     doRegister(otp.trim());
@@ -128,11 +130,11 @@ export default function RegisterScreen() {
     try {
       const res = await authService.sendOtp(email.trim(), 'register');
       Alert.alert(
-        'Verification code',
-        res.success ? 'A new code was sent to your email.' : res.error || 'Could not resend the code'
+        t('auth.codeTitle'),
+        res.success ? t('auth.codeResent') : res.error || t('auth.errResend')
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Network error occurred');
+      Alert.alert(t('common.error'), error.message || t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -151,7 +153,7 @@ export default function RegisterScreen() {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{step === 'otp' ? 'Verify Email' : 'Sign Up'}</Text>
+        <Text style={styles.headerTitle}>{step === 'otp' ? t('auth.verifyEmail') : t('auth.signUp')}</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -168,7 +170,7 @@ export default function RegisterScreen() {
             <>
               {/* Email Field */}
               <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Email*</Text>
+                <Text style={styles.label}>{t('auth.emailLabel')}</Text>
                 <TextInput
                   style={[styles.input, emailError ? styles.inputError : null]}
                   value={email}
@@ -176,7 +178,7 @@ export default function RegisterScreen() {
                     setEmail(text);
                     setEmailError('');
                   }}
-                  placeholder="Enter your email"
+                  placeholder={t('auth.emailPlaceholder')}
                   placeholderTextColor="#64B5F6"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -186,12 +188,12 @@ export default function RegisterScreen() {
 
               {/* Password Field */}
               <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Password*</Text>
+                <Text style={styles.label}>{t('auth.passwordLabel')}</Text>
                 <TextInput
                   style={styles.input}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="Enter your password"
+                  placeholder={t('auth.passwordPlaceholder')}
                   placeholderTextColor="#64B5F6"
                   secureTextEntry
                   autoCapitalize="none"
@@ -209,10 +211,10 @@ export default function RegisterScreen() {
                   )}
                 </View>
                 <Text style={styles.checkboxText}>
-                  I accept the{' '}
-                  <Text style={styles.linkText}>terms of service</Text>
+                  {t('auth.acceptThe')}{' '}
+                  <Text style={styles.linkText}>{t('auth.termsOfService')}</Text>
                   {' & '}
-                  <Text style={styles.linkText}>privacy policy</Text>
+                  <Text style={styles.linkText}>{t('auth.privacyPolicy')}</Text>
                 </Text>
               </TouchableOpacity>
 
@@ -228,7 +230,7 @@ export default function RegisterScreen() {
                     {loading ? (
                       <ActivityIndicator color="#FFFFFF" />
                     ) : (
-                      <Text style={[styles.signUpButtonText, styles.disabledButtonText]}>Sign Up</Text>
+                      <Text style={[styles.signUpButtonText, styles.disabledButtonText]}>{t('auth.signUp')}</Text>
                     )}
                   </View>
                 ) : (
@@ -238,7 +240,7 @@ export default function RegisterScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.signUpButton}
                   >
-                    <Text style={styles.signUpButtonText}>Sign Up</Text>
+                    <Text style={styles.signUpButtonText}>{t('auth.signUp')}</Text>
                   </LinearGradient>
                 )}
               </TouchableOpacity>
@@ -246,7 +248,7 @@ export default function RegisterScreen() {
               {/* Login Link */}
               <View style={styles.loginContainer}>
                 <Text style={styles.loginText}>
-                  Already have an account? <Text style={styles.loginLink} onPress={handleLogin}>Login</Text>
+                  {t('auth.haveAccount')} <Text style={styles.loginLink} onPress={handleLogin}>{t('auth.loginShort')}</Text>
                 </Text>
               </View>
             </>
@@ -259,7 +261,7 @@ export default function RegisterScreen() {
               </Text>
 
               <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Verification code*</Text>
+                <Text style={styles.label}>{t('auth.codeLabel')}</Text>
                 <TextInput
                   style={[styles.input, styles.otpInput]}
                   value={otp}
@@ -283,7 +285,7 @@ export default function RegisterScreen() {
                     {loading ? (
                       <ActivityIndicator color="#FFFFFF" />
                     ) : (
-                      <Text style={[styles.signUpButtonText, styles.disabledButtonText]}>Verify & Create Account</Text>
+                      <Text style={[styles.signUpButtonText, styles.disabledButtonText]}>{t('auth.verifyCreate')}</Text>
                     )}
                   </View>
                 ) : (
@@ -293,7 +295,7 @@ export default function RegisterScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.signUpButton}
                   >
-                    <Text style={styles.signUpButtonText}>Verify & Create Account</Text>
+                    <Text style={styles.signUpButtonText}>{t('auth.verifyCreate')}</Text>
                   </LinearGradient>
                 )}
               </TouchableOpacity>
@@ -301,7 +303,7 @@ export default function RegisterScreen() {
               {/* Resend */}
               <View style={styles.loginContainer}>
                 <Text style={styles.loginText}>
-                  Didn't get the code? <Text style={styles.loginLink} onPress={handleResend}>Resend</Text>
+                  {t('auth.noCode')} <Text style={styles.loginLink} onPress={handleResend}>{t('auth.resend')}</Text>
                 </Text>
               </View>
             </>

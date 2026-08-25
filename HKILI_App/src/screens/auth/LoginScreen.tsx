@@ -16,8 +16,10 @@ import { ScreenBackground } from '../../components/ui/ScreenBackground';
 import { theme } from '../../theme';
 
 import { authService } from '../../services/authService';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,7 +67,7 @@ export default function LoginScreen() {
       <ScreenBackground>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
-          <Text style={styles.loadingText}>Signing in...</Text>
+          <Text style={styles.loadingText}>{t('auth.signingIn')}</Text>
         </View>
       </ScreenBackground>
     );
@@ -76,33 +78,33 @@ export default function LoginScreen() {
       {/* Header */}
       <View style={styles.header}>
 
-        <Text style={styles.headerTitle}>Sign In</Text>
+        <Text style={styles.headerTitle}>{t('auth.signIn')}</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Email Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email*</Text>
+          <Text style={styles.label}>{t('auth.emailLabel')}</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholder="Enter your email"
+            placeholder={t('auth.emailPlaceholder')}
             placeholderTextColor="#64B5F6"
           />
         </View>
 
         {/* Password Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password*</Text>
+          <Text style={styles.label}>{t('auth.passwordLabel')}</Text>
           <TextInput
             style={styles.input}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholder="Enter your password"
+            placeholder={t('auth.passwordPlaceholder')}
             placeholderTextColor="#64B5F6"
           />
         </View>
@@ -116,7 +118,7 @@ export default function LoginScreen() {
 
         {/* Forgot Password */}
         <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotContainer}>
-          <Text style={styles.forgotText}>Forgot password?</Text>
+          <Text style={styles.forgotText}>{t('auth.forgotQ')}</Text>
         </TouchableOpacity>
 
         {/* Sign In Button */}
@@ -127,14 +129,14 @@ export default function LoginScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.signInButton}
           >
-            <Text style={styles.signInButtonText}>Sign In</Text>
+            <Text style={styles.signInButtonText}>{t('auth.signIn')}</Text>
           </LinearGradient>
         </TouchableOpacity>
 
         {/* Sign Up Link */}
         <View style={styles.signUpContainer}>
           <Text style={styles.signUpText}>
-            I'm a new user. <Text style={styles.signUpLink} onPress={handleSignUp}>Sign Up</Text>
+            {t('auth.newUser')} <Text style={styles.signUpLink} onPress={handleSignUp}>{t('auth.signUp')}</Text>
           </Text>
         </View>
       </ScrollView>
