@@ -17,6 +17,8 @@ export const theme = {
     overlay: 'rgba(10, 25, 41, 0.8)',
     glassBorder: 'rgba(129, 199, 132, 0.25)',
     glassFill: 'rgba(255, 255, 255, 0.06)',
+    // Pale mint sparkle used for the starfield.
+    starlight: '#B9F6CA',
   },
   // Gradient palettes for `expo-linear-gradient` (use as the `colors` prop).
   gradients: {
@@ -32,6 +34,14 @@ export const theme = {
     card: ['rgba(33, 150, 243, 0.18)', 'rgba(76, 175, 80, 0.10)'] as const,
     // Selected / active highlight.
     highlight: ['rgba(0, 230, 118, 0.35)', 'rgba(33, 150, 243, 0.18)'] as const,
+    // Full green->teal->blue sweep for hero moments.
+    aurora: ['#00E676', '#26C6DA', '#42A5F5'] as const,
+    // Brighter green for story/magic accents.
+    magic: ['#69F0AE', '#00E676', '#1FB85F'] as const,
+    // Warm amber, for playful child-facing surfaces.
+    sunset: ['#FFE082', '#FFB300', '#FF6F00'] as const,
+    // Glass edge sheen (top-left light source) + CTA shimmer band.
+    sheen: ['rgba(255,255,255,0.22)', 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0)'] as const,
   },
   spacing: {
     xs: 4,
@@ -46,6 +56,7 @@ export const theme = {
     md: 12,
     lg: 16,
     xl: 24,
+    pill: 999,
   },
   typography: {
     h1: {
@@ -119,6 +130,20 @@ export const theme = {
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.5,
       shadowRadius: 14,
+      elevation: 0,
+    },
+    glowBlue: {
+      shadowColor: '#42A5F5',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.55,
+      shadowRadius: 16,
+      elevation: 0,
+    },
+    glowTeal: {
+      shadowColor: '#26C6DA',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.55,
+      shadowRadius: 16,
       elevation: 0,
     },
   },

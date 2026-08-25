@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -8,12 +8,13 @@ import {
   TextStyle,
   View,
   Animated,
+  Easing,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../theme';
 
-type GradientName = 'primary' | 'secondary' | 'gold';
+type GradientName = 'primary' | 'secondary' | 'gold' | 'aurora' | 'magic' | 'sunset';
 
 interface GradientButtonProps {
   title: string;
@@ -46,7 +47,13 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
 }) => {
   const sizeStyle = styles[size];
   const glow =
-    gradient === 'gold' ? theme.shadows.glowGold : theme.shadows.glow;
+    gradient === 'gold'
+      ? theme.shadows.glowGold
+      : gradient === 'secondary'
+      ? theme.shadows.glowBlue
+      : gradient === 'magic' || gradient === 'sunset'
+      ? theme.shadows.glowTeal
+      : theme.shadows.glow;
 
   // Subtle press-scale micro-interaction for a more tactile, premium feel.
   const scale = useRef(new Animated.Value(1)).current;
@@ -54,6 +61,26 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
   const pressOut = () =>
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 6 }).start();
+
+  // Slow specular sweep across the fill so the CTA reads as polished glass.
+  const shimmer = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (disabled) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, {
+          toValue: 1,
+          duration: 1800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        // Pause between sweeps so it feels like a highlight, not a barber pole.
+        Animated.delay(2400),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [shimmer, disabled]);
 
   const content = (
     <View style={[styles.content, { flexDirection }]}>
@@ -105,6 +132,34 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
           end={{ x: 1, y: 1 }}
           style={[styles.fill, sizeStyle]}
         >
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.shimmer,
+              {
+                opacity: shimmer.interpolate({
+                  inputRange: [0, 0.15, 0.85, 1],
+                  outputRange: [0, 1, 1, 0],
+                }),
+                transform: [
+                  {
+                    translateX: shimmer.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-260, 260],
+                    }),
+                  },
+                  { rotate: '18deg' },
+                ],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={theme.gradients.sheen}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
           {content}
         </LinearGradient>
       </TouchableOpacity>
@@ -122,6 +177,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.borderRadius.lg,
+  },
+  shimmer: {
+    position: 'absolute',
+    top: -40,
+    bottom: -40,
+    width: 70,
   },
   content: {
     alignItems: 'center',
