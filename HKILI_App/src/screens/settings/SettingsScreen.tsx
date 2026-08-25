@@ -102,7 +102,9 @@ export default function SettingsScreen() {
       Alert.alert(t('profile.title'), t('profile.guestEditNotice'));
       return;
     }
-    setNameInput(user?.name || '');
+    // Prefill with the same value the profile row displays, so the field is
+    // never blank when a name is shown above it (falls back to the email handle).
+    setNameInput(user?.name?.trim() || user?.email?.split('@')[0] || '');
     setCountryInput(user?.country || '');
     setCurrentPassword('');
     setNewPassword('');
@@ -703,13 +705,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   saveBtnWrapper: {
-    padding: 0,
+    // The gradient child supplies the padding, so the wrapper adds none of its
+    // own. It must NOT keep modalBtn's paddingVertical or the button doubles up.
+    paddingVertical: 0,
+    paddingHorizontal: 0,
     overflow: 'hidden',
     ...theme.shadows.glow,
   },
   saveBtn: {
-    flex: 1,
+    // No flex here: the gradient sizes itself from its own padding. With flex:1
+    // it collapsed to a sliver and overflow:'hidden' clipped the label away.
     width: '100%',
+    minHeight: 50,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
