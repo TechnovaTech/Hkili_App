@@ -24,7 +24,12 @@ const { width } = Dimensions.get('window');
 
 export default function ModeSelectionScreen() {
   const params = useLocalSearchParams();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  // Show this screen in the story language picked on the previous step.
+  const lang = (typeof params.language === 'string' ? params.language : i18n.language)
+    .toLowerCase()
+    .slice(0, 2);
+  const t = i18n.getFixedT(lang);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,6 +82,9 @@ export default function ModeSelectionScreen() {
     return { uri: `${baseUrl}/${cleanPath}` };
   };
 
+  const getModeName = (mode: Category) =>
+    (lang === 'fr' && mode.nameFr) || (lang === 'ar' && mode.nameAr) || mode.name;
+
   const renderModeCard = (mode: Category, index: number) => {
     const cardWidth = (width - 60) / 2;
     const isTopRow = index < 2;
@@ -109,7 +117,7 @@ export default function ModeSelectionScreen() {
             </LinearGradient>
           )}
         </TouchableOpacity>
-        <Text style={styles.modeTitle}>{mode.name}</Text>
+        <Text style={styles.modeTitle}>{getModeName(mode)}</Text>
       </View>
     );
   };

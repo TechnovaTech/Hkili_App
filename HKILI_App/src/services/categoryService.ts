@@ -4,6 +4,8 @@ import { ApiResponse } from '@/types';
 export interface Category {
   _id: string;
   name: string;
+  nameFr?: string;
+  nameAr?: string;
   description?: string;
   image?: string;
   createdAt?: string;

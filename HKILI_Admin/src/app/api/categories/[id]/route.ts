@@ -26,10 +26,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json()
     await dbConnect()
 
-    const category = await Category.findByIdAndUpdate(id, body, { new: true })
-    if (!category) {
+    const existing = await Category.findById(id)
+    if (!existing) {
       return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 })
     }
+
+    // Renamed: clear translations the admin didn't edit so they get re-translated.
+    if (body.name && body.name !== existing.name) {
+      if ((body.nameFr ?? existing.nameFr) === existing.nameFr) body.nameFr = ''
+      if ((body.nameAr ?? existing.nameAr) === existing.nameAr) body.nameAr = ''
+    }
+
+    const category = await Category.findByIdAndUpdate(id, body, { new: true })
 
     return NextResponse.json({ success: true, data: category })
   } catch (error) {

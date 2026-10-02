@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import dbConnect from '../../../lib/mongodb'
 import Category from '../../../models/Category'
+import { fillMissingCategoryTranslations } from '../../../lib/categoryTranslations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
 
     await dbConnect()
     const categories = await Category.find().sort({ createdAt: -1 })
+    await fillMissingCategoryTranslations(categories)
 
     return NextResponse.json({ success: true, data: categories })
   } catch (error) {

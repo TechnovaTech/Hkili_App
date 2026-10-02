@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 interface Category {
   _id: string
   name: string
+  nameFr?: string
+  nameAr?: string
   description?: string
   image?: string
   createdAt: string
@@ -19,6 +21,8 @@ export default function CategoriesManagement() {
   const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
+    nameFr: '',
+    nameAr: '',
     description: '',
     image: ''
   })
@@ -95,6 +99,8 @@ export default function CategoriesManagement() {
       setCurrentCategory(category)
       setFormData({
         name: category.name,
+        nameFr: category.nameFr || '',
+        nameAr: category.nameAr || '',
         description: category.description || '',
         image: category.image || ''
       })
@@ -102,6 +108,8 @@ export default function CategoriesManagement() {
       setCurrentCategory(null)
       setFormData({
         name: '',
+        nameFr: '',
+        nameAr: '',
         description: '',
         image: ''
       })
@@ -200,6 +208,11 @@ export default function CategoriesManagement() {
                 )}
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+                  {(category.nameFr || category.nameAr) && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      FR: {category.nameFr || '—'} · AR: <span dir="rtl">{category.nameAr || '—'}</span>
+                    </p>
+                  )}
                   {category.description && (
                     <p className="text-sm text-gray-500 mt-1">{category.description}</p>
                   )}
@@ -242,6 +255,33 @@ export default function CategoriesManagement() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name (French)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nameFr}
+                    onChange={(e) => setFormData({ ...formData, nameFr: e.target.value })}
+                    placeholder="Auto-translated if empty"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name (Arabic)
+                  </label>
+                  <input
+                    type="text"
+                    dir="rtl"
+                    value={formData.nameAr}
+                    onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
+                    placeholder="Auto-translated if empty"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
