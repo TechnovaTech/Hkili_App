@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const provider = getVoiceProvider()
+    const provider = await getVoiceProvider()
     assertVoiceConfigured(provider)
 
     const { providerVoiceId } = await provider.cloneVoice({

@@ -8,6 +8,7 @@ interface AppSettings {
   signupBonusCoins: number | string
   storyCost: number | string
   openaiApiKey: string
+  elevenlabsApiKey: string
   languages: {
     EN: boolean
     FR: boolean
@@ -27,6 +28,7 @@ export default function SettingsManagement() {
     signupBonusCoins: 0,
     storyCost: 10,
     openaiApiKey: '',
+    elevenlabsApiKey: '',
     languages: {
       EN: true,
       FR: true,
@@ -142,6 +144,13 @@ export default function SettingsManagement() {
     }))
   }
 
+  const handleElevenlabsKeyChange = (value: string) => {
+    setSettings(prev => ({
+      ...prev,
+      elevenlabsApiKey: value
+    }))
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     router.push('/admin/login')
@@ -230,6 +239,25 @@ export default function SettingsManagement() {
               </div>
             </div>
 
+            {/* ElevenLabs API Key Settings */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">ElevenLabs API Key</h3>
+              <p className="text-sm text-gray-600 mb-6">Set the ElevenLabs API Key for voice cloning and narration (Leave empty to use environment variable)</p>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  API Key
+                </label>
+                <input
+                  type="password"
+                  value={settings.elevenlabsApiKey || ''}
+                  onChange={(e) => handleElevenlabsKeyChange(e.target.value)}
+                  placeholder="sk_..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
 
 
 
@@ -270,6 +298,7 @@ export default function SettingsManagement() {
                   <h4 className="font-medium text-gray-700 mb-2">Story Settings</h4>
                   <p className="text-gray-600">Story Cost: {settings.storyCost} coins</p>
                   <p className="text-gray-600">OpenAI Key: {settings.openaiApiKey ? '••••••••' : 'Not Set (Using Env)'}</p>
+                  <p className="text-gray-600">ElevenLabs Key: {settings.elevenlabsApiKey ? '••••••••' : 'Not Set (Using Env)'}</p>
                 </div>
               </div>
             </div>

@@ -36,10 +36,8 @@ export async function DELETE(
 
     // Best-effort remote cleanup, then remove our record.
     try {
-      const provider = getVoiceProvider()
-      if (provider.name === voice.provider) {
-        await provider.deleteVoice(voice.providerVoiceId)
-      }
+      const provider = await getVoiceProvider(voice.provider)
+      await provider.deleteVoice(voice.providerVoiceId)
     } catch (e) {
       console.warn('Provider voice delete failed (continuing):', e)
     }

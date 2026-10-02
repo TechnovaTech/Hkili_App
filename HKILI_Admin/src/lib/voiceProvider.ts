@@ -5,9 +5,10 @@
  * To switch providers you only change env vars (and, for Fish/Replicate, fill
  * in the two stubbed methods). Nothing else in the codebase needs to change.
  *
- *   VOICE_PROVIDER = replicate | elevenlabs | fish    (default: replicate)
+ *   VOICE_PROVIDER = replicate | elevenlabs | fish    (default: elevenlabs if a key is set, else replicate)
  *   REPLICATE_API_TOKEN = <token>                     (when provider=replicate, open-source XTTS-v2)
- *   ELEVENLABS_API_KEY  = <key>                       (when provider=elevenlabs, paid)
+ *   ELEVENLABS_API_KEY  = <key>                       (when provider=elevenlabs, paid; the key saved in
+ *                                                      Admin → Settings takes precedence)
  *
  * Contract:
  *   - isConfigured(): is the selected provider ready to use?
@@ -15,6 +16,9 @@
  *   - synthesize():   turn story text into spoken audio (mp3 bytes) in that voice
  *   - deleteVoice():  remove the cloned voice from the provider
  */
+
+import dbConnect from './mongodb'
+import Setting from '../models/Setting'
 
 export type VoiceLanguage = 'EN' | 'FR' | 'AR'
 
@@ -54,15 +58,26 @@ export class VoiceProviderError extends Error {
 // ---------------------------------------------------------------------------
 const ELEVEN_BASE = 'https://api.elevenlabs.io/v1'
 
-const elevenLabsProvider: VoiceProvider = {
+// Admin → Settings key wins over the env var (same as the OpenAI key).
+async function getElevenLabsApiKey(): Promise<string | undefined> {
+  try {
+    await dbConnect()
+    const setting = await Setting.findOne()
+    if (setting?.elevenlabsApiKey) return setting.elevenlabsApiKey
+  } catch (e) {
+    console.warn('Could not read ElevenLabs key from settings:', e)
+  }
+  return process.env.ELEVENLABS_API_KEY
+}
+
+const createElevenLabsProvider = (apiKey?: string): VoiceProvider => ({
   name: 'elevenlabs',
 
   isConfigured() {
-    return !!process.env.ELEVENLABS_API_KEY
+    return !!apiKey
   },
 
   async cloneVoice({ name, sampleUrl }) {
-    const apiKey = process.env.ELEVENLABS_API_KEY!
     // Download the recorded sample, then forward it to ElevenLabs as a file.
     const sampleRes = await fetch(sampleUrl)
     if (!sampleRes.ok) {
@@ -83,7 +98,7 @@ const elevenLabsProvider: VoiceProvider = {
 
     const res = await fetch(`${ELEVEN_BASE}/voices/add`, {
       method: 'POST',
-      headers: { 'xi-api-key': apiKey },
+      headers: { 'xi-api-key': apiKey! },
       body: form,
     })
 
@@ -103,13 +118,12 @@ const elevenLabsProvider: VoiceProvider = {
   },
 
   async synthesize({ text, providerVoiceId }) {
-    const apiKey = process.env.ELEVENLABS_API_KEY!
     const res = await fetch(
       `${ELEVEN_BASE}/text-to-speech/${providerVoiceId}`,
       {
         method: 'POST',
         headers: {
-          'xi-api-key': apiKey,
+          'xi-api-key': apiKey!,
           'Content-Type': 'application/json',
           Accept: 'audio/mpeg',
         },
@@ -134,7 +148,6 @@ const elevenLabsProvider: VoiceProvider = {
   },
 
   async deleteVoice(providerVoiceId) {
-    const apiKey = process.env.ELEVENLABS_API_KEY
     if (!apiKey) return
     // Best-effort: don't fail account/voice cleanup if the remote delete errors.
     await fetch(`${ELEVEN_BASE}/voices/${providerVoiceId}`, {
@@ -142,7 +155,7 @@ const elevenLabsProvider: VoiceProvider = {
       headers: { 'xi-api-key': apiKey },
     }).catch(() => {})
   },
-}
+})
 
 // ---------------------------------------------------------------------------
 // Fish Audio — STUB. Fill these two methods + set FISH_API_KEY to enable.
@@ -290,21 +303,30 @@ const replicateProvider: VoiceProvider = {
   },
 }
 
-const PROVIDERS: Record<string, VoiceProvider> = {
-  elevenlabs: elevenLabsProvider,
-  fish: fishProvider,
-  replicate: replicateProvider,
+const PROVIDERS: Record<string, (elevenLabsKey?: string) => VoiceProvider> = {
+  elevenlabs: createElevenLabsProvider,
+  fish: () => fishProvider,
+  replicate: () => replicateProvider,
 }
 
-export function getVoiceProvider(): VoiceProvider {
-  const key = (process.env.VOICE_PROVIDER || 'replicate').toLowerCase()
-  const provider = PROVIDERS[key]
-  if (!provider) {
+/**
+ * Pass `name` to get the provider an existing voice was created with;
+ * omit it to get the provider new voices should be cloned on.
+ */
+export async function getVoiceProvider(name?: string): Promise<VoiceProvider> {
+  const elevenLabsKey = await getElevenLabsApiKey()
+  const key = (
+    name ||
+    process.env.VOICE_PROVIDER ||
+    (elevenLabsKey ? 'elevenlabs' : 'replicate')
+  ).toLowerCase()
+  const createProvider = PROVIDERS[key]
+  if (!createProvider) {
     throw new VoiceProviderError(
       `Unknown VOICE_PROVIDER "${key}". Use one of: ${Object.keys(PROVIDERS).join(', ')}`
     )
   }
-  return provider
+  return createProvider(elevenLabsKey)
 }
 
 /** Guard used by routes to fail fast with a clear, user-facing message. */
@@ -314,7 +336,7 @@ export function assertVoiceConfigured(provider: VoiceProvider) {
       provider.name === 'replicate'
         ? 'REPLICATE_API_TOKEN'
         : provider.name === 'elevenlabs'
-          ? 'ELEVENLABS_API_KEY'
+          ? 'the ElevenLabs API key in Admin → Settings (or ELEVENLABS_API_KEY)'
           : provider.name === 'fish'
             ? 'FISH_API_KEY'
             : 'the provider API key'

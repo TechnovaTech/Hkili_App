@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const provider = getVoiceProvider()
+    const provider = await getVoiceProvider(voice.provider)
     assertVoiceConfigured(provider)
 
     const audioBuffer = await provider.synthesize({

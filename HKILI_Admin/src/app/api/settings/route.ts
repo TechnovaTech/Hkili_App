@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken'
 import dbConnect from '../../../lib/mongodb'
 import Setting from '../../../models/Setting'
 
+// Secrets only the admin panel may read; app users get the rest of the settings.
+const SECRET_FIELDS = ['openaiApiKey', 'elevenlabsApiKey']
+
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
@@ -11,8 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    let decoded: any
     try {
-      jwt.verify(token, process.env.JWT_SECRET!)
+      decoded = jwt.verify(token, process.env.JWT_SECRET!)
     } catch (e) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
     }
@@ -30,7 +34,12 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ success: true, data: settings })
+    const data = settings.toObject()
+    if (decoded.role !== 'admin') {
+      for (const field of SECRET_FIELDS) delete data[field]
+    }
+
+    return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Error fetching settings:', error)
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
@@ -45,10 +54,15 @@ export async function PUT(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    let decoded: any
     try {
-      jwt.verify(token, process.env.JWT_SECRET!)
+      decoded = jwt.verify(token, process.env.JWT_SECRET!)
     } catch (e) {
       return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
+    }
+
+    if (decoded.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
     await dbConnect()

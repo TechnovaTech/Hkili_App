@@ -13,6 +13,10 @@ const SettingSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  elevenlabsApiKey: {
+    type: String,
+    default: ''
+  },
   languages: {
     EN: { type: Boolean, default: true },
     FR: { type: Boolean, default: true },
