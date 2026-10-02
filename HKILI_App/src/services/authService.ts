@@ -108,16 +108,6 @@ class AuthService {
     return response;
   }
 
-  async createGuestSession(): Promise<User> {
-    return {
-      id: 'guest',
-      email: '',
-      isGuest: true,
-      coins: 3, // Free coins for guest users
-      subscription: { type: 'free' },
-    };
-  }
-
   async isAuthenticated(): Promise<boolean> {
     try {
       const tokens = await tokenStorage.get();

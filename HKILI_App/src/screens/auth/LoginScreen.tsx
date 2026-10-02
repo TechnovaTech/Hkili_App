@@ -58,10 +58,6 @@ export default function LoginScreen() {
     router.push('/auth/forgot-password');
   };
 
-  const handleBack = () => {
-    router.push('/(tabs)/home');
-  };
-
   if (loading) {
     return (
       <ScreenBackground>

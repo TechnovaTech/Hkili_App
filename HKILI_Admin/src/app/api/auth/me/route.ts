@@ -61,8 +61,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         role: user.role,
         coins: user.coins || 0,
-        country: user.country || '',
-        isGuest: false
+        country: user.country || ''
       }
     })
   } catch (error) {
@@ -135,8 +134,7 @@ export async function PATCH(request: NextRequest) {
         name: user.name,
         role: user.role,
         coins: user.coins || 0,
-        country: user.country || '',
-        isGuest: false
+        country: user.country || ''
       },
       message: 'Profile updated successfully'
     })

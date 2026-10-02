@@ -29,7 +29,6 @@
     "forgotPassword": "Mot de passe oublié?",
     "loginWithGoogle": "Continuer avec Google",
     "loginWithApple": "Continuer avec Apple",
-    "continueAsGuest": "Continuer en tant qu'invité",
     "logout": "Déconnexion",
     "resetPassword": "Réinitialiser le mot de passe",
     "emailLabel": "E-mail*",
@@ -164,7 +163,6 @@
   },
   "profile": {
     "title": "Profil",
-    "guest": "Utilisateur invité",
     "noName": "Appuyez pour ajouter votre nom",
     "editTitle": "Modifier le profil",
     "name": "Nom",
@@ -182,7 +180,6 @@
     "deleteConfirmMessage": "Cela supprimera définitivement votre compte et toutes vos données. Cette action est irréversible.",
     "deleteConfirmButton": "Supprimer",
     "deleteError": "Impossible de supprimer le compte",
-    "guestEditNotice": "Connectez-vous pour gérer votre profil",
     "country": "Pays",
     "selectCountry": "Sélectionnez votre pays"
   },

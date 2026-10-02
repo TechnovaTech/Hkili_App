@@ -29,7 +29,6 @@
     "forgotPassword": "Forgot Password?",
     "loginWithGoogle": "Continue with Google",
     "loginWithApple": "Continue with Apple",
-    "continueAsGuest": "Continue as Guest",
     "logout": "Logout",
     "resetPassword": "Reset Password",
     "emailLabel": "Email*",
@@ -164,7 +163,6 @@
   },
   "profile": {
     "title": "Profile",
-    "guest": "Guest User",
     "noName": "Tap to add your name",
     "editTitle": "Edit Profile",
     "name": "Name",
@@ -182,7 +180,6 @@
     "deleteConfirmMessage": "This will permanently delete your account and all your data. This action cannot be undone.",
     "deleteConfirmButton": "Delete",
     "deleteError": "Could not delete account",
-    "guestEditNotice": "Sign in to manage your profile",
     "country": "Country",
     "selectCountry": "Select your country"
   },

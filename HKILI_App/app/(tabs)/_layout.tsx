@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useRTL } from '../../src/hooks/useRTL';
+import { authService } from '../../src/services/authService';
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -11,7 +12,14 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const { flexDirection } = useRTL();
   const currentTab = segments[1] || 'home';
-  
+
+  // The app has no guest mode — anyone without a session goes to sign in.
+  useEffect(() => {
+    authService.isAuthenticated().then((authenticated) => {
+      if (!authenticated) router.replace('/auth/login');
+    });
+  }, []);
+
   return (
     <>
       <Tabs

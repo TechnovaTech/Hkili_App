@@ -1,10 +1,24 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ApiResponse, AuthTokens } from '@/types';
+import { router } from 'expo-router';
 import { tokenStorage } from './tokenStorage';
+
+// Endpoints used while signed out; a 401 here must not trigger the session-expired redirect.
+const PUBLIC_AUTH_PATHS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/google',
+  '/auth/apple',
+  '/auth/send-otp',
+  '/auth/reset-password',
+  '/auth/refresh',
+  '/auth/logout',
+];
 
 class ApiClient {
   private client: AxiosInstance;
   private baseURL: string;
+  private redirectingToLogin = false;
 
   constructor() {
     this.baseURL = process.env.EXPO_PUBLIC_API_URL || 'https://api.example.com';
@@ -46,6 +60,11 @@ class ApiClient {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           
+          // A 401 from a sign-in endpoint means bad credentials, not an expired session.
+          if (PUBLIC_AUTH_PATHS.some((path) => originalRequest.url?.startsWith(path))) {
+            return Promise.reject(error);
+          }
+
           try {
             const tokens = await tokenStorage.get();
             if (tokens?.refreshToken) {
@@ -55,14 +74,28 @@ class ApiClient {
               return this.client(originalRequest);
             }
           } catch (refreshError) {
-            await tokenStorage.clear();
-            // Redirect to login would be handled by the app
+            // Fall through to sign-out below
           }
+
+          // No valid session — there is no guest mode, so send the user to sign in.
+          await tokenStorage.clear();
+          this.redirectToLogin();
         }
         
         return Promise.reject(error);
       }
     );
+  }
+
+  private redirectToLogin() {
+    // Several requests can fail together (e.g. a screen loading in parallel);
+    // only navigate once.
+    if (this.redirectingToLogin) return;
+    this.redirectingToLogin = true;
+    router.replace('/auth/login');
+    setTimeout(() => {
+      this.redirectingToLogin = false;
+    }, 1000);
   }
 
   private async refreshTokens(refreshToken: string): Promise<AuthTokens> {

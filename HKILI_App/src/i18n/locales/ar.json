@@ -29,7 +29,6 @@
     "forgotPassword": "نسيت كلمة المرور؟",
     "loginWithGoogle": "المتابعة مع جوجل",
     "loginWithApple": "المتابعة مع آبل",
-    "continueAsGuest": "المتابعة كضيف",
     "logout": "تسجيل الخروج",
     "resetPassword": "إعادة تعيين كلمة المرور",
     "emailLabel": "البريد الإلكتروني*",
@@ -164,7 +163,6 @@
   },
   "profile": {
     "title": "الملف الشخصي",
-    "guest": "مستخدم ضيف",
     "noName": "اضغط لإضافة اسمك",
     "editTitle": "تعديل الملف الشخصي",
     "name": "الاسم",
@@ -182,7 +180,6 @@
     "deleteConfirmMessage": "سيؤدي هذا إلى حذف حسابك وجميع بياناتك نهائياً. لا يمكن التراجع عن هذا الإجراء.",
     "deleteConfirmButton": "حذف",
     "deleteError": "تعذّر حذف الحساب",
-    "guestEditNotice": "سجّل الدخول لإدارة ملفك الشخصي",
     "country": "الدولة",
     "selectCountry": "اختر دولتك"
   },

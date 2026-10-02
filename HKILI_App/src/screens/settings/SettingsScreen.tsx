@@ -87,21 +87,12 @@ export default function SettingsScreen() {
 
   const currentLanguage = languages.find(l => l.code === i18n.language) || languages[0];
 
-  const isGuest = !user || user.isGuest;
-
-  const displayName =
-    user?.name?.trim() ||
-    (isGuest ? t('profile.guest') : '') ||
-    user?.email?.split('@')[0] ||
-    '';
+  const displayName = user?.name?.trim() || user?.email?.split('@')[0] || '';
 
   const avatarInitial = (user?.name?.trim()?.[0] || user?.email?.[0] || '?').toUpperCase();
 
   const openEdit = () => {
-    if (isGuest) {
-      Alert.alert(t('profile.title'), t('profile.guestEditNotice'));
-      return;
-    }
+    if (!user) return;
     // Prefill with the same value the profile row displays, so the field is
     // never blank when a name is shown above it (falls back to the email handle).
     setNameInput(user?.name?.trim() || user?.email?.split('@')[0] || '');
@@ -156,10 +147,6 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteAccount = () => {
-    if (isGuest) {
-      Alert.alert(t('profile.title'), t('profile.guestEditNotice'));
-      return;
-    }
     Alert.alert(
       t('profile.deleteConfirmTitle'),
       t('profile.deleteConfirmMessage'),
@@ -203,13 +190,13 @@ export default function SettingsScreen() {
             alignItems: isRTL ? 'flex-end' : 'flex-start',
           }]}>
             <Text style={[styles.profileName, { textAlign }]} numberOfLines={1}>
-              {displayName || t('profile.noName')}
+              {displayName || (loadingUser ? '' : t('profile.noName'))}
             </Text>
             <Text style={[styles.profileEmail, { textAlign }]} numberOfLines={1}>
-              {isGuest ? t('profile.guest') : user?.email}
+              {user?.email}
             </Text>
           </View>
-          {!isGuest && (
+          {user && (
             <Ionicons name="create-outline" size={22} color="#81C784" />
           )}
         </TouchableOpacity>
@@ -267,23 +254,21 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {!isGuest && (
-          <TouchableOpacity
-            style={[styles.settingItem, { flexDirection }]}
-            onPress={() => router.push('/voice/my-voice' as any)}
-          >
-            <Ionicons name="mic-outline" size={24} color="#4CAF50" />
-            <View style={[styles.settingContent, {
-              marginLeft: isRTL ? 0 : 16,
-              marginRight: isRTL ? 16 : 0,
-              alignItems: isRTL ? 'flex-end' : 'flex-start'
-            }]}>
-              <Text style={[styles.settingTitle, { textAlign }]}>{t('voice.title')}</Text>
-              <Text style={[styles.settingSubtitle, { textAlign }]}>{t('voice.settingsSubtitle')}</Text>
-            </View>
-            <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#81C784" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[styles.settingItem, { flexDirection }]}
+          onPress={() => router.push('/voice/my-voice' as any)}
+        >
+          <Ionicons name="mic-outline" size={24} color="#4CAF50" />
+          <View style={[styles.settingContent, {
+            marginLeft: isRTL ? 0 : 16,
+            marginRight: isRTL ? 16 : 0,
+            alignItems: isRTL ? 'flex-end' : 'flex-start'
+          }]}>
+            <Text style={[styles.settingTitle, { textAlign }]}>{t('voice.title')}</Text>
+            <Text style={[styles.settingSubtitle, { textAlign }]}>{t('voice.settingsSubtitle')}</Text>
+          </View>
+          <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#81C784" />
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.settingItem, { flexDirection }]}
@@ -323,25 +308,23 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         {/* Delete account */}
-        {!isGuest && (
-          <TouchableOpacity
-            style={[styles.deleteButton, { flexDirection }]}
-            onPress={handleDeleteAccount}
-            disabled={deleting}
-          >
-            {deleting ? (
-              <ActivityIndicator color="#F44336" />
-            ) : (
-              <>
-                <Ionicons name="trash-outline" size={22} color="#F44336" />
-                <Text style={[styles.deleteText, {
-                  marginLeft: isRTL ? 0 : 16,
-                  marginRight: isRTL ? 16 : 0,
-                }]}>{t('profile.deleteAccount')}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[styles.deleteButton, { flexDirection }]}
+          onPress={handleDeleteAccount}
+          disabled={deleting}
+        >
+          {deleting ? (
+            <ActivityIndicator color="#F44336" />
+          ) : (
+            <>
+              <Ionicons name="trash-outline" size={22} color="#F44336" />
+              <Text style={[styles.deleteText, {
+                marginLeft: isRTL ? 0 : 16,
+                marginRight: isRTL ? 16 : 0,
+              }]}>{t('profile.deleteAccount')}</Text>
+            </>
+          )}
+        </TouchableOpacity>
 
         <View style={{ height: 40 }} />
       </ScrollView>

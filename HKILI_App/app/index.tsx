@@ -2,9 +2,6 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { authService } from '../src/services/authService';
-import * as SecureStore from 'expo-secure-store';
-
-const ONBOARDING_KEY = 'onboarding_completed';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -27,16 +24,7 @@ export default function IndexPage() {
 
     const bootstrap = async () => {
       const isAuthenticated = await authService.isAuthenticated();
-      if (isAuthenticated) {
-        router.replace('/(tabs)/home');
-        return;
-      }
-      const onboardingDone = await SecureStore.getItemAsync(ONBOARDING_KEY);
-      if (onboardingDone) {
-        router.replace('/auth/login');
-      } else {
-        router.replace('/onboarding');
-      }
+      router.replace(isAuthenticated ? '/(tabs)/home' : '/auth/login');
     };
 
     const timer = setTimeout(bootstrap, 2000);
