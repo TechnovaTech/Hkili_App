@@ -26,6 +26,31 @@ interface Story {
   sideCharacters?: string[]
 }
 
+const SPEECH_LANG: Record<string, string> = { EN: 'en-US', FR: 'fr-FR', AR: 'ar-SA' }
+
+// Story content is a JSON array of { text } segments (AI stories) or plain text.
+const getStoryText = (story: Story) => {
+  try {
+    const segments = JSON.parse(story.content)
+    if (Array.isArray(segments)) {
+      return segments.map((s: any) => s?.text || '').filter(Boolean).join('\n')
+    }
+  } catch {}
+  return story.content || ''
+}
+
+// Chrome stops reading very long utterances, so speak the story in short chunks.
+const toSpeechChunks = (text: string) =>
+  (text.match(/[^.!?؟\n]+[.!?؟]*/g) || []).reduce<string[]>((chunks, sentence) => {
+    // Titles have no full stop; add one so the voice pauses after them.
+    const s = sentence.trim().replace(/([^.!?؟])$/, '$1.')
+    if (!s) return chunks
+    const last = chunks[chunks.length - 1]
+    if (last && last.length + s.length < 200) chunks[chunks.length - 1] = `${last} ${s}`
+    else chunks.push(s)
+    return chunks
+  }, [])
+
 export default function StoriesManagement() {
   const [stories, setStories] = useState<Story[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -37,6 +62,7 @@ export default function StoriesManagement() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false)
   const [editingStory, setEditingStory] = useState<Story | null>(null)
   const [uploadingState, setUploadingState] = useState<Record<string, boolean>>({})
+  const [playingId, setPlayingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -54,7 +80,34 @@ export default function StoriesManagement() {
   useEffect(() => {
     fetchStories()
     fetchCategories()
+    // Stop any story being read aloud when leaving the page.
+    return () => window.speechSynthesis?.cancel()
   }, [])
+
+  const handleToggleVoice = (story: Story) => {
+    const synth = window.speechSynthesis
+    if (!synth) {
+      alert('Voice playback is not supported in this browser')
+      return
+    }
+    synth.cancel()
+    if (playingId === story._id) {
+      setPlayingId(null)
+      return
+    }
+
+    const chunks = toSpeechChunks(`${story.title || ''}. ${getStoryText(story)}`)
+    chunks.forEach((chunk, i) => {
+      const utterance = new SpeechSynthesisUtterance(chunk)
+      utterance.lang = SPEECH_LANG[story.language] || 'en-US'
+      utterance.rate = 0.9
+      if (i === chunks.length - 1) {
+        utterance.onend = () => setPlayingId((current) => (current === story._id ? null : current))
+      }
+      synth.speak(utterance)
+    })
+    setPlayingId(story._id)
+  }
 
   const getAuthHeader = (): Record<string, string> => {
     const token = localStorage.getItem('adminToken')
@@ -346,6 +399,16 @@ export default function StoriesManagement() {
                         </div>
                       </div>
                       <div className="ml-4 flex-shrink-0 flex space-x-2">
+                        <button
+                          onClick={() => handleToggleVoice(story)}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            playingId === story._id
+                              ? 'bg-green-600 text-white hover:bg-green-700'
+                              : 'bg-green-100 text-green-800 hover:bg-green-200'
+                          }`}
+                        >
+                          {playingId === story._id ? '⏹ Stop' : '🔊 Listen'}
+                        </button>
                         <button
                           onClick={() => handleOpenFormModal(story)}
                           className="bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 text-sm font-medium rounded-lg transition-colors"

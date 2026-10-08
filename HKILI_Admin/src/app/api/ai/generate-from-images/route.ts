@@ -145,9 +145,10 @@ CRITICAL RULES:
     if (sections.length === 0) sections = [result];
 
     // One segment per image (in order), each carrying its user-provided image.
-    const segments: { id: string; text: string; imageUrl?: string }[] = imageUrls.map((url, i) => ({
+    const segments: { id: string; text: string; imageUrl?: string; kind?: 'moral' }[] = imageUrls.map((url, i) => ({
       id: String(i + 1),
-      text: sections[i] || sections[sections.length - 1] || '',
+      // Never repeat another section's text: a duplicate reads as an out-of-order chapter.
+      text: sections[i] || '',
       imageUrl: url,
     }));
     // Any extra sections beyond the image count are appended as text-only.
@@ -155,7 +156,7 @@ CRITICAL RULES:
       segments.push({ id: String(i + 1), text: sections[i] });
     }
     if (typeof parsed.moral === 'string' && parsed.moral.trim()) {
-      segments.push({ id: String(segments.length + 1), text: parsed.moral.trim() });
+      segments.push({ id: String(segments.length + 1), text: parsed.moral.trim(), kind: 'moral' });
     }
 
     const storyContent = JSON.stringify(segments);

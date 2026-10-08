@@ -11,6 +11,8 @@ import {
   Platform,
   Modal,
   Alert,
+  Animated,
+  Easing,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,8 +31,19 @@ import { ScreenBackground } from '../../components/ui/ScreenBackground';
 export default function StoryViewerScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const { storyId, storyData } = useLocalSearchParams<{ storyId: string; storyData: string }>();
+  const { storyId, storyData, intro } = useLocalSearchParams<{ storyId: string; storyData: string; intro?: string }>();
   const id = Array.isArray(storyId) ? storyId[0] : storyId;
+
+  // Title-first intro for a freshly generated story: the title appears alone in
+  // the middle, holds for a second, slides up, then the story fades in below it.
+  const playIntro = intro === '1';
+  const [introDone, setIntroDone] = useState(!playIntro);
+  const introStartedRef = useRef(false);
+  const titleOpacity = useRef(new Animated.Value(playIntro ? 0 : 1)).current;
+  const titleShift = useRef(new Animated.Value(0)).current;
+  const contentOpacity = useRef(new Animated.Value(playIntro ? 0 : 1)).current;
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [titleLayout, setTitleLayout] = useState<{ y: number; height: number } | null>(null);
 
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,6 +100,24 @@ export default function StoryViewerScreen() {
       }
     };
   }, [id, storyData]);
+
+  useEffect(() => {
+    if (!playIntro || introStartedRef.current || !viewportHeight || !titleLayout) return;
+    introStartedRef.current = true;
+    // Start with the title centred in the visible story area.
+    titleShift.setValue(viewportHeight / 2 - titleLayout.height / 2 - titleLayout.y);
+    Animated.sequence([
+      Animated.timing(titleOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.delay(1000),
+      Animated.timing(titleShift, {
+        toValue: 0,
+        duration: 700,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+    ]).start(() => setIntroDone(true));
+  }, [playIntro, viewportHeight, titleLayout]);
 
   // Load the user's cloned voices so they can pick a narrator.
   useEffect(() => {
@@ -374,6 +405,10 @@ export default function StoryViewerScreen() {
   // predate per-segment images.
   const hasSegmentImages = segments.some((s: any) => s.imageUrl);
   const legacyImages = [story.image1, story.image2, story.image3].filter(Boolean) as string[];
+  // Number only real chapters; the moral (last segment on new stories) gets its own heading.
+  let chapterCount = 0;
+  const chapterNumbers = segments.map((s: any) => (s.kind === 'moral' ? 0 : ++chapterCount));
+
   const imageForChapter = (seg: any, index: number): string | undefined => {
     if (seg.imageUrl) return seg.imageUrl;
     if (hasSegmentImages) return undefined;
@@ -394,38 +429,68 @@ export default function StoryViewerScreen() {
       </View>
 
       {/* Story Content */}
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.storyTitle, { textAlign: storyTextAlign }]}>{story.title}</Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        scrollEnabled={introDone}
+        onLayout={(e) => setViewportHeight(e.nativeEvent.layout.height)}
+      >
+        <Animated.Text
+          onLayout={(e) => {
+            const { y, height } = e.nativeEvent.layout;
+            setTitleLayout((prev) => (prev && prev.y === y && prev.height === height ? prev : { y, height }));
+          }}
+          style={[
+            styles.storyTitle,
+            { textAlign: storyTextAlign, opacity: titleOpacity, transform: [{ translateY: titleShift }] },
+          ]}
+        >
+          {story.title}
+        </Animated.Text>
 
-        {/* One illustration per chapter, followed by that chapter's text */}
-        {segments.map((seg: any, i: number) => {
-          const chapterImg = getImageUri(imageForChapter(seg, i));
-          return (
-            <View key={seg.id || `seg-${i}`} style={styles.chapterBlock}>
-              {renderStoryImage(chapterImg)}
+        <Animated.View
+          style={{
+            opacity: contentOpacity,
+            transform: [{ translateY: contentOpacity.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
+          }}
+        >
+          {/* One illustration per chapter, followed by that chapter's text */}
+          {segments.map((seg: any, i: number) => {
+            const chapterImg = getImageUri(imageForChapter(seg, i));
+            return (
+              <View key={seg.id || `seg-${i}`} style={styles.chapterBlock}>
+                {renderStoryImage(chapterImg)}
 
-              <LinearGradient
-                colors={theme.gradients.card}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.contentCard}
-              >
-                {segments.length > 1 && (
-                  <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>
-                    {tStory('storyViewer.chapter')} {i + 1}
-                  </Text>
-                )}
-                <Text style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
-              </LinearGradient>
-            </View>
-          );
-        })}
+                <LinearGradient
+                  colors={theme.gradients.card}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.contentCard}
+                >
+                  {seg.kind === 'moral' ? (
+                    <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>
+                      {tStory('storyViewer.moral')}
+                    </Text>
+                  ) : chapterCount > 1 && (
+                    <Text style={[styles.sectionTitle, { textAlign: storyTextAlign }]}>
+                      {tStory('storyViewer.chapter')} {chapterNumbers[i]}
+                    </Text>
+                  )}
+                  <Text style={[styles.storyText, { textAlign: storyTextAlign }]}>{seg.text}</Text>
+                </LinearGradient>
+              </View>
+            );
+          })}
+        </Animated.View>
 
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Player — always visible */}
-      <View style={styles.player}>
+      {/* Bottom Player — appears with the story after the title intro */}
+      <Animated.View
+        style={[styles.player, { opacity: contentOpacity }]}
+        pointerEvents={introDone ? 'auto' : 'none'}
+      >
         {/* Progress bar with times on each side */}
         <View style={styles.progressRow}>
           <Text style={styles.timeText}>{formatTime(elapsed)}</Text>
@@ -477,7 +542,7 @@ export default function StoryViewerScreen() {
         <Text style={styles.narratorLabel} numberOfLines={1}>
           {tStory('voice.narrator')}: {selectedVoice ? selectedVoice.name : tStory('voice.defaultNarrator')}
         </Text>
-      </View>
+      </Animated.View>
 
       {/* Narrator picker modal */}
       <Modal
@@ -553,7 +618,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   storyTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
     color: theme.colors.text,
     letterSpacing: 0.5,
@@ -569,15 +634,15 @@ const styles = StyleSheet.create({
     ...theme.shadows.md,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: theme.colors.text,
     marginBottom: 15,
   },
   textBlock: { marginBottom: 20 },
   storyText: {
-    fontSize: 16,
-    lineHeight: 26,
+    fontSize: 20,
+    lineHeight: 32,
     color: theme.colors.textSecondary,
     marginBottom: 15,
   },

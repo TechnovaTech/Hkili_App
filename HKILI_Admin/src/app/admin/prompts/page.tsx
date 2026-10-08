@@ -21,7 +21,7 @@ Moral of the story: [MORAL]
 
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`
 
-const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`
+const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt.`
 
 const PLACEHOLDERS = [
   { key: '[CATEGORY]', desc: 'Story category (e.g. Adventure, Fantasy)' },

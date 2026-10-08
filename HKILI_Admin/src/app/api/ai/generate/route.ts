@@ -6,6 +6,7 @@ import User from '@/models/User';
 import Setting from '@/models/Setting';
 import Category from '@/models/Category';
 import Character from '@/models/Character';
+import StoryCharacter from '@/models/StoryCharacter';
 import Prompt from '@/models/Prompt';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
@@ -18,13 +19,21 @@ Moral of the story: [MORAL]
 
 Make the story immersive, coherent, and end with the moral clearly reflected in the outcome.`;
 
-const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt. Return JSON with 'title' and 'content' fields.`;
+const DEFAULT_SYSTEM = `You are a creative children's story writer. Write an engaging, age-appropriate story based on the user's prompt.`;
 
 // Image model. Newer OpenAI project keys only have access to the `gpt-image-*`
 // family — the legacy `dall-e-3`/`dall-e-2` models return "model does not exist".
 // gpt-image-1 returns base64 (b64_json), NOT a URL, so generated images are
 // uploaded to Cloudinary for permanent storage. Override via OPENAI_IMAGE_MODEL.
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
+
+// Story text model. gpt-4o-mini follows the chapter structure far more reliably
+// than gpt-3.5-turbo (and is cheaper). Override via OPENAI_STORY_MODEL.
+const STORY_MODEL = process.env.OPENAI_STORY_MODEL || 'gpt-4o-mini';
+
+// "Chapter 3: …", "Chapitre 3 - …", "الفصل ٣: …" → 3
+const CHAPTER_PREFIX = /^\s*(?:chapter|chapitre|الفصل)\s*([0-9٠-٩]+)\s*[:：.\-–—]?\s*/i;
+const toAsciiDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -146,8 +155,13 @@ export async function POST(request: NextRequest) {
       mainCharacterNames = mainChars.map((c: any) => c.name);
 
       if (sideCharacterIds?.length > 0) {
-        const sideChars = await Character.find({ _id: { $in: sideCharacterIds } });
-        sideCharacterNames = sideChars.map((c: any) => c.name);
+        // Side characters can be the user's own or admin-made story characters.
+        const [userSide, storySide] = await Promise.all([
+          Character.find({ _id: { $in: sideCharacterIds } }),
+          StoryCharacter.find({ _id: { $in: sideCharacterIds } }),
+        ]);
+        const nameById = new Map([...userSide, ...storySide].map((c: any) => [String(c._id), c.name]));
+        sideCharacterNames = sideCharacterIds.map((id: string) => nameById.get(String(id))).filter(Boolean);
       }
 
       // Load active prompt template from DB, fall back to default
@@ -166,7 +180,7 @@ export async function POST(request: NextRequest) {
 
       finalPrompt = buildPrompt(template, vars);
       // Force language in system message regardless of template to ensure output language is correct
-      finalSystemMessage = `${buildPrompt(systemTpl, vars)}\n\nCRITICAL: THE ENTIRE OUTPUT MUST BE IN ${targetLanguage.toUpperCase()}. THIS INCLUDES BOTH THE "title" AND THE "content" FIELDS. DO NOT USE ANY ENGLISH IN THE OUTPUT EXCEPT FOR THE JSON KEYS.`;
+      finalSystemMessage = `${buildPrompt(systemTpl, vars)}\n\nCRITICAL: THE ENTIRE OUTPUT MUST BE IN ${targetLanguage.toUpperCase()}. THIS INCLUDES THE STORY "title", EVERY CHAPTER "title" AND "content", AND THE "moral". DO NOT USE ANY ENGLISH IN THE OUTPUT EXCEPT FOR THE JSON KEYS AND THE "imagePrompt" FIELDS.`;
     }
 
     if (!finalPrompt) {
@@ -183,12 +197,15 @@ CRITICAL OUTPUT FORMAT — return ONE valid JSON object with EXACTLY this shape 
 {
   "title": "overall story title",
   "chapters": [
-    { "title": "chapter title", "content": "the full chapter text", "imagePrompt": "a detailed prompt describing this chapter's main scene for AI image generation" }
+    { "number": 1, "title": "chapter title", "content": "the full chapter text", "imagePrompt": "a detailed prompt describing this chapter's main scene for AI image generation" }
   ],
   "moral": "the moral of the story"
 }
 Rules:
 - Use 3 to 5 chapters.
+- Chapters MUST be in story order: chapter 1 is the beginning, the last chapter is the ending, and each chapter continues directly from the one before it.
+- Number the chapters 1, 2, 3… in the "number" field. Do NOT write "Chapter 1" etc. inside the chapter "title".
+- Do NOT give the characters any family relationship (mother, father, sister, brother, grandparent, aunt, uncle, cousin, etc.). Refer to every character only by their name.
 - "title" and every chapter "content" MUST be written in ${targetLanguage.toUpperCase()}.
 - Every "imagePrompt" MUST be written in ENGLISH (image models perform better in English), even when the story is in another language.
 - Do NOT output any text, markdown, or code fences outside the JSON object.`;
@@ -204,7 +221,7 @@ Rules:
         { role: 'system', content: finalSystemMessage },
         { role: 'user', content: finalPrompt },
       ],
-      model: 'gpt-3.5-turbo', // Use a more modern version of 3.5 that handles JSON better
+      model: STORY_MODEL,
       response_format: { type: 'json_object' },
     });
 
@@ -219,28 +236,45 @@ Rules:
     // { content: [...] }, and plain-string content. This is what fixes the
     // "Cast to string failed for value {...}" error: content is no longer
     // saved as a raw object.
-    type Chapter = { title?: string; content: string; imagePrompt?: string };
+    type Chapter = { number?: number; title?: string; content: string; imagePrompt?: string };
     const pick = (o: any, ...keys: string[]): string | undefined => {
       for (const k of keys) {
         if (o && typeof o[k] === 'string' && o[k].trim()) return o[k] as string;
       }
       return undefined;
     };
-    const toChapter = (c: any): Chapter => ({
-      title: pick(c, 'title', 'Chapter Title', 'chapterTitle'),
+    // Chapter number from an explicit field, the object key ("Chapter 3"), or the title.
+    const chapterNumber = (c: any, key?: string): number | undefined => {
+      const explicit = Number(c?.number ?? c?.chapter ?? c?.chapterNumber);
+      if (Number.isFinite(explicit) && explicit > 0) return explicit;
+      for (const s of [key, typeof c?.title === 'string' ? c.title : undefined]) {
+        const m = s?.match(CHAPTER_PREFIX) || s?.match(/^\s*([0-9]+)\s*$/);
+        if (m) return Number(toAsciiDigits(m[1]));
+      }
+      return undefined;
+    };
+    const toChapter = (c: any, key?: string): Chapter => ({
+      number: chapterNumber(c, key),
+      // The app labels chapters itself, so drop any "Chapter N:" prefix from the title.
+      title: pick(c, 'title', 'Chapter Title', 'chapterTitle')?.replace(CHAPTER_PREFIX, '').trim() || undefined,
       content: pick(c, 'content', 'Chapter Content', 'chapterContent', 'text') ?? (typeof c === 'string' ? c : ''),
       imagePrompt: pick(c, 'imagePrompt', 'Image Prompt', 'image_prompt', 'imagePromptEn'),
     });
 
     let chapters: Chapter[] = [];
     if (Array.isArray(parsedResult.chapters)) {
-      chapters = parsedResult.chapters.map(toChapter);
+      chapters = parsedResult.chapters.map((c: any) => toChapter(c));
     } else if (parsedResult.content && typeof parsedResult.content === 'object' && !Array.isArray(parsedResult.content)) {
-      chapters = Object.values(parsedResult.content).map(toChapter);
+      chapters = Object.entries(parsedResult.content).map(([key, c]) => toChapter(c, key));
     } else if (Array.isArray(parsedResult.content)) {
-      chapters = parsedResult.content.map(toChapter);
+      chapters = parsedResult.content.map((c: any) => toChapter(c));
     }
     chapters = chapters.filter(c => c.content && c.content.trim());
+
+    // Keep chapters in story order when the model numbered every one of them.
+    if (chapters.length > 1 && chapters.every(c => c.number !== undefined)) {
+      chapters.sort((a, b) => a.number! - b.number!);
+    }
 
     // Fallback: treat whatever we got as a single plain-text chapter.
     if (chapters.length === 0) {
@@ -284,13 +318,13 @@ Rules:
     );
 
     // ---- Build the segment array the mobile app expects (content is a JSON string) ----
-    const segments: { id: string; text: string; imageUrl?: string }[] = chapters.map((c, i) => ({
+    const segments: { id: string; text: string; imageUrl?: string; kind?: 'moral' }[] = chapters.map((c, i) => ({
       id: String(i + 1),
       text: c.title ? `${c.title}\n\n${c.content}` : c.content,
       imageUrl: chapterImageUrls[i] || undefined,
     }));
     if (typeof parsedResult.moral === 'string' && parsedResult.moral.trim()) {
-      segments.push({ id: String(segments.length + 1), text: parsedResult.moral.trim() });
+      segments.push({ id: String(segments.length + 1), text: parsedResult.moral.trim(), kind: 'moral' });
     }
     const storyContent = JSON.stringify(segments);
 

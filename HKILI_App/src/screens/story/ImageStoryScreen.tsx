@@ -115,7 +115,7 @@ export default function ImageStoryScreen() {
       if (res.success && res.data) {
         const storyId = res.data._id || res.data.id;
         storyService.addToLibrary(storyId).catch(() => {}).finally(() => {
-          router.replace({ pathname: '/story/viewer', params: { storyId } });
+          router.replace({ pathname: '/story/viewer', params: { storyId, intro: '1' } });
         });
       } else {
         setSubmitting(false);

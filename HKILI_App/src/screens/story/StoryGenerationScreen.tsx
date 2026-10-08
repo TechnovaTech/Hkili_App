@@ -64,7 +64,7 @@ export default function StoryGenerationScreen() {
       storyService.addToLibrary(storyId)
         .catch(() => {})
         .finally(() => {
-          router.replace({ pathname: '/story/viewer', params: { storyId } });
+          router.replace({ pathname: '/story/viewer', params: { storyId, intro: '1' } });
         });
     }
   }, [status]);
