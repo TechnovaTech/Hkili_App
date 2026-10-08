@@ -33,6 +33,15 @@ const STORY_MODEL = process.env.OPENAI_STORY_MODEL || 'gpt-4o-mini';
 
 // "Chapter 3: …", "Chapitre 3 - …", "الفصل ٣: …" → 3
 const CHAPTER_PREFIX = /^\s*(?:chapter|chapitre|الفصل)\s*([0-9٠-٩]+)\s*[:：.\-–—]?\s*/i;
+// Age of the child the story is written for (chosen in the app), independent of
+// the characters' ages. The length here overrides any length in the admin prompt.
+const AGE_GUIDANCE: Record<string, { label: string; guidance: string }> = {
+  '2-4': { label: '2–4 years', guidance: 'very simple words, short sentences, gentle and reassuring, with some repetition; about 300–600 words in total' },
+  '5-7': { label: '5–7 years', guidance: 'simple words, short paragraphs, playful and clear; about 600–1,200 words in total' },
+  '8-10': { label: '8–10 years', guidance: 'richer vocabulary, some suspense and humour; about 1,200–2,500 words in total' },
+  '11+': { label: '11+ years', guidance: 'a more complex plot, richer vocabulary and emotions; about 2,500–4,000 words in total' },
+};
+
 const toAsciiDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
 cloudinary.config({
@@ -129,8 +138,10 @@ export async function POST(request: NextRequest) {
       sideCharacterIds,
       place,
       moral,
+      targetAge,
       prompt: directPrompt,
     } = body;
+    const age: string | undefined = Object.prototype.hasOwnProperty.call(AGE_GUIDANCE, targetAge) ? targetAge : undefined;
 
     const languageNames: Record<string, string> = {
       'EN': 'English',
@@ -175,6 +186,7 @@ export async function POST(request: NextRequest) {
         '[MAIN_CHARACTER_NAMES]': mainCharacterNames.join(', '),
         '[SIDE_CHARACTER_NAMES]': sideCharacterNames.length > 0 ? sideCharacterNames.join(', ') : 'None',
         '[MORAL]': moral || 'No specific moral',
+        '[TARGET_AGE]': age ? AGE_GUIDANCE[age].label : 'children',
         '[LANGUAGE]': targetLanguage,
       };
 
@@ -202,7 +214,8 @@ CRITICAL OUTPUT FORMAT — return ONE valid JSON object with EXACTLY this shape 
   "moral": "the moral of the story"
 }
 Rules:
-- Use 3 to 5 chapters.
+- Use 3 to 5 chapters.${age ? `
+- The story is for children aged ${AGE_GUIDANCE[age].label}: ${AGE_GUIDANCE[age].guidance}. This is independent of the characters' ages, and this length overrides any other length requirement.` : ''}
 - Chapters MUST be in story order: chapter 1 is the beginning, the last chapter is the ending, and each chapter continues directly from the one before it.
 - Number the chapters 1, 2, 3… in the "number" field. Do NOT write "Chapter 1" etc. inside the chapter "title".
 - Do NOT give the characters any family relationship (mother, father, sister, brother, grandparent, aunt, uncle, cousin, etc.). Refer to every character only by their name.
@@ -346,6 +359,7 @@ Rules:
       categoryId: categoryId || undefined,
       place: place || undefined,
       moral: moral || undefined,
+      targetAge: age,
       mainCharacters: mainCharacterNames,
       sideCharacters: sideCharacterNames,
       prompt: finalPrompt,

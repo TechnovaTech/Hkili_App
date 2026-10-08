@@ -23,13 +23,14 @@ const EXPECTED_SECONDS = 45;
 
 export default function StoryGenerationScreen() {
   const { t } = useTranslation();
-  const { categoryId, mainCharacterIds, sideCharacterIds, place, moral, language } = useLocalSearchParams<{
+  const { categoryId, mainCharacterIds, sideCharacterIds, place, moral, language, targetAge } = useLocalSearchParams<{
     categoryId: string;
     mainCharacterIds: string;
     sideCharacterIds: string;
     place: string;
     moral: string;
     language: string;
+    targetAge: string;
   }>();
 
   const [scaleAnim] = useState(new Animated.Value(1));
@@ -82,6 +83,7 @@ export default function StoryGenerationScreen() {
         sideCharacterIds: sideIds,
         place,
         moral,
+        targetAge,
         language: language || 'EN',
       });
 

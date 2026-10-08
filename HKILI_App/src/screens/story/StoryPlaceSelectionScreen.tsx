@@ -20,6 +20,9 @@ import { playClickSound } from '@/utils/soundUtils';
 
 const { width } = Dimensions.get('window');
 
+// Age of the child the story is written for — independent of the characters' ages.
+const ageGroups = ['2-4', '5-7', '8-10', '11+'];
+
 // Each moral's displayed text comes from i18n (key), so it shows in the story
 // language; `key` is also what we send to the backend as the chosen moral.
 const morals = [
@@ -49,11 +52,12 @@ export default function StoryPlaceSelectionScreen() {
 
   const [storyPlace, setStoryPlace] = useState('');
   const [selectedMoral, setSelectedMoral] = useState<string | null>(null);
+  const [targetAge, setTargetAge] = useState<string | null>(null);
 
   const cardWidth = (width - 60) / 2;
 
   const handleStart = async () => {
-    if (!storyPlace.trim() || !selectedMoral) return;
+    if (!storyPlace.trim() || !selectedMoral || !targetAge) return;
     await playClickSound();
     // Send the moral in the STORY's language so it matches the generated text.
     const moralKey = morals.find(m => m.id === selectedMoral)?.key || '';
@@ -64,11 +68,12 @@ export default function StoryPlaceSelectionScreen() {
         ...params,
         place: storyPlace.trim(),
         moral: moralText,
+        targetAge,
       },
     });
   };
 
-  const canProceed = storyPlace.trim().length > 0 && selectedMoral !== null;
+  const canProceed = storyPlace.trim().length > 0 && selectedMoral !== null && targetAge !== null;
 
   return (
     <ScreenBackground>
@@ -85,6 +90,25 @@ export default function StoryPlaceSelectionScreen() {
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Target age */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>
+            {t('storyFlow.ageLabel')}<Text style={styles.asterisk}> *</Text>
+          </Text>
+          <View style={styles.ageRow}>
+            {ageGroups.map((age) => (
+              <TouchableOpacity
+                key={age}
+                style={[styles.ageChip, targetAge === age && styles.selectedCard]}
+                onPress={() => setTargetAge(age)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.ageText}>{age.replace('-', '–')}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {/* Place Input */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>
@@ -181,6 +205,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text,
   },
+  ageRow: { flexDirection: 'row', gap: 10 },
+  ageChip: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: theme.borderRadius.md,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(129, 199, 132, 0.18)',
+  },
+  ageText: { fontSize: 16, fontWeight: '700', color: theme.colors.text },
   moralsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

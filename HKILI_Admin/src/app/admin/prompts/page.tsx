@@ -29,6 +29,7 @@ const PLACEHOLDERS = [
   { key: '[MAIN_CHARACTER_NAMES]', desc: 'Comma-separated main character names' },
   { key: '[SIDE_CHARACTER_NAMES]', desc: 'Comma-separated side character names (or "None")' },
   { key: '[MORAL]', desc: 'The moral of the story' },
+  { key: '[TARGET_AGE]', desc: 'Age of the child the story is for (e.g. 5–7 years)' },
   { key: '[LANGUAGE]', desc: 'Language code (EN, FR, AR) — use in Prompt Template' },
 ]
 

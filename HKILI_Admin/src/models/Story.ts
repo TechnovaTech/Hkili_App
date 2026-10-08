@@ -34,6 +34,7 @@ const StorySchema = new mongoose.Schema({
   },
   place: { type: String, required: false },
   moral: { type: String, required: false },
+  targetAge: { type: String, required: false }, // reader age group, e.g. '5-7'
   mainCharacters: [{ type: String }],
   sideCharacters: [{ type: String }],
   prompt: { type: String, required: false },

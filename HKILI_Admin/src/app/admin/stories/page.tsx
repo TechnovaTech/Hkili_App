@@ -22,6 +22,7 @@ interface Story {
   prompt?: string
   place?: string
   moral?: string
+  targetAge?: string
   mainCharacters?: string[]
   sideCharacters?: string[]
 }
@@ -383,8 +384,9 @@ export default function StoriesManagement() {
                             <pre className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded text-xs text-gray-700 whitespace-pre-wrap break-words">{story.prompt}</pre>
                           </details>
                         )}
-                        {(story.place || story.moral || (story.mainCharacters && story.mainCharacters.length > 0)) && (
+                        {(story.place || story.moral || story.targetAge || (story.mainCharacters && story.mainCharacters.length > 0)) && (
                           <div className="flex flex-wrap gap-2 mb-2">
+                            {story.targetAge && <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">👶 Age {story.targetAge.replace('-', '–')}</span>}
                             {story.place && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">📍 {story.place}</span>}
                             {story.moral && <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded">💡 {story.moral}</span>}
                             {story.mainCharacters && story.mainCharacters.length > 0 && <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">👤 {story.mainCharacters.join(', ')}</span>}
