@@ -7,6 +7,7 @@ import Category from '@/models/Category';
 import Character from '@/models/Character';
 import dbConnect from '@/lib/mongodb';
 import jwt from 'jsonwebtoken';
+import { MUSIC_MOODS, isMusicMood } from '@/lib/musicMoods';
 
 // Vision-capable model. The user supplies 3-5 illustration images and we write
 // ONE section of story per image, in order, so text and pictures line up.
@@ -96,7 +97,8 @@ ${moral ? `Moral of the story: ${moral}.` : ''}
 CRITICAL RULES:
 - Write EVERYTHING (title and every section) in ${targetLanguage.toUpperCase()}. Do NOT use any other language except for the JSON keys.
 - Return ONE valid JSON object with EXACTLY this shape and nothing else:
-{"title":"overall title","sections":[{"content":"the section text"}],"moral":"the moral"}
+{"title":"overall title","sections":[{"content":"the section text"}],"moral":"the moral","mood":"the story's mood"}
+- "mood" MUST be exactly one of: ${MUSIC_MOODS.join(', ')} — the overall feeling of the story (used to pick its background music).
 - The "sections" array MUST have EXACTLY ${n} items, in the same order as the images.
 - Do NOT output any text, markdown, or code fences outside the JSON object.`;
 
@@ -170,6 +172,7 @@ CRITICAL RULES:
       categoryId: categoryId || undefined,
       place: place || undefined,
       moral: moral || undefined,
+      mood: isMusicMood(parsed.mood) ? parsed.mood : undefined,
       mainCharacters: mainCharacterNames,
       prompt: description || 'Generated from user-provided images',
       image1: imageUrls[0] || null,

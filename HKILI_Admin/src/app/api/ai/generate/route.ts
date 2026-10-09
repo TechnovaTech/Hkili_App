@@ -9,6 +9,7 @@ import Character from '@/models/Character';
 import StoryCharacter from '@/models/StoryCharacter';
 import Prompt from '@/models/Prompt';
 import dbConnect from '@/lib/mongodb';
+import { MUSIC_MOODS, isMusicMood } from '@/lib/musicMoods';
 import jwt from 'jsonwebtoken';
 
 const DEFAULT_TEMPLATE = `Write a [CATEGORY] story set in [PLACE] in [LANGUAGE] language.
@@ -211,13 +212,15 @@ CRITICAL OUTPUT FORMAT — return ONE valid JSON object with EXACTLY this shape 
   "chapters": [
     { "number": 1, "title": "chapter title", "content": "the full chapter text", "imagePrompt": "a detailed prompt describing this chapter's main scene for AI image generation" }
   ],
-  "moral": "the moral of the story"
+  "moral": "the moral of the story",
+  "mood": "the story's mood"
 }
 Rules:
 - Use 3 to 5 chapters.${age ? `
 - The story is for children aged ${AGE_GUIDANCE[age].label}: ${AGE_GUIDANCE[age].guidance}. This is independent of the characters' ages, and this length overrides any other length requirement.` : ''}
 - Chapters MUST be in story order: chapter 1 is the beginning, the last chapter is the ending, and each chapter continues directly from the one before it.
 - Number the chapters 1, 2, 3… in the "number" field. Do NOT write "Chapter 1" etc. inside the chapter "title".
+- "mood" MUST be exactly one of: ${MUSIC_MOODS.join(', ')} — the overall feeling of the story (used to pick its background music).
 - Do NOT give the characters any family relationship (mother, father, sister, brother, grandparent, aunt, uncle, cousin, etc.). Refer to every character only by their name.
 - "title" and every chapter "content" MUST be written in ${targetLanguage.toUpperCase()}.
 - Every "imagePrompt" MUST be written in ENGLISH (image models perform better in English), even when the story is in another language.
@@ -360,6 +363,7 @@ Rules:
       place: place || undefined,
       moral: moral || undefined,
       targetAge: age,
+      mood: isMusicMood(parsedResult.mood) ? parsedResult.mood : undefined,
       mainCharacters: mainCharacterNames,
       sideCharacters: sideCharacterNames,
       prompt: finalPrompt,

@@ -27,6 +27,9 @@ import { Story, VoiceProfile } from '@/types';
 import { theme } from '@/theme';
 import { ScreenBackground } from '../../components/ui/ScreenBackground';
 
+const MUSIC_PREF_KEY = 'backgroundMusicEnabled';
+const MUSIC_VOLUME = 0.15; // soft, under the narrator's voice
+
 
 export default function StoryViewerScreen() {
   const router = useRouter();
@@ -73,6 +76,11 @@ export default function StoryViewerScreen() {
   const [voicePickerVisible, setVoicePickerVisible] = useState(false);
   const [synthLoading, setSynthLoading] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+
+  // Background music: plays softly while the story is being narrated.
+  const musicRef = useRef<Audio.Sound | null>(null);
+  const [musicReady, setMusicReady] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
   // In-memory cache of synthesized audio URLs for this story, keyed by voiceId.
   const audioUrlCacheRef = useRef<Record<string, string>>({});
 
@@ -118,6 +126,55 @@ export default function StoryViewerScreen() {
       Animated.timing(contentOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
     ]).start(() => setIntroDone(true));
   }, [playIntro, viewportHeight, titleLayout]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(MUSIC_PREF_KEY)
+      .then((value) => { if (value === 'off') setMusicEnabled(false); })
+      .catch(() => {});
+  }, []);
+
+  const musicUrl = story?.backgroundMusicUrl;
+  useEffect(() => {
+    if (!musicUrl) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: musicUrl },
+          { isLooping: true, volume: MUSIC_VOLUME, shouldPlay: false }
+        );
+        if (cancelled) {
+          sound.unloadAsync().catch(() => {});
+          return;
+        }
+        musicRef.current = sound;
+        setMusicReady(true);
+      } catch (e) {
+        console.warn('Background music failed to load:', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      setMusicReady(false);
+      musicRef.current?.unloadAsync().catch(() => {});
+      musicRef.current = null;
+    };
+  }, [musicUrl]);
+
+  // Music follows the narrator: it plays while the story is read aloud (unless muted).
+  useEffect(() => {
+    const music = musicRef.current;
+    if (!music || !musicReady) return;
+    if (isPlaying && musicEnabled) music.playAsync().catch(() => {});
+    else music.pauseAsync().catch(() => {});
+  }, [isPlaying, musicEnabled, musicReady]);
+
+  const toggleMusic = () => {
+    const next = !musicEnabled;
+    setMusicEnabled(next);
+    AsyncStorage.setItem(MUSIC_PREF_KEY, next ? 'on' : 'off').catch(() => {});
+  };
 
   // Load the user's cloned voices so they can pick a narrator.
   useEffect(() => {
@@ -502,7 +559,18 @@ export default function StoryViewerScreen() {
 
         {/* Controls row: play button centered, narrator button at right corner */}
         <View style={styles.controls}>
-          <View style={{ width: 52 }} />
+          {musicUrl ? (
+            <TouchableOpacity onPress={toggleMusic} style={styles.voiceBtn} activeOpacity={0.8}>
+              <Ionicons
+                name={musicEnabled ? 'musical-notes' : 'musical-notes-outline'}
+                size={20}
+                color={musicEnabled ? '#4CAF50' : '#81C784'}
+                style={{ opacity: musicEnabled ? 1 : 0.45 }}
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 52 }} />
+          )}
 
           <TouchableOpacity onPress={handlePlay} style={styles.playBtnWrapper} activeOpacity={0.85} disabled={synthLoading}>
             <LinearGradient

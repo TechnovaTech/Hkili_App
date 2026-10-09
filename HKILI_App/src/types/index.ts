@@ -55,6 +55,8 @@ export interface Story {
   isDownloaded: boolean;
   duration?: number;
   language?: string;
+  mood?: string;
+  backgroundMusicUrl?: string | null; // picked by the server from the admin music library
 }
 
 export interface StorySegment {

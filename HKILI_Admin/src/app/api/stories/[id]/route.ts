@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import dbConnect from '../../../../lib/mongodb'
 import Story from '../../../../models/Story'
+import { pickBackgroundMusic } from '../../../../lib/backgroundMusic'
 // Ensure all referenced models are registered
 import '../../../../models/User'
 import '../../../../models/Category'
@@ -33,7 +34,13 @@ export async function GET(
       return NextResponse.json({ message: 'Story not found' }, { status: 404 })
     }
 
-    return NextResponse.json(story)
+    // Background music is optional — never fail the story fetch over it.
+    const music = await pickBackgroundMusic(story).catch((e) => {
+      console.warn('Background music pick failed:', e)
+      return null
+    })
+
+    return NextResponse.json({ ...story.toJSON(), backgroundMusicUrl: music?.url ?? null })
   } catch (error) {
     console.error('Story fetch error:', error)
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
